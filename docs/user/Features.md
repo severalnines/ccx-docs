@@ -18,11 +18,13 @@ Our platform is compatible with a diverse array of database types, including:
 
 ## Cloud Service Providers
 
-We support integration with several leading Cloud Service Providers (CSPs), including:
+We support integration with several leading Cloud Service Providers (CSPs) and infrastructure, including:
 
 - Amazon Web Services (AWS)
 - OpenStack
+- Google Compute Platform (GCP)
 - SafeSpring
+- VMWare
 
 ## Node Configurations
 

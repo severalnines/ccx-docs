@@ -8,7 +8,10 @@ Yes, the UI can be white-labeled.
 
 ### What version of SQL Server does CCX support?
 
-2019 and 2022.
+2022
+
+### What database version does CCX support?
+Here is a list of [supported database versions](/docs/user/Reference/Supported-Databases).
 
 ### Do you support MongoDB?
 
@@ -18,17 +21,21 @@ Not at this time due to MongoDB SSPL license restrictions (Server Side Public Li
 
 Yes.
 
+### What other clouds do you support?
+
+Please see the [features](/docs/user/Features.md) for information.
+
 ### Are there any specific dependencies between CCX and OpenStack/VMware?
 
 No.
 
 ### Do you support CloudStack?
 
-Not yet, but we are working on supporting CloudStack.
+We are working on supporting CloudStack.
 
 ### Do you support VMWare?
 
-Not yet, but we are working on supporting VMWare.
+Yes
 
 ### Do you support Nutanix?
 
