@@ -1,0 +1,51 @@
+name: Process Markdown files and Push to Wiki
+
+on:
+  workflow_call:
+    inputs:
+      CUST:
+        description: "Customer name"
+        required: true
+        type: string
+      wikiRepo:
+        description: "Name of customer Wiki git repo"
+        required: true
+        type: string
+    secrets:
+      deployKey:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run envsubst on markdown files
+        working-directory: ./wiki
+        run: |
+          # Export the variable that envsubst will substitute
+          export CUST=${{ inputs.CUST }}
+
+          # Process all markdown files in the repository
+          find . -name '*.md' -exec bash -c 'envsubst < {} > {}.tmp && mv {}.tmp {}' \;
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.deployKey }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+
+      - name: Commit and push changes to wiki
+        working-directory: ./wiki
+        run: |
+          git init
+          git remote add origin git@github.com:severalnines/${{ inputs.wikiRepo }}.wiki.git
+          git add -A
+          git commit -m 'Updated wiki pages' || exit 0
+          git push -f origin master

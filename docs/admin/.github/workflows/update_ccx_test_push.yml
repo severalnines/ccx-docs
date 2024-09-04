@@ -1,0 +1,17 @@
+name: CCX Test - Update Wiki
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - wiki/**
+
+jobs:
+  call-build-flow:
+    uses: ./.github/workflows/update_customer_workflow.yml
+    with:
+      CUST: "CCX"
+      wikiRepo: "ccx-customer-docs"
+    secrets:
+      deployKey: ${{ secrets.DEPLOY_KEY }}

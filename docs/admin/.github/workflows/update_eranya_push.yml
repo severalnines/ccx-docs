@@ -1,0 +1,18 @@
+name: Eranya - Update Wiki
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - wiki/**
+
+jobs:
+  call-build-flow:
+    uses: ./.github/workflows/update_customer_workflow.yml
+    with:
+      CUST: "eranya"
+      wikiRepo: "ccx-eranya"
+    secrets:
+      deployKey: ${{ secrets.DEPLOY_KEY_ERANYA}}
