@@ -88,8 +88,16 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'CCX Introduction',
+              label: 'Introduction',
               to: '/docs/user/Features',
+            },
+            {
+              label: 'Admin Guide',
+              to: '/docs/admin/',
+            },
+            {
+              label: 'User Guide',
+              to: '/docs/user/',
             },
           ],
         },
@@ -111,11 +119,11 @@ const config: Config = {
           items: [
             {
               label: 'Blog',
-              to: '/blog',
+              to: 'https://severalnines.com/blog/',
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
+              href: 'https://github.com/severalnines',
             },
           ],
         },

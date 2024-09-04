@@ -1,4 +1,4 @@
-# Frontend
+# Frontend customization
 
 ## Environment Variables
 
