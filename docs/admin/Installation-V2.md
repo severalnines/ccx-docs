@@ -168,3 +168,9 @@ Backups needs to be configured for:
 ### Observability
 
 To know more about the monitoring setup, please read [Observability](Observability).
+
+### Day 2:
+- [Configuration Management](/docs/admin/ConfigMgmt)
+- [Lifecycle Management](/docs/admin/LifecycleManagement)
+- [Upgrading the Controlplane](/docs/admin/Upgrading-the-Control-Plane)
+
