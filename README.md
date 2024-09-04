@@ -1,7 +1,8 @@
 ### Setup
-1. Install node
-2. npm install
-3. npm start  or perhaps npm run build 
+1. Install node (e.g `brew install node`
+2. `npm install`
+3. `npm run build`
+4. `npm run serve` 
 
 # Website
 
