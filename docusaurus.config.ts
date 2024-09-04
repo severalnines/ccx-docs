@@ -37,9 +37,10 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+          //editUrl:
+          //  'https://github.com/ebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
         },
+/*
         blog: {
           showReadingTime: true,
           feedOptions: {
@@ -54,7 +55,7 @@ const config: Config = {
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
-        },
+        },*/
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -76,7 +77,7 @@ const config: Config = {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
           position: 'left',
-          label: 'Tutorial',
+          label: 'Main',
         },
       ],
     },
@@ -87,8 +88,8 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Tutorial',
-              to: '/docs/intro',
+              label: 'CCX Introduction',
+              to: '/docs/user/Features',
             },
           ],
         },
