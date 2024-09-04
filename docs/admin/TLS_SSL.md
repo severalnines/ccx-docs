@@ -1,4 +1,4 @@
-# TLS/SSL in CCX
+# Security (TLS/SSL) 
 
 CCX uses Transport Layer Security (TLS) and Secure Sockets Layer (SSL) to secure the communication between the MySQL server and clients. Here's how the process works:
 
