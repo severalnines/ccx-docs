@@ -97,7 +97,7 @@ const config: Config = {
             },
             {
               label: 'User Guide',
-              to: '/docs/user/',
+              to: '/docs/user/Features',
             },
           ],
         },
