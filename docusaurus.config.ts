@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'CCX Documentation',
-  tagline: 'CCX is the best',
+  tagline: '',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
