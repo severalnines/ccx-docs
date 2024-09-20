@@ -21,6 +21,9 @@ These settings cannot be changed as it affects system stability
 | 32 | 800 |
 | 64+ | 1000 |
 
+## Archive mode
+All nodes are configured with `archive_mode=always`.
+
 ## Auto-vacuum
 Auto-vacuum settings are set to default. Please read more about [automatic vaccuming here](https://www.postgresql.org/docs/15/runtime-config-autovacuum.html)
 

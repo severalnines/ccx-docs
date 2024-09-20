@@ -1,4 +1,4 @@
-# Security (TLS/SSL) 
+# Security - in-transit(TLS/SSL) 
 
 CCX uses Transport Layer Security (TLS) and Secure Sockets Layer (SSL) to secure the communication between the MySQL server and clients. Here's how the process works:
 
@@ -23,3 +23,6 @@ SSL is required for all users. The following SSL modes are supported:
 Unsecured connections can only be established for users that use the `mysql_native_password` authentication method. This is because this method sends the password as a hash, which provides some level of security.
 
 Please note that CCX will not start if the CA certificate is not found in the Kubernetes secrets. This is to ensure that all connections are secured with SSL.
+
+# Security -  At-rest
+Volumes are created using LUKS to encrypt the filesystem.
