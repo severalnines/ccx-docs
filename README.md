@@ -1,8 +1,18 @@
-### Setup
+# Introduction
+This repository facilitates both the Administrator guide, and the User guide.
+The documentation can be rendered with either Docusaurus or mkdocs.
+
+# Setup
+## Docusaurus
 1. Install node (e.g `brew install node`)
 2. `npm install`
 3. `npm run build`
 4. `npm start` 
+## Mkdocs
+1. Install mkdocs (pip install mkdocs)
+2. mkdocs server
+
+
 
 # Website
 

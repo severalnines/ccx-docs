@@ -1,0 +1,18 @@
+site_name: 'CCX Documentation'
+site_description: Documentation
+site_url: ""
+copyright: Severalnines AB, &#169; 2024
+markdown_extensions: 
+  - toc
+nav: 
+   - Admin Guide: 
+     - Overview: admin/Index.md
+     - Installation: admin/Installation/Index.md
+     - Day 2 Ops: admin/Day2/Index.md
+     - Troubleshooting: admin/Troubleshooting/Troubleshooting.md
+     - Security: admin/Security/TLS_SSL.md
+     - Testing: admin/Testing/Index.md
+   - User Guide: 
+     - Overview: user/Index.md
+     - Reference: user/Reference/
+     - How-to:  user/Howto/Index.md
