@@ -28,17 +28,24 @@ CCX requires Kubernetes Cluster Version to be >=1.22.
 A namespace must be configured for the CCX K8s services to operate.
 example: `production`
 
-### Prerequisite tool sets for CCX Installation:
+### Helm Charts
+The Helm charts are located in [https://artifacthub.io/packages/helm/clustercontrol/ccx/](https://artifacthub.io/packages/helm/clustercontrol/ccx/). 
+The source respository is located in [https://github.com/severalnines/helm-charts](https://github.com/severalnines/helm-charts). The three charts used below are:
+- ccx
+- ccxdeps
+- Observability
 
+### Prerequisite tool sets for CCX Installation
+The following prerequisites are needed:
 - nginx ingress controller
-- nats
+- NATS
 - external-dns (Please see - [DynamicDNS](DynamicDNS.md) and please check the supported DNS provider for external-dns [here](https://github.com/kubernetes-sigs/external-dns#status-of-providers))
-- MySQL Database, aka CMON DB, is used by the CMON container to store metadata about managed/monitored data stores
-- PostgresSQL Database, aka CCX DB, is used to store CCX (Control Plane) metadata.
-- Prometheus compatible monitoring server
+- MySQL Database, aka CMON DB, is used by the CMON container to store metadata about managed/monitored data stores. See [MySQL Operator installation guide](MysqlOperatorInstallation).
+- PostgresSQL Database, aka CCX DB, is used to store CCX (Control Plane) metadata. See [Postgres Operator installation guide](PostgresOperatorInstallation).
+- Prometheus compatible monitoring server. If you don't have one, please visit the [Observability installation guide](Observability.md).
 
 This prequisite can be installed using ccxdeps. Dependencies required for CCX are created as child charts inside ccxdeps.
-By default only ingress-nginx controller and external-dns is not enabled in ccxdeps.
+By default only the ingress-nginx controller and the external-dns is not enabled in ccxdeps.
 you can enable by setting it to true by using below command.
 
 ```
