@@ -33,13 +33,13 @@ The Helm charts are located in [https://artifacthub.io/packages/helm/clustercont
 The source respository is located in [https://github.com/severalnines/helm-charts](https://github.com/severalnines/helm-charts). The three charts used below are:
 - ccx
 - ccxdeps
-- Observability
+- observability
 
 ### Prerequisite tool sets for CCX Installation
 The following prerequisites are needed:
 - nginx ingress controller
 - NATS
-- external-dns (Please see - [DynamicDNS](DynamicDNS.md) and please check the supported DNS provider for external-dns [here](https://github.com/kubernetes-sigs/external-dns#status-of-providers))
+- external-dns (Please see - [DynamicDNS](DynamicDNS.md) and please check the supported DNS provider for external-dns [here](https://github.com/kubernetes-sigs/external-dns#status-of-providers)). If you do not find your DNS on this list, we recommend that you create a zone in e.g AWS Route 53, CloudFlare or Google Cloud DNS.
 - MySQL Database, aka CMON DB, is used by the CMON container to store metadata about managed/monitored data stores. See [MySQL Operator installation guide](MysqlOperatorInstallation).
 - PostgresSQL Database, aka CCX DB, is used to store CCX (Control Plane) metadata. See [Postgres Operator installation guide](PostgresOperatorInstallation).
 - Prometheus compatible monitoring server. If you don't have one, please visit the [Observability installation guide](Observability.md).
