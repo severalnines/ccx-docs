@@ -1,7 +1,4 @@
 # Restore
-Postgres configures `archive_command` and `archive_mode=always`.
-Morever, during the restore the `restore_command` is set.
-
 There are two options to restore a backup:
 - Restore a backup on the existing datastore
 - Restore a backup on a new datastore
