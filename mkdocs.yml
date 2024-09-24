@@ -29,7 +29,6 @@ nav:
 
   - 'User Guide':
       - 'Introduction': 'user/Index.md'
-      - 'Features': 'user/Features.md'
       - 'Managed Service': 'user/Managed-Service.md'
       - 'FAQ': 'user/FAQ.md'
       - 'How-to Guides':

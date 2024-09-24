@@ -114,11 +114,6 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'doc',
-          id: 'user/Features',
-          label: 'Features',
-        },
-        {
-          type: 'doc',
           id: 'user/Managed-Service',
           label: 'Managed Service',
         },
