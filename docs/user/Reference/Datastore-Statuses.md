@@ -1,6 +1,8 @@
 <!-- Parent: CCX-Docs --> 
 <!-- Parent: End-Users --> 
 <!-- Title: Datastore-Statuses --> 
+<!-- Title: Datastore-Statuses --> 
+# Datastore Statuses
 When you deploy a Datastore, you will see a `Status` reported in the CCX Dashboard. This article outlines the statuses and what they mean.
 
 | **Status** | **Description** | **Action Required?** |

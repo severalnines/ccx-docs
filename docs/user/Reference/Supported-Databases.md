@@ -1,6 +1,7 @@
 <!-- Parent: CCX-Docs --> 
 <!-- Parent: End-Users --> 
 <!-- Title: Supported-Databases --> 
+# Supported databases
 | **Database** | **Topology** | **CCX Supported** |
 | ---------- | --------------- | -------------------- |
 | MariaDB | Primary/Replica | 10.11, 11.4 |

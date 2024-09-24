@@ -1,6 +1,4 @@
-# MariaDb 10.x
-
-## Overview
+# Overview
 CCX supports two types of MariaDb clustering:
 * MariaDb Replication (Primary-replica configuration)x
 * MariaDb Cluster (Multi-primary configuration)

@@ -1,6 +1,4 @@
-# CCX User Documentation
-
-## User Authentication
+# User Authentication
 
 In CCX, all database users are created using the `caching_sha2_password` authentication plugin by default. 
 This plugin requires an SSL connection to ensure secure communication between the MySQL server and clients.

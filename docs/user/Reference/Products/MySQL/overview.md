@@ -1,6 +1,4 @@
-# MySQL
-
-## Overview
+# Overview
 CCX supports two types of MySQL clustering:
 * MySQL Replication (Primary-replica configuration)
 * Percona XtraDb Cluster (Multi-primary configuration)
