@@ -12,7 +12,13 @@ The documentation can be rendered with either Docusaurus or mkdocs.
 1. Install mkdocs (pip install mkdocs)
 2. mkdocs server
 
-
+## Updating sidebar in mkdocs
+- Please update the sidebars.ts
+- You can now convert the sidebar.ts to mkdocs compatible nav structure:
+```
+node convert_sidebars.js
+python3 convert_sidebars.py > mkdocs-nav.yml
+```
 
 # Website
 
