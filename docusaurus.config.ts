@@ -74,16 +74,18 @@ const config: Config = {
       },
       items: [
         {
-          type: 'docSidebar',
+          type: 'doc',
           sidebarId: 'tutorialSidebar',
           position: 'left',
           label: 'Admin Guide',
+          docId: 'admin/Installation/Index',
         },
         {
-          type: 'docSidebar',
+          type: 'doc',
           sidebarId: 'tutorialSidebar2',
           position: 'left',
           label: 'User Guide',
+          docId: 'user/Index',
         },
       ],
     },

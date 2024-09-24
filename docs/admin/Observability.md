@@ -1,4 +1,4 @@
-# Integrations
+# Observability
 For more information see:
 - [Observability](/docs/admin/Observability)
 - [Logging](/docs/admin/Logging)

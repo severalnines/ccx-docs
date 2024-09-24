@@ -1,6 +1,10 @@
-# JWT Integration
-
+# JWT Authentication
+This section describes how to implement JWT Authentication. The JWT Authentication allows integrating a Service Portal with CCX.
+![img](../images/JWT.png)
 ### Users and Sessions Managed Using JWTs
+The picture below shows the authentication flow:
+
+![img](../images/JWTFLOW.png)
 
 A **JWT** contains an associative array with claims about the user and session, and is signed by the issuer with a private key (RSA).
 

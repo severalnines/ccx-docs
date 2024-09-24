@@ -4,15 +4,81 @@ site_url: ""
 copyright: Severalnines AB, &#169; 2024
 markdown_extensions: 
   - toc
-nav: 
-   - Admin Guide: 
-     - Overview: admin/Index.md
-     - Installation: admin/Installation/Index.md
-     - Day 2 Ops: admin/Day2/Index.md
-     - Troubleshooting: admin/Troubleshooting/Troubleshooting.md
-     - Security: admin/Security/TLS_SSL.md
-     - Testing: admin/Testing/Index.md
-   - User Guide: 
-     - Overview: user/Index.md
-     - Reference: user/Reference/
-     - How-to:  user/Howto/Index.md
+plugins:
+  - search
+#  - awesome-pages
+# mkdocs.yml
+nav:
+  - 'Admin Guide':
+      - 'Installation': 'admin/Installation/Index.md'
+      - 'Introduction': 'admin/Index.md'
+      - 'Customisation':
+          - 'admin/Customisation/'  # Include all files under Customisation
+      - 'Observability': 'admin/Observability.md'
+      - 'Day 2 Operations':
+          - 'admin/Day2/'
+      - 'Security':
+          - 'admin/Security/'
+      - 'Testing':
+          - 'admin/Testing/'
+      - 'Troubleshooting':
+          - 'admin/Troubleshooting/'
+      - 'Other':
+          - 'admin/Other/'
+      - 'Changelog': 'admin/Changelog.md'
+
+  - 'User Guide':
+      - 'Introduction': 'user/Index.md'
+      - 'Features': 'user/Features.md'
+      - 'Managed Service': 'user/Managed-Service.md'
+      - 'FAQ': 'user/FAQ.md'
+      - 'How-to Guides':
+          - 'Config Management': 'user/Howto/Config-management.md'
+          - 'Create Datastore From Backup': 'user/Howto/CreateDatastoreFromBackup.md'
+          - 'Deploy a Datastore': 'user/Howto/Deploy-a-Datastore.md'
+          - 'Scale a Datastore': 'user/Howto/Scale-a-Datastore.md'
+          - 'Upgrade Lifecycle Management': 'user/Howto/Upgrade-Lifecycle-mgmt.md'
+      - 'Reference':
+          - 'Datastore Statuses': 'user/Reference/Datastore-Statuses.md'
+          - 'Glossary': 'user/Reference/Glossary.md'
+          - 'Supported Databases': 'user/Reference/Supported-Databases.md'
+          - 'Observability':
+              - 'Metrics':
+                  - 'Introduction': 'user/Reference/Observability/Metrics/Introduction.md'
+                  - 'MySQL and MariaDB': 'user/Reference/Observability/Metrics/MySQL-and-MariaDB.md'
+                  - 'PostgreSQL': 'user/Reference/Observability/Metrics/PostgreSQL.md'
+                  - 'Redis': 'user/Reference/Observability/Metrics/Redis.md'
+                  - 'System': 'user/Reference/Observability/Metrics/System.md'
+          - 'Products':
+              - 'MSSQLServer':
+                  - 'Overview': 'user/Reference/Products/MSSQLServer/overview.md'
+                  - 'Configurations': 'user/Reference/Products/MSSQLServer/configurations.md'
+                  - 'Limitations': 'user/Reference/Products/MSSQLServer/limitations.md'
+                  - 'User Management': 'user/Reference/Products/MSSQLServer/usermgmt.md'
+              - 'MariaDB':
+                  - 'Overview': 'user/Reference/Products/MariaDb/overview.md'
+                  - 'Configuration': 'user/Reference/Products/MariaDb/configuration.md'
+                  - 'Backup': 'user/Reference/Products/MariaDb/Backup.md'
+                  - 'Importing Data': 'user/Reference/Products/MariaDb/importing_data.md'
+                  - 'Limitations': 'user/Reference/Products/MariaDb/limitations.md'
+              - 'MySQL':
+                  - 'Overview': 'user/Reference/Products/MySQL/overview.md'
+                  - 'Configuration': 'user/Reference/Products/MySQL/configuration.md'
+                  - 'Backup': 'user/Reference/Products/MySQL/Backup.md'
+                  - 'Importing Data': 'user/Reference/Products/MySQL/importing_data.md'
+                  - 'Limitations': 'user/Reference/Products/MySQL/limitations.md'
+                  - 'TLS Connection': 'user/Reference/Products/MySQL/tls_connection.md'
+                  - 'User Management': 'user/Reference/Products/MySQL/usermgmt.md'
+              - 'PostgreSQL':
+                  - 'Configuration': 'user/Reference/Products/PostgreSQL/configuration.md'
+                  - 'Extensions': 'user/Reference/Products/PostgreSQL/extensions.md'
+                  - 'Importing Data': 'user/Reference/Products/PostgreSQL/importing_data.md'
+                  - 'Limitations': 'user/Reference/Products/PostgreSQL/limitations.md'
+                  - 'Restore': 'user/Reference/Products/PostgreSQL/restore.md'
+              - 'Redis':
+                  - 'Backup': 'user/Reference/Products/Redis/backup.md'
+                  - 'Configuration': 'user/Reference/Products/Redis/configuration.md'
+                  - 'User Management': 'user/Reference/Products/Redis/usermgmt.md'
+      - 'Technical':
+          - 'API': 'user/Technical/API.md'
+          - 'Terraform': 'user/Technical/Terraform.md'

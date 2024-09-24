@@ -114,6 +114,18 @@ Missing indicator when filters are set
 
 * \[MSSQL\] Restore backup - Storage host must be the same as restore host.
 
+# Release notes - CCX - v1.48.10
+### CMON Fixes
+* Postgres restore fixes
+* Postgres charts in CC UI fixes
+
+# Release notes - CCX - v1.48.9
+### CMON Fixes
+* Create datastore from backup for psql
+
+### Features
+* Terraform creating firewall support
+
 # Release notes - CCX - v1.48.8
 ### Fixes
 * invalid memory address or nil pointer dereference - panic error log fix

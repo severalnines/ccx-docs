@@ -201,7 +201,7 @@ We do not modify the storage of an existing instance. To grow the storage or ins
 
 ### How are minor version upgrades handled?
 
-[Lifecycle Management](./LifecycleManagement.md)
+[Lifecycle Management](Day2/LifecycleManagement.md)
 
 ### Is vertical scaling possible? If so how is it handled?
 
