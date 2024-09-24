@@ -1,5 +1,10 @@
 # Frontend customization
 
+## Integration using JWT
+Integration with JWT can be used if you are white-labeling the UI and wish to integrate CCX with your service panel.
+JWT allows a way to authenticate users from your service panel in CCX.
+Read more in the [JWT Integration guide](JWT).
+
 ## Environment Variables
 
 A number of variables is used to control the frontend:
