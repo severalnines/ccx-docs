@@ -97,7 +97,7 @@ const config: Config = {
           items: [
             {
               label: 'Introduction',
-              to: '/docs/user/Features',
+              to: '/docs/user',
             },
             {
               label: 'Admin Guide',
@@ -105,7 +105,7 @@ const config: Config = {
             },
             {
               label: 'User Guide',
-              to: '/docs/user/Features',
+              to: '/docs/user',
             },
           ],
         },

@@ -23,7 +23,7 @@ Yes.
 
 ### What other clouds do you support?
 
-Please see the [features](/docs/user/Features.md) for information.
+Please see the [features](/docs/user/Index) for information.
 
 ### Are there any specific dependencies between CCX and OpenStack/VMware?
 
