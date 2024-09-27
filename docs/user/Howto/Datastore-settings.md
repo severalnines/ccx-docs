@@ -16,6 +16,7 @@ The **Datastore Name** in CCX is an identifier for your datastore instance, and 
 ![img](../images/change_name.png)
 
 ## Notifications in CCX
+*Introduced in v.1.50.*
 
 The **Notifications** feature in CCX allows you to configure email alerts for important system events. These notifications help ensure that you are aware of critical events happening within your environment, such as when the disk space usage exceeds a certain threshold or when important jobs are started on the datastore.
 
@@ -34,6 +35,7 @@ This feature ensures that system administrators and key stakeholders are always 
 
 
 ## Auto Scaling Storage Size in CCX
+*Introduced in v.1.50.*
 
 CCX provides a convenient **Auto Scaling Storage Size** feature that ensures your system never runs out of storage capacity unexpectedly. By enabling this feature, users can automatically scale storage based on usage, optimizing space management. 
 
@@ -49,6 +51,7 @@ When **Auto Scale** is turned **ON**, the system will automatically increase the
 This feature is especially useful for dynamic environments where storage usage can rapidly change, allowing for seamless growth as your data expands.
 
 ## Authentication in CCX
+*Introduced in v.1.49.*
 
 The **Authentication** section in CCX allows users to download credentials and CA certificates, which are essential for securing communication between the system and external services or applications.
 

@@ -4,20 +4,19 @@
 <!-- Parent: CCX -->
 
 # Release Changelog
-# Release notes - CCX - v1.49.4
+## Release notes - CCX - v1.49.4
 
 ### Customer Bug
-
 * increase datastore deployment default timeout 
   
-# Release notes - CCX - v1.49.3
+## Release notes - CCX - v1.49.3
 
 ### Customer Bug
 
 * VMWare multiple network support
 * Admin panel theme fix
 
-# Release notes - CCX - v1.49.2
+## Release notes - CCX - v1.49.2
 
 ### Improvement
 
@@ -39,13 +38,13 @@
 
 * VMWare add node for redis is failing
 
-# Release notes - CCX - v1.49.1
+## Release notes - CCX - v1.49.1
 
 ### Bugs
 * admin app image is not public
 
   
-# Release notes - CCX - v1.49.0
+## Release notes - CCX - v1.49.0
 
 ### Features
 
@@ -114,54 +113,54 @@ Missing indicator when filters are set
 
 * \[MSSQL\] Restore backup - Storage host must be the same as restore host.
 
-# Release notes - CCX - v1.48.10
+## Release notes - CCX - v1.48.10
 ### CMON Fixes
 * Postgres restore fixes
 * Postgres charts in CC UI fixes
 
-# Release notes - CCX - v1.48.9
+## Release notes - CCX - v1.48.9
 ### CMON Fixes
 * Create datastore from backup for psql
 
 ### Features
 * Terraform creating firewall support
 
-# Release notes - CCX - v1.48.8
+## Release notes - CCX - v1.48.8
 ### Fixes
 * invalid memory address or nil pointer dereference - panic error log fix
 
-# Release notes - CCX - v1.48.7
+## Release notes - CCX - v1.48.7
 ### Fixes
 * MSSQL change volume type fix
 * Create datastore from backup fix
 * Change volume type UI validation improvments
 
-# Release notes - CCX - v1.48.6
+## Release notes - CCX - v1.48.6
 ### Fixes
 * JWT - fails to register/login
 
-# Release notes - CCX - v1.48.5
+## Release notes - CCX - v1.48.5
 ### Fixes
 * After automatic failover number of nodes is increased by 1
 
-# Release notes - CCX - v1.48.4
+## Release notes - CCX - v1.48.4
 ### Fixes
 * create RBAC first fix
 * Bring back ccx-datastore-storage-service-svc in k8s
 
-# Release notes - CCX - v1.48.3
+## Release notes - CCX - v1.48.3
 ### Fixes
 * add permissions to service account
 
-# Release notes - CCX - v1.48.2
+## Release notes - CCX - v1.48.2
 ### Fixes
 * Users login permission fix
 
-# Release notes - CCX - v1.48.1
+## Release notes - CCX - v1.48.1
 ### Fixes
 * use cmondb instead of mysql for dabatase config in cmon.cnf
 
-# Release notes - CCX - v1.48.0
+## Release notes - CCX - v1.48.0
 CMON version: 2.0.0.9042
 
 ⚠️ Migrate vault is enabled by default. So if you are using Vault we will copy all the values to the Kubernetes secrets. To disable it change useK8sSecrets in values.yaml ⚠️
@@ -215,7 +214,7 @@ CMON version: 2.0.0.9042
 * Billing is returning datastores that were deleted before selected billing period
 * Nodes disk\_type is the same for all nodes even if API returns others
 
-# Release notes - CCX - v1.47.0
+## Release notes - CCX - v1.47.0
 CMON version: 2.0.0-8679
 
 ### New features
