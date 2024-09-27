@@ -161,6 +161,7 @@ const sidebars: SidebarsConfig = {
           type: 'category',
           label: 'How-to Guides',
           items: [
+            'user/Howto/Datastore-settings',
             'user/Howto/Config-management',
             'user/Howto/CreateDatastoreFromBackup',
             'user/Howto/Deploy-a-Datastore',
