@@ -14,8 +14,8 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        CCX was designed from the ground up to be easily installed and
-        used to get your DBaaS up and running quickly.
+        CCX was designed from the ground up for K8s to be easily installd
+        so you can get your own sovereign DBaaS up and running quickly.
       </>
     ),
   },
