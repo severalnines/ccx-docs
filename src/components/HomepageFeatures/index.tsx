@@ -14,7 +14,7 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        CCX was designed from the ground up for K8s to be easily installd
+        CCX is designed from the ground up for K8s and to be easily installed
         so you can get your own sovereign DBaaS up and running quickly.
       </>
     ),
@@ -24,7 +24,7 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-      CCX takes care of the boring database work and let's you get down to business.
+      CCX takes care of the boring database work and lets you get down to business.
       </>
     ),
   },
@@ -33,7 +33,7 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Rely on battle-tested and proven technology since 2011.
+        Rely on battle-tested and proven ClusterControl technology.
       </>
     ),
   },
