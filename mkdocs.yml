@@ -1,108 +1,136 @@
-site_name: 'CCX Documentation'
+site_name: CCX Documentation
 site_description: Documentation
-site_url: ""
+site_url: ''
 copyright: Severalnines AB, &#169; 2024
-markdown_extensions: 
-  - toc
-plugins:
-  - search
-#  - awesome-pages
-# mkdocs.yml
+theme:
+  name: material
+  palette:
+    # Light mode
+    - media: '(prefers-color-scheme: light)'
+      scheme: percona-light
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+        # Dark mode
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  features:
+    - search.highlight
+    - navigation.top
+    - content.tabs.link
+    - content.code.copy
+    - navigation.tracking
+    - content.action.edit
+    - content.action.view
+    - content.code.copy
+  logo: assets/ccx.png
+  favicon: assets/favicon.png
+markdown_extensions:
+  - codehilite:
+      guess_lang: true
+      use_pygments: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
 nav:
-- Admin Guide:
-  - Introduction: admin/Index.md
-  - Installation:
-    - admin/Installation/Index: admin/Installation/Index.md
-    - admin/Installation/CloudProviders: admin/Installation/CloudProviders.md
-    - admin/Installation/Configuring-Helm-Install: admin/Installation/Configuring-Helm-Install.md
-    - admin/Installation/DynamicDNS: admin/Installation/DynamicDNS.md
-    - admin/Installation/MysqlOperatorInstallation: admin/Installation/MysqlOperatorInstallation.md
-    - admin/Installation/PostgresOperatorInstallation: admin/Installation/PostgresOperatorInstallation.md
-    - admin/Installation/Observability: admin/Installation/Observability.md
-    - admin/Installation/Logging: admin/Installation/Logging.md
-    - admin/Installation/MultiAZForVolumes: admin/Installation/MultiAZForVolumes.md
-    - admin/Installation/Limitations: admin/Installation/Limitations.md
-  - Customisation:
-    - admin/Customisation:
-      - API: admin/Customisation/API.md
-      - Frontend: admin/Customisation/Frontend.md
-      - JWT: admin/Customisation/JWT.md
-  - Observability: admin/Observability.md
-  - Day 2 Operations:
-    - admin/Day2:
-      - ConfigMgmt: admin/Day2/ConfigMgmt.md
-      - Index: admin/Day2/Index.md
-      - LifecycleManagement: admin/Day2/LifecycleManagement.md
-      - Notifications: admin/Day2/Notifications.md
-      - Upgrading-the-Control-Plane: admin/Day2/Upgrading-the-Control-Plane.md
-  - Security:
-    - admin/Security:
-      - TLS_SSL: admin/Security/TLS_SSL.md
-  - Testing:
-    - admin/Testing:
-      - DAST: admin/Testing/DAST.md
-      - E2E-tests: admin/Testing/E2E-tests.md
-  - Troubleshooting:
-    - admin/Troubleshooting:
-      - Operations-and-Management: admin/Troubleshooting/Operations-and-Management.md
-      - Support: admin/Troubleshooting/Support.md
-      - Troubleshooting: admin/Troubleshooting/Troubleshooting.md
-  - Changelog: admin/Changelog.md
-- User Guide:
-  - Introduction: user/Index.md
-  - Managed Service: user/Managed-Service.md
-  - FAQ: user/FAQ.md
-  - How-to Guides:
-    - Datastore-settings: user/Howto/Datastore-settings.md
-    - Config-management: user/Howto/Config-management.md
-    - CreateDatastoreFromBackup: user/Howto/CreateDatastoreFromBackup.md
-    - Deploy-a-Datastore: user/Howto/Deploy-a-Datastore.md
-    - Scale-a-Datastore: user/Howto/Scale-a-Datastore.md
-    - Upgrade-Lifecycle-mgmt: user/Howto/Upgrade-Lifecycle-mgmt.md
-  - Reference:
-    - Datastore-Statuses: user/Reference/Datastore-Statuses.md
-    - Glossary: user/Reference/Glossary.md
-    - Supported-Databases: user/Reference/Supported-Databases.md
-    - Observability:
-      - Metrics:
-        - Introduction: user/Reference/Observability/Metrics/Introduction.md
-        - MySQL-and-MariaDB: user/Reference/Observability/Metrics/MySQL-and-MariaDB.md
-        - PostgreSQL: user/Reference/Observability/Metrics/PostgreSQL.md
-        - Redis: user/Reference/Observability/Metrics/Redis.md
-        - System: user/Reference/Observability/Metrics/System.md
-    - Products:
-      - MSSQLServer:
-        - overview: user/Reference/Products/MSSQLServer/overview.md
-        - configurations: user/Reference/Products/MSSQLServer/configurations.md
-        - limitations: user/Reference/Products/MSSQLServer/limitations.md
-        - usermgmt: user/Reference/Products/MSSQLServer/usermgmt.md
-      - MariaDB:
-        - overview: user/Reference/Products/MariaDb/overview.md
-        - Backup: user/Reference/Products/MariaDb/Backup.md
-        - restore: user/Reference/Products/MariaDb/restore.md
-        - configuration: user/Reference/Products/MariaDb/configuration.md
-        - importing_data: user/Reference/Products/MariaDb/importing_data.md
-        - tls_connection: user/Reference/Products/MariaDb/tls_connection.md
-        - limitations: user/Reference/Products/MariaDb/limitations.md
-      - MySQL:
-        - overview: user/Reference/Products/MySQL/overview.md
-        - Backup: user/Reference/Products/MySQL/Backup.md
-        - restore: user/Reference/Products/MySQL/restore.md
-        - configuration: user/Reference/Products/MySQL/configuration.md
-        - importing_data: user/Reference/Products/MySQL/importing_data.md
-        - limitations: user/Reference/Products/MySQL/limitations.md
-        - tls_connection: user/Reference/Products/MySQL/tls_connection.md
-        - usermgmt: user/Reference/Products/MySQL/usermgmt.md
-      - PostgreSQL:
-        - configuration: user/Reference/Products/PostgreSQL/configuration.md
-        - extensions: user/Reference/Products/PostgreSQL/extensions.md
-        - importing_data: user/Reference/Products/PostgreSQL/importing_data.md
-        - limitations: user/Reference/Products/PostgreSQL/limitations.md
-        - restore: user/Reference/Products/PostgreSQL/restore.md
-      - Redis:
-        - backup: user/Reference/Products/Redis/backup.md
-        - configuration: user/Reference/Products/Redis/configuration.md
-        - usermgmt: user/Reference/Products/Redis/usermgmt.md
-  - Technical:
-    - API: user/Technical/API.md
-    - Terraform: user/Technical/Terraform.md
+  - Admin Guide:
+      - Introduction: admin/Index.md
+      - Installation:
+          - Index: admin/Installation/Index.md
+          - Cloud Providers: admin/Installation/Cloud-Providers.md
+          - Configuring Helm Install: admin/Installation/Configuring-Helm-Install.md
+          - Dynamic Dns: admin/Installation/Dynamic-DNS.md
+          - Mysql Operator Installation: admin/Installation/Mysql-Operator-Installation.md
+          - Postgres Operator Installation: admin/Installation/Postgres-Operator-Installation.md
+          - Observability: admin/Installation/Observability.md
+          - Logging: admin/Installation/Logging.md
+          - Multi Az For Volumes: admin/Installation/Multi-AZ-For-Volumes.md
+          - Limitations: admin/Installation/Limitations.md
+      - Customisation:
+          - Api: admin/Customisation/API.md
+          - Frontend: admin/Customisation/Frontend.md
+          - Jwt: admin/Customisation/JWT.md
+      - Observability: admin/Observability.md
+      - Day 2 Operations:
+          - Config Management: admin/Day2/Config-Management.md
+          - Index: admin/Day2/Index.md
+          - Lifecycle Management: admin/Day2/Lifecycle-Management.md
+          - Notifications: admin/Day2/Notifications.md
+          - Upgrading The Control Plane: admin/Day2/Upgrading-the-Control-Plane.md
+      - Security:
+          - Tls And Ssl: admin/Security/TLS-and-SSL.md
+      - Testing:
+          - Dast: admin/Testing/DAST.md
+          - E2E Tests: admin/Testing/E2E-tests.md
+      - Troubleshooting:
+          - Operations And Management: admin/Troubleshooting/Operations-and-Management.md
+          - Support: admin/Troubleshooting/Support.md
+          - Troubleshooting: admin/Troubleshooting/Troubleshooting.md
+      - Changelog: admin/Changelog.md
+  - User Guide:
+      - Introduction: user/Index.md
+      - Managed Service: user/Managed-Service.md
+      - Faq: user/FAQ.md
+      - How-to Guides:
+          - Datastore Settings: user/Howto/Datastore-settings.md
+          - Config Management: user/Howto/Config-management.md
+          - Create Datastore From Backup: user/Howto/Create-Datastore-From-Backup.md
+          - Deploy A Datastore: user/Howto/Deploy-a-Datastore.md
+          - Scale A Datastore: user/Howto/Scale-a-Datastore.md
+          - Upgrade Lifecycle Mgmt: user/Howto/Upgrade-Lifecycle-mgmt.md
+      - Reference:
+          - Datastore Statuses: user/Reference/Datastore-Statuses.md
+          - Glossary: user/Reference/Glossary.md
+          - Supported Databases: user/Reference/Supported-Databases.md
+          - Observability:
+              - Introduction: user/Reference/Observability/Metrics/Introduction.md
+              - Mysql And Mariadb: user/Reference/Observability/Metrics/MySQL-and-MariaDB.md
+              - Postgresql: user/Reference/Observability/Metrics/PostgreSQL.md
+              - Redis: user/Reference/Observability/Metrics/Redis.md
+              - System: user/Reference/Observability/Metrics/System.md
+          - Products:
+              - MSSQLServer:
+                  - Overview: user/Reference/Products/MSSQLServer/overview.md
+                  - Configurations: user/Reference/Products/MSSQLServer/configurations.md
+                  - Limitations: user/Reference/Products/MSSQLServer/limitations.md
+                  - User Management: user/Reference/Products/MSSQLServer/User-Management.md
+              - MariaDB:
+                  - Overview: user/Reference/Products/MariaDb/overview.md
+                  - Backup: user/Reference/Products/MariaDb/Backup.md
+                  - Restore: user/Reference/Products/MariaDb/restore.md
+                  - Configuration: user/Reference/Products/MariaDb/configuration.md
+                  - Importing Data: user/Reference/Products/MariaDb/Importing-Data.md
+                  - Tsl Connection: user/Reference/Products/MariaDb/TSL-Connection.md
+                  - Limitations: user/Reference/Products/MariaDb/limitations.md
+              - MySQL:
+                  - Overview: user/Reference/Products/MySQL/overview.md
+                  - Backup: user/Reference/Products/MySQL/Backup.md
+                  - Restore: user/Reference/Products/MySQL/restore.md
+                  - Configuration: user/Reference/Products/MySQL/configuration.md
+                  - Importing Data: user/Reference/Products/MySQL/Importing-Data.md
+                  - Limitations: user/Reference/Products/MySQL/limitations.md
+                  - Tsl Connection: user/Reference/Products/MySQL/TSL-Connection.md
+                  - User Management: user/Reference/Products/MySQL/User-Management.md
+              - PostgreSQL:
+                  - Configuration: user/Reference/Products/PostgreSQL/configuration.md
+                  - Extensions: user/Reference/Products/PostgreSQL/extensions.md
+                  - Importing Data: user/Reference/Products/PostgreSQL/Importing-Data.md
+                  - Limitations: user/Reference/Products/PostgreSQL/limitations.md
+                  - Restore: user/Reference/Products/PostgreSQL/restore.md
+              - Redis:
+                  - Backup: user/Reference/Products/Redis/backup.md
+                  - Configuration: user/Reference/Products/Redis/configuration.md
+                  - User Management: user/Reference/Products/Redis/User-Management.md
+      - Technical:
+          - Api: user/Technical/API.md
+          - Terraform: user/Technical/Terraform.md
+extra_css:
+  - stylesheets/extra.css
+

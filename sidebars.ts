@@ -40,7 +40,7 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: 'doc',
-              id:'admin/Installation/CloudProviders'
+              id:'admin/Installation/Cloud-Providers'
             },
             {
               type: 'doc',
@@ -48,15 +48,15 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: 'doc',
-              id:'admin/Installation/DynamicDNS'
+              id:'admin/Installation/Dynamic-DNS'
             },
             {
               type: 'doc',
-              id:'admin/Installation/MysqlOperatorInstallation'
+              id:'admin/Installation/Mysql-Operator-Installation'
             },
             {
               type: 'doc',
-              id:'admin/Installation/PostgresOperatorInstallation'
+              id:'admin/Installation/Postgres-Operator-Installation'
             },
             {
               type: 'doc',
@@ -68,7 +68,7 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: 'doc',
-              id:'admin/Installation/MultiAZForVolumes'
+              id:'admin/Installation/Multi-AZ-For-Volumes'
             },
             {
               type: 'doc',
@@ -163,7 +163,7 @@ const sidebars: SidebarsConfig = {
           items: [
             'user/Howto/Datastore-settings',
             'user/Howto/Config-management',
-            'user/Howto/CreateDatastoreFromBackup',
+            'user/Howto/Create-Datastore-From-Backup',
             'user/Howto/Deploy-a-Datastore',
             'user/Howto/Scale-a-Datastore',
             'user/Howto/Upgrade-Lifecycle-mgmt',
@@ -204,7 +204,7 @@ const sidebars: SidebarsConfig = {
                     'user/Reference/Products/MSSQLServer/overview',
                     'user/Reference/Products/MSSQLServer/configurations',
                     'user/Reference/Products/MSSQLServer/limitations',
-                    'user/Reference/Products/MSSQLServer/usermgmt',
+                    'user/Reference/Products/MSSQLServer/User-Management',
                   ],
                 },
                 {
@@ -215,8 +215,8 @@ const sidebars: SidebarsConfig = {
                     'user/Reference/Products/MariaDb/Backup',
                     'user/Reference/Products/MariaDb/restore',
                     'user/Reference/Products/MariaDb/configuration',
-                    'user/Reference/Products/MariaDb/importing_data',
-                    'user/Reference/Products/MariaDb/tls_connection',
+                    'user/Reference/Products/MariaDb/Importing-Data',
+                    'user/Reference/Products/MariaDb/TSL-Connection',
                     'user/Reference/Products/MariaDb/limitations',
                   ],
                 },
@@ -228,10 +228,10 @@ const sidebars: SidebarsConfig = {
                     'user/Reference/Products/MySQL/Backup',
                     'user/Reference/Products/MySQL/restore',
                     'user/Reference/Products/MySQL/configuration',
-                    'user/Reference/Products/MySQL/importing_data',
+                    'user/Reference/Products/MySQL/Importing-Data',
                     'user/Reference/Products/MySQL/limitations',
-                    'user/Reference/Products/MySQL/tls_connection',
-                    'user/Reference/Products/MySQL/usermgmt',
+                    'user/Reference/Products/MySQL/TSL-Connection',
+                    'user/Reference/Products/MySQL/User-Management',
                   ],
                 },
                 {
@@ -240,7 +240,7 @@ const sidebars: SidebarsConfig = {
                   items: [
                     'user/Reference/Products/PostgreSQL/configuration',
                     'user/Reference/Products/PostgreSQL/extensions',
-                    'user/Reference/Products/PostgreSQL/importing_data',
+                    'user/Reference/Products/PostgreSQL/Importing-Data',
                     'user/Reference/Products/PostgreSQL/limitations',
                     'user/Reference/Products/PostgreSQL/restore',
                   ],
@@ -251,7 +251,7 @@ const sidebars: SidebarsConfig = {
                   items: [
                     'user/Reference/Products/Redis/backup',
                     'user/Reference/Products/Redis/configuration',
-                    'user/Reference/Products/Redis/usermgmt',
+                    'user/Reference/Products/Redis/User-Management',
                   ],
                 },
               ],

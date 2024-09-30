@@ -39,9 +39,9 @@ The source respository is located in [https://github.com/severalnines/helm-chart
 The following prerequisites are needed:
 - nginx ingress controller
 - NATS
-- external-dns (Please see - [DynamicDNS](DynamicDNS.md) and please check the supported DNS provider for external-dns [here](https://github.com/kubernetes-sigs/external-dns#status-of-providers)). If you do not find your DNS on this list, we recommend that you create a zone in e.g AWS Route 53, CloudFlare or Google Cloud DNS.
-- MySQL Database, aka CMON DB, is used by the CMON container to store metadata about managed/monitored data stores. See [MySQL Operator installation guide](MysqlOperatorInstallation).
-- PostgresSQL Database, aka CCX DB, is used to store CCX (Control Plane) metadata. See [Postgres Operator installation guide](PostgresOperatorInstallation).
+- external-dns (Please see - [DynamicDNS](Dynamic-DNS.md) and please check the supported DNS provider for external-dns [here](https://github.com/kubernetes-sigs/external-dns#status-of-providers)). If you do not find your DNS on this list, we recommend that you create a zone in e.g AWS Route 53, CloudFlare or Google Cloud DNS.
+- MySQL Database, aka CMON DB, is used by the CMON container to store metadata about managed/monitored data stores. See [MySQL Operator installation guide](Mysql-Operator-Installation).
+- PostgresSQL Database, aka CCX DB, is used to store CCX (Control Plane) metadata. See [Postgres Operator installation guide](Postgres-Operator-Installation).
 - Prometheus compatible monitoring server. If you don't have one, please visit the [Observability installation guide](Observability.md).
 
 This prequisite can be installed using ccxdeps. Dependencies required for CCX are created as child charts inside ccxdeps.
@@ -164,8 +164,8 @@ Note: Ensure to check all pods, jobs are running without any errors
 
 Backups needs to be configured for:
 
-- CMON database (See [mysql](MysqlOperatorInstallation))
-- CCX database (See [postgres](PostgresOperatorInstallation))
+- CMON database (See [mysql](Mysql-Operator-Installation))
+- CCX database (See [postgres](Postgres-Operator-Installation))
   
   > **Note**
   > Severalnines is not responsible for backups that is lost or incorrect configuration
@@ -178,6 +178,6 @@ To know more about the monitoring setup, please read [Observability](Observabili
 
 ### Day 2:
 - [Configuration Management](/docs/admin/ConfigMgmt)
-- [Lifecycle Management](/docs/admin/LifecycleManagement)
+- [Lifecycle Management](/docs/admin/Lifecycle-Management)
 - [Upgrading the Controlplane](/docs/admin/Upgrading-the-Control-Plane)
 
