@@ -40,6 +40,10 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: 'doc',
+              id:'admin/Installation/Secrets'
+            },
+            {
+              type: 'doc',
               id:'admin/Installation/CloudProviders'
             },
             {
