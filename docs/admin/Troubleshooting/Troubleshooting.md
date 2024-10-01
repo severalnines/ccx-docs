@@ -14,6 +14,8 @@ Use kubectl and open a bash terminal on the cmon-master container.
 
 ### S9S CLI commands
 
+*WARNING!* Do not add or remove database nodes using the S9s CLI. 
+
 The 's9s job' commands can be used to debug why a datastore failed to create. Example:
 
 ```bash
