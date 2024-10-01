@@ -238,6 +238,7 @@ const sidebars: SidebarsConfig = {
                   type: 'category',
                   label: 'PostgreSQL',
                   items: [
+                    'user/Reference/Products/PostgreSQL/backup',
                     'user/Reference/Products/PostgreSQL/configuration',
                     'user/Reference/Products/PostgreSQL/extensions',
                     'user/Reference/Products/PostgreSQL/importing_data',
