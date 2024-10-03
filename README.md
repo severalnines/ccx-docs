@@ -2,6 +2,8 @@
 This repository facilitates both the Administrator guide, and the User guide.
 The documentation can be rendered with either Docusaurus or mkdocs.
 
+An instantion of the docs is available here [https://severalnines.github.io/ccx-docs/](https://severalnines.github.io/ccx-docs/).
+
 # Setup
 ## Docusaurus
 1. Install node (e.g `brew install node`)
