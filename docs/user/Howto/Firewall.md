@@ -2,6 +2,9 @@
 This guide explains how to manage trusted sources and open ports within the firewall settings of the CCX platform.
 Only trusted sources are allowed to connect to the datastore.
 
+A number of ports are open for each trusted source. One port is opened for the database service, but other ports are open for metrics.
+This makes it possible to connect and scrape the database nodes for metrics from a trusted source. The metrics are served using Prometheus exporters.
+
 ## List Trusted Sources
 Trusted sources can be managed from the **Firewall** tab. Only trusted sources are allowed to connect to the datastore.
 . Here you can see:
