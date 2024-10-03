@@ -40,6 +40,10 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: 'doc',
+              id:'admin/Installation/Secrets'
+            },
+            {
+              type: 'doc',
               id:'admin/Installation/CloudProviders'
             },
             {
@@ -161,6 +165,7 @@ const sidebars: SidebarsConfig = {
           type: 'category',
           label: 'How-to Guides',
           items: [
+            'user/Howto/Datastore-settings',
             'user/Howto/Config-management',
             'user/Howto/CreateDatastoreFromBackup',
             'user/Howto/Deploy-a-Datastore',
@@ -239,6 +244,7 @@ const sidebars: SidebarsConfig = {
                   type: 'category',
                   label: 'PostgreSQL',
                   items: [
+                    'user/Reference/Products/PostgreSQL/backup',
                     'user/Reference/Products/PostgreSQL/configuration',
                     'user/Reference/Products/PostgreSQL/extensions',
                     'user/Reference/Products/PostgreSQL/importing_data',

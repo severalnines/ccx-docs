@@ -1,5 +1,5 @@
 # Backup
-Percona Xtrabackup is used to create backups.
+Pg_basebackup is used to create backup.
 Also see the secion 'Schedule'.
 
 CCX backups the Secondary server.
