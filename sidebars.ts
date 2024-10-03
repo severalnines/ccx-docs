@@ -175,6 +175,7 @@ const sidebars: SidebarsConfig = {
             'user/Howto/Upgrade-Lifecycle-mgmt',
             'user/Howto/Database-User-management',
             'user/Howto/Database-Db-management',
+            'user/Howto/Firewall',
             'user/Howto/Event-viewer',
           ],
         },
