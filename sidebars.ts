@@ -173,6 +173,8 @@ const sidebars: SidebarsConfig = {
             'user/Howto/Restore-backup',
             'user/Howto/CreateDatastoreFromBackup',
             'user/Howto/Upgrade-Lifecycle-mgmt',
+            'user/Howto/Database-User-management',
+            'user/Howto/Database-Db-management',
             'user/Howto/Event-viewer',
           ],
         },
