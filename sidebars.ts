@@ -165,7 +165,9 @@ const sidebars: SidebarsConfig = {
             'user/Howto/CreateDatastoreFromBackup',
             'user/Howto/Deploy-a-Datastore',
             'user/Howto/Scale-a-Datastore',
+            'user/Howto/Promote-a-replica',
             'user/Howto/Upgrade-Lifecycle-mgmt',
+            'user/Howto/Event-viewer',
           ],
         },
         {

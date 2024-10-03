@@ -12,6 +12,8 @@ The update will be performed using a roll-forward upgrade algorithm:
 4. 1-3 continues until all replicas (or primaries in case of a multi-primary setup)  are updated.
 5. If it is a primary-replica configuration then the primary will be updated last. A new node will be added, the new node will be promoted to become the new primary, and the old primary will be removed.
 
+![upgrade](../images/upgrade.png)
+
 ## Upgrade now
 This option will start the upgrade now.
 
