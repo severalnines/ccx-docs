@@ -1,5 +1,6 @@
-# Terraform provider
-
+# Terraform provider 
+The CCX Terraform provider allows to create datastores on all supported clouds.
+The CCX Terraform provider project is hosted on [github](https://github.com/severalnines/terraform-provider-ccx).
 ## Oauth2 credentials
 Oauth2 credentials are used to authenticate the CCX Terraform provider with CCX.
 You can generate these credentials on the Account page Authorization tab.

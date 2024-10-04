@@ -4,6 +4,18 @@
  * work well for content-centric websites.
  */
 
+ /* Global link styles */
+a {
+  color: #0E045E;             /* Change link color to a vibrant shade */
+  font-weight: bold;          /* Make link text bold */
+  text-decoration: underline; /* Underline links */
+}
+
+/* Hover effect for links */
+a:hover {
+  color: #0E045E;             /* Darken color on hover */
+  text-decoration: none;      /* Remove underline on hover */
+}
 /* You can override the default Infima variables here. */
 :root {
   --ifm-color-primary: #0E045E;
