@@ -2,7 +2,7 @@
 
 This section explains how to scale a datastore, including:
 * Scaling volumes
-* Scaling nodes
+* Scaling nodes (out, in, up and down)
 
 ## Scaling a Datastore
 
