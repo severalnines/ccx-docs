@@ -44,7 +44,7 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: 'doc',
-              id:'admin/Installation/CloudProviders'
+              id:'admin/Installation/Cloud-Providers'
             },
             {
               type: 'doc',
@@ -171,7 +171,7 @@ const sidebars: SidebarsConfig = {
             'user/Howto/Scale-a-Datastore',
             'user/Howto/Promote-a-replica',
             'user/Howto/Restore-backup',
-            'user/Howto/CreateDatastoreFromBackup',
+            'user/Howto/Create-Datastore-From-Backup',
             'user/Howto/Upgrade-Lifecycle-mgmt',
             'user/Howto/Database-User-management',
             'user/Howto/Database-Db-management',

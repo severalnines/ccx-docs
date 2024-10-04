@@ -44,6 +44,7 @@ nav:
       - Introduction: admin/Index.md
       - Installation:
           - Index: admin/Installation/Index.md
+          - Secrets: admin/Installation/Secrets.md
           - Cloud Providers: admin/Installation/Cloud-Providers.md
           - Configuring Helm Install: admin/Installation/Configuring-Helm-Install.md
           - Dynamic Dns: admin/Installation/Dynamic-DNS.md
@@ -59,6 +60,7 @@ nav:
           - Jwt: admin/Customisation/JWT.md
       - Observability: admin/Observability.md
       - Day 2 Operations:
+          - Autoscaling: admin/Day2/Autoscaling.md
           - Config Management: admin/Day2/Config-Management.md
           - Index: admin/Day2/Index.md
           - Lifecycle Management: admin/Day2/Lifecycle-Management.md
@@ -79,12 +81,19 @@ nav:
       - Managed Service: user/Managed-Service.md
       - Faq: user/FAQ.md
       - How-to Guides:
+          - Deploy A Datastore: user/Howto/Deploy-a-Datastore.md
           - Datastore Settings: user/Howto/Datastore-settings.md
           - Config Management: user/Howto/Config-management.md
-          - Create Datastore From Backup: user/Howto/Create-Datastore-From-Backup.md
-          - Deploy A Datastore: user/Howto/Deploy-a-Datastore.md
           - Scale A Datastore: user/Howto/Scale-a-Datastore.md
+          - Promote A Replica: user/Howto/Promote-a-replica.md
+          - Restore Backup: user/Howto/Restore-backup.md
+          - Create Datastore From Backup: user/Howto/Create-Datastore-From-Backup.md
           - Upgrade Lifecycle Mgmt: user/Howto/Upgrade-Lifecycle-mgmt.md
+          - Database User Management: user/Howto/Database-User-management.md
+          - Database Db Management: user/Howto/Database-Db-management.md
+          - Firewall: user/Howto/Firewall.md
+          - Event Viewer: user/Howto/Event-viewer.md
+          - Terraform Provider: user/Howto/Terraform-provider.md
       - Reference:
           - Datastore Statuses: user/Reference/Datastore-Statuses.md
           - Glossary: user/Reference/Glossary.md
@@ -119,6 +128,7 @@ nav:
                   - Tsl Connection: user/Reference/Products/MySQL/TSL-Connection.md
                   - User Management: user/Reference/Products/MySQL/User-Management.md
               - PostgreSQL:
+                  - Backup: user/Reference/Products/PostgreSQL/backup.md
                   - Configuration: user/Reference/Products/PostgreSQL/configuration.md
                   - Extensions: user/Reference/Products/PostgreSQL/extensions.md
                   - Importing Data: user/Reference/Products/PostgreSQL/Importing-Data.md

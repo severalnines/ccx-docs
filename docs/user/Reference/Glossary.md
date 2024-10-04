@@ -1,6 +1,7 @@
 <!-- Parent: CCX-Docs --> 
 <!-- Parent: End-Users --> 
 <!-- Title: Glossary --> 
+
 | **Term** | **Definition** | **AKA** | **Area** |
 | -------- | ------------- | --------- | -------- |
 | Datastore | A deployment of a `Database` on `CCX`. A `Datastore` has a unique ID, it is essential to include this when contacting Support with issues or queries. | Service | Deployment |
