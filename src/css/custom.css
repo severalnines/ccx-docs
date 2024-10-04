@@ -8,7 +8,7 @@
 a {
   color: #0E045E;             /* Change link color to a vibrant shade */
   font-weight: bold;          /* Make link text bold */
-  text-decoration: underline; /* Underline links */
+  text-decoration: none; /* Underline links */
 }
 
 /* Hover effect for links */
