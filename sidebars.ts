@@ -40,7 +40,11 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: 'doc',
-              id:'admin/Installation/Cloud-Providers'
+              id:'admin/Installation/Secrets'
+            },
+            {
+              type: 'doc',
+              id:'admin/Installation/CloudProviders'
             },
             {
               type: 'doc',
@@ -161,12 +165,20 @@ const sidebars: SidebarsConfig = {
           type: 'category',
           label: 'How-to Guides',
           items: [
+            'user/Howto/Deploy-a-Datastore',
             'user/Howto/Datastore-settings',
             'user/Howto/Config-management',
-            'user/Howto/Create-Datastore-From-Backup',
-            'user/Howto/Deploy-a-Datastore',
             'user/Howto/Scale-a-Datastore',
+            'user/Howto/Promote-a-replica',
+            'user/Howto/Restore-backup',
+            'user/Howto/CreateDatastoreFromBackup',
             'user/Howto/Upgrade-Lifecycle-mgmt',
+            'user/Howto/Database-User-management',
+            'user/Howto/Database-Db-management',
+            'user/Howto/Firewall',
+            'user/Howto/Event-viewer',
+            'user/Howto/Terraform-provider',
+
           ],
         },
         {
@@ -238,6 +250,7 @@ const sidebars: SidebarsConfig = {
                   type: 'category',
                   label: 'PostgreSQL',
                   items: [
+                    'user/Reference/Products/PostgreSQL/backup',
                     'user/Reference/Products/PostgreSQL/configuration',
                     'user/Reference/Products/PostgreSQL/extensions',
                     'user/Reference/Products/PostgreSQL/Importing-Data',
