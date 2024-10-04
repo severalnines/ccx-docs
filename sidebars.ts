@@ -177,6 +177,8 @@ const sidebars: SidebarsConfig = {
             'user/Howto/Database-Db-management',
             'user/Howto/Firewall',
             'user/Howto/Event-viewer',
+            'user/Howto/Terraform-provider',
+
           ],
         },
         {
