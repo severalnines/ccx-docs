@@ -7,7 +7,7 @@ The **General** settings section allows you to configure high-level settings for
 The **DB Parameters** section is used for fine-tuning your database. Here, you can adjust specific database settings such as memory allocation, query behavior, or performance-related parameters. These settings allow for a deeper level of control and optimization of the datastore for your specific workload.
 
 ## Database Parameters
-Please see [Configuration management](Config-management).
+Please see [Configuration management](Config-management.md).
 
 ## Changing the Datastore Name in CCX
 

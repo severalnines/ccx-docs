@@ -12,7 +12,8 @@ An instantion of the docs is available here [https://severalnines.github.io/ccx-
 4. `npm start` 
 ## Mkdocs
 1. Install mkdocs (pip install mkdocs)
-2. mkdocs server
+2. Install material theme (pip install mkdocs-material)
+3. mkdocs server
 
 ## Updating sidebar in mkdocs
 - Please update the sidebars.ts

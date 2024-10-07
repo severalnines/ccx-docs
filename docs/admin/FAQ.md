@@ -23,7 +23,7 @@ Yes.
 
 ### What other clouds do you support?
 
-Please see the [features](/docs/user/Index) for information.
+Please see the [features](/docs/user/) for information.
 
 ### Are there any specific dependencies between CCX and OpenStack/VMware?
 
@@ -201,7 +201,7 @@ We do not modify the storage of an existing instance. To grow the storage or ins
 
 ### How are minor version upgrades handled?
 
-[Lifecycle Management](Day2/LifecycleManagement.md)
+[Lifecycle Management](Day2/Lifecycle-Management.md)
 
 ### Is vertical scaling possible? If so how is it handled?
 
