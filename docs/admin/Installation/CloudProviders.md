@@ -49,7 +49,7 @@ To configure OpenStack as a cloud provider in CCX, we need to define the provide
       type: b.4c16gb
       cpu: 4
       ram: 16
-      disk_size: 100
+      disk_size: 100 # optional, only set for flavors with ephemeral storage.
       name: Medium-S
   volume_types:
     - code: cinder # volume type code.
