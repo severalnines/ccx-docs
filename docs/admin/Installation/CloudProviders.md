@@ -158,7 +158,7 @@ For OpenStack S3-compatible backup, create a Kubernetes secret with S3 credentia
 apiVersion: v1
 kind: Secret
 metadata:
-  name: openstack-s3
+  name: mycloud-s3
 type: Opaque
 data:
   MYCLOUD_S3_ENDPOINT: CHANGE_ME
