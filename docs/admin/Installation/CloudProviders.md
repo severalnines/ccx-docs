@@ -135,7 +135,7 @@ Here is an example of how to store OpenStack credentials in Kubernetes:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: openstack
+  name: mycloud-openstack
 type: Opaque
 data:
   MYCLOUD_USERNAME: base64_encoded_username
