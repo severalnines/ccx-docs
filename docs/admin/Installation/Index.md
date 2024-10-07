@@ -177,7 +177,7 @@ Backups needs to be configured for:
 To know more about the monitoring setup, please read [Observability](Observability.md).
 
 ### Day 2:
-- [Configuration Management](/admin/Config-Management.md)
-- [Lifecycle Management](/admin/Lifecycle-Management.md)
-- [Upgrading the Controlplane](/admin/Upgrading-the-Control-Plane.md)
+- [Configuration Management](/admin/Day2/Config-Management.md)
+- [Lifecycle Management](/admin/Day2/Lifecycle-Management.md)
+- [Upgrading the Controlplane](/admin/Day2/Upgrading-the-Control-Plane.md)
 
