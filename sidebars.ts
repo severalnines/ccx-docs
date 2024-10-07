@@ -137,6 +137,11 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'doc',
+          id: 'admin/FAQ',
+          label: 'FAQ',
+        },
+        {
+          type: 'doc',
           id: 'admin/Changelog',
           label: 'Changelog',
         },
