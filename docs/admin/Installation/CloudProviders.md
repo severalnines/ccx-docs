@@ -22,12 +22,13 @@ For a test/evaluation the following flavors are recommended:
 ##### Floating IPs
 To Create a pool of floating IPs. Each VM requires a floating IP. CCX must be able to allocate and manage public IP addresses for database instances, ensuring network connectivity.
 
-##### Disk Space
-Disk space can either be ephemeral or block storage to provide disk storage for database instances.
+##### Storage Volumes
+Storage can either be ephemeral or block storage to provide disk storage for database instances. Openstack services such as cinder manages storage volume.
+CCX uses storage volumes for acquiring and attaching storage volumes to VMs.
 
-#####  Firewall Configuration
-CCX requires the ability to manage firewall rules to control traffic and secure access to the database VMs.
-
+#####  Security group Configuration
+CCX requires the ability to manage security group to create firewall rules to control traffic and secure access to the database VMs.
+The Security group firewall rule should include a rule to allow CMON ip(CIDR address) to connect to it.
 
 ## Configuration
 #####  CCX OpenStack Configuration
@@ -42,13 +43,13 @@ To configure OpenStack as a cloud provider in CCX, we need to define the provide
       type: b.2c4gb # instance type as defined by the cloud vendor.
       cpu: 2 # number of CPUs
       ram: 4 # amount of RAM in GB
-      disk_size: 0 # amount of disk space in GB
+      disk_size: 50 # amount of disk space in GB
       name: Small-S # instance type name as shown to the user
     - code: b.4c16gb
       type: b.4c16gb
       cpu: 4
       ram: 16
-      disk_size: 0
+      disk_size: 100
       name: Medium-S
   volume_types:
     - code: cinder # volume type code.
@@ -85,7 +86,7 @@ To deploy CCX using OpenStack, the OpenStack-specific configurations must be add
 
 ```
 openstack_vendors:
- vendor_name:
+ MYCLOUD:
 #    REQUIRED auth_url refers to an URL of the authentication service endpoint.
    auth_url: https://openstack_authurl
 #    REQUIRED project_id refers to a unique identifier assigned to an Openstack project. All the resources (VMs, volumes, sec. groups, floating IPs, etc.) created by ccx will be created in this project. REQUIRED
@@ -121,12 +122,12 @@ openstack_vendors:
 #####  OpenStack Credentials
 The credentials required for OpenStack API access should be stored in Kubernetes secrets. The required values are 
 
->   <name_of_the_cloudstack_vendor>_USERNAME, 
-    <name_of_the_cloudstack_vendor>_PASSWORD, 
-    <name_of_the_cloudstack_vendor>_PROJECT_ID, 
-    <name_of_the_cloudstack_vendor>_AUTH_URL, 
-    <name_of_the_cloudstack_vendor>_USER_DOMAIN
-    <name_of_the_cloudstack_vendor>_USER_DOMAIN_NAME
+>   MYCLOUD_USERNAME, 
+    MYCLOUD_PASSWORD, 
+    MYCLOUD_PROJECT_ID, 
+    MYCLOUD_AUTH_URL, 
+    MYCLOUD_USER_DOMAIN
+    MYCLOUD_USER_DOMAIN_NAME
 
 Here is an example of how to store OpenStack credentials in Kubernetes:
 
@@ -144,7 +145,7 @@ data:
   MYCLOUD_USER_DOMAIN: base64_encoded_user_domain
   MYCLOUD_USER_DOMAIN_NAME: base64_encoded_user_domain # duplicates USER_DOMAIN
 ```
-These credentials should be referenced in the ccx-values.yaml configuration under the cloudSecrets section:
+These credentials should be referenced in the ccx-values.yaml configuration under the ccx.cloudSecrets section:
 ```
 cloudSecrets:
   - openstack
@@ -166,10 +167,11 @@ data:
   MYCLOUD_S3_BUCKETNAME: CHANGE_ME
   MYCLOUD_S3_INSECURE_SSL: ZmFsc2U= # base64 encoded 'true' or 'false'
 ```
-The secret must be included in the ccx-values.yaml under the cloudSecrets:
+The secret must be included in the ccx-values.yaml under the ccx.cloudSecrets:
 
 ```
 cloudSecrets:
+  - openstack
   - openstack-s3
 ```
 
