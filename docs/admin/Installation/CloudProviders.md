@@ -87,7 +87,7 @@ To deploy CCX using OpenStack, the OpenStack-specific configurations must be add
 ```
 openstack_vendors:
  MYCLOUD:
-#    REQUIRED auth_url refers to an URL of the authentication service endpoint.
+#    REQUIRED auth_url refers to an URL of the Identity service endpoint.
    auth_url: https://openstack_authurl
 #    REQUIRED project_id refers to a unique identifier assigned to an Openstack project. All the resources (VMs, volumes, sec. groups, floating IPs, etc.) created by ccx will be created in this project. REQUIRED
    project_id: 00000000000000000000000000000000
