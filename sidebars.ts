@@ -190,9 +190,17 @@ const sidebars: SidebarsConfig = {
           type: 'category',
           label: 'Reference',
           items: [
-            'user/Reference/Datastore-Statuses',
+            {
+              type: 'doc',
+              id: 'user/Reference/Datastore-Statuses',
+              label: "Datastore Statuses",
+            },
             'user/Reference/Glossary',
-            'user/Reference/Supported-Databases',
+            {
+              type: 'doc',
+              id: 'user/Reference/Supported-Databases',
+              label: "Supported databases",
+            },      
             {
               type: 'category',
               label: 'Observability',
