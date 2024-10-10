@@ -8,6 +8,8 @@ Your `CCX_URL` has the `/auth/admin` endpoint that allows you (and your support 
 
 The account details for this are found in the kubernetes secret `admin-users`. (The format is `<email>:<password>` and additional users can be specified using the `;` as a separator)
 
+You need to logout from CCX web-app first or clear the cookies for your `CCX_URL` in a browser.
+
 ## Ops-C and ClusterControl UI
 
 This is the admin panel for Cluster Control and exposes the functionality of CMON through a web interface (you can also use the `s9s` CLI to interact).
