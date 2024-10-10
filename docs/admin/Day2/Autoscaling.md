@@ -16,7 +16,7 @@ If notifications are enabled for the cluster, the designated email addresses wil
 The threshold and percentage values are defined in helm values as `autoscaling.storage.threshold` and `autoscaling.storage.percentage`.
 
 
-If `autoscaling.storage.threshold` or `autoscaling.storage.percentage` are set to zero, this feature will be disabled for all clusters.
+The default `autoscaling.storage.threshold` is `75` and `autoscaling.storage.percentage` is `20`
 
-The default `autoscaling.storage.threshold` is `85` and `autoscaling.storage.percentage` is `15`
 
+To disable storage autoscaling globally (users won't be able to enable it for their datastores) set `autoscaling.storage.enabled: false`
