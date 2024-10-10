@@ -28,7 +28,9 @@ CCX uses storage volumes for acquiring and attaching storage volumes to VMs.
 
 #####  Security group Configuration
 CCX requires the ability to manage security group to create firewall rules to control traffic and secure access to the database VMs.
-The Security group firewall rule should include a rule to allow CMON ip(CIDR address) to connect to it.
+Create a security group named ccx-common manually and this name needs to be updated in overriden yaml file.
+`ccx.services.deployer.config.openstack_vendors.MYCLOUD.regions.REGIONNAME.secgrp_name`
+The Security group firewall rule should include a rule to allow CCX ip(CIDR address) to connect to it.
 
 ## Configuration
 #####  CCX OpenStack Configuration
