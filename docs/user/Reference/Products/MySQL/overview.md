@@ -27,4 +27,4 @@ A node cannot be scaled vertically currently. To scale to large instance type, t
 
 * [Limitations](./limitations.md)
 * [Configuration](./configuration.md)
-* [Importing Data](./importing_data.md)
+* [Importing Data](./Importing-Data.md)

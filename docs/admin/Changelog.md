@@ -4,6 +4,10 @@
 <!-- Parent: CCX -->
 
 # Release Changelog
+
+:::danger
+Downgrades are not supported.
+::::
 ## Release notes - CCX - v1.49.4
 
 ### Customer Bug
@@ -466,7 +470,7 @@ CMON version - 1.9.8-7463
 
 ### New Features
 
-- Access to services/failover. This provides the user with a single entrypoint to the datastore. Requires ExternalDNS. Check your CCX Wiki for main/wiki/DynamicDNS.md
+- Access to services/failover. This provides the user with a single entrypoint to the datastore. Requires ExternalDNS. Check your CCX Wiki for main/wiki/Dynamic-DNS.md
 - Configuration Management. Ability to let the end-user tune certain configuration values. Use with care.
 - Lifecycle Management. Ability to upgrade datastores (OS and database software) using a roll-forward upgrade method.
 

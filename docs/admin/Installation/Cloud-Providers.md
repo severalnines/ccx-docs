@@ -400,6 +400,7 @@ The secret has to be included in the ccx-values under the cloudSecrets.
     - cloudstack-s3
 ```
 
+
 ## VMware
 ### Overview
 VMware's support for CCX is available for ESXi versions that adhere to the [VMware Product Lifecycle Matrix](https://lifecycle.vmware.com/).
@@ -438,6 +439,7 @@ vmware_vendors:
 
 The *vmware_vendor_name* can be any string.
 
+
 | Key                | Description                                                                                                                                                                                                           |
 |--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | dc                 | The name of the data center                                                                                                                                                                                           | 
@@ -448,7 +450,7 @@ The *vmware_vendor_name* can be any string.
 | resource_pool      | The resource pool name                                                                                                                                                                                                |
 | vc_url             | The ESXi URL address                                                                                                                                                                                                  |
 | vc_path            | The name of the datastore                                                                                                                                                                                             |
- 
+
 
 To set up the username and password we need to create a Kubernetes secret.
 For example, if the *vmware_vendor_name* is *vmware* then we need to create a secret *VMWARE_ESX_PASSWORD* for password and 
