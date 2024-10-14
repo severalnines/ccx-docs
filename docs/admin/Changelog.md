@@ -8,6 +8,118 @@
 :::danger
 Downgrades are not supported.
 ::::
+# Release Notes - CCX - v1.50.0
+
+## Features
+- Auto-scale volumes
+- Send email notifications to end user
+- TLS v1 Postgres and Redis
+- Cloudstack support
+
+## Task
+- Add mariadb 11.4 support
+- Global: tooltip rounding
+- Global: modal rounding
+- Global: Modal margins for action buttons
+- Landing page: change date format on click
+- Datastore wizard: DB type selection
+- Datastore wizard: CSP selection
+- TLS support for Postgres
+- Redis support
+- Datastore overview: show AZ in network section
+- Global: Copy button should fill purple on hover
+- Scale nodes: slider and picker on the slider should be purple
+- Scale nodes: Configuration text should be purple
+- Scale nodes: polish the popup
+- Scale nodes: galera - when adding 2 more nodes, there is empty space
+- Monitoring: loaders are not centered, loader box smaller on loading
+- Monitoring: Auto Refresh -> refresh and the same row as label
+- Copy action: top right notification
+- Deployment wizard: remove recommended if there is just one option to pick
+- Backend: send the notifications
+- Backend APIs for Dashboard Revamp
+- Merge cmon-go repo into ccx-backend
+- Configure HostAutoScaleDiskSpaceReached event in observability
+- Handle HostAutoScaleDiskSpaceReached event in ccx
+- Send notification to user on auto-scaling success
+- Implement FE design
+- Use zone\_ids from clouds config
+- Playwright tests for autoscale
+- Add/Remove nodes
+- Resource cleaning
+- Multiple Openstack region backend support
+- Restore again
+- Datastore form backup tests
+- Add cloud groups to yaml and API endpoints
+- Group cloud vendors
+- Delete ssh keys
+- We do not update public IP in add node to cluster
+- Wrong cloud-init setup in add node
+- AddNode did not add volumes
+- Log API error responses
+- Release v1.50.0
+- Return on error from createNode
+- Node information is gone when we can't attach a disk
+- Restore Volume
+- Restore from backup: validate whether the backup ID belongs to the user
+- Add Autoscale to status handler
+- Autoscale use status info
+- Redis deployment missing /data
+- Encrypt data volumes
+
+## Bugs
+- CCX main page is repeatedly calling for jobs
+- UI: Inconsistent placement of "Connection information"
+- Scale wizard auto reloads before I had time to make my selections
+- Inconsistent use of Instance names and types
+- ccx-controller-storage selects random controller from the database and fails if controller\_address is not set
+- CCX can't handle Postgres failover
+- Users are not available while there is a backup restore running in the background
+- Multiple 401 in Admin Panel
+- CCX main page is repeatedly calling for subscription
+- CCX main page is repeatedly calling for deploy wizard
+- Errors in log when viewing failed clusters
+- Spelling error on the signup page
+- cmon-sd panic on fail response from cmon
+- Too little disk for Safespring volume
+- Lintasarta: Missing cmon host
+- Clicking on CCX logo does not always lead to the "homepage"
+- Command error, will retry
+- Restore backup fails on VMWare
+- \[MSSQL\] Restore backup: Storage host must be the same as restore host
+- Incorrect key parsing in users
+- Fix creation of store inside project
+- Deployer S3 config all broken
+- S3 bucket not created/deleted for VMWare
+- VMWare username not set from secret
+- VMWare deployer does not delete secrets
+- GCP deployer eats errors
+- Some sort of test conflict on GitHub runners
+- Some services report an error on shutdown
+- "Custom migrations" in ccx-migrate are unwanted and print errors
+- Theme missing for admin panel
+- Nodes frames are too close to each other
+- Create datastore from backup fails for PostgreSQL 16
+- Monitoring Summary Tab: Fixes
+- Do not set PrivateFQDN if userDomain is not set
+- Can't deploy to AWS with IOPS
+- Cannot display datastore when having more than 30 datastores
+- Backup schedule is always the same
+- Connection assistant won't display newly created users
+- Privileges are concatenated in the User List
+- \[VMWare\] cloud-init domain not set
+- Volume size OR IOPS cannot be changed on AWS io1 volume type
+- \[Softbank\] Multiply network does not work on Softbank VMWare
+- Clicking on "Settings" redirects to main page
+- \[Softbank\] create\_restore\_dir error
+- Autoscale Storage button reverts automatically
+- Nodes info and settings are being reset at every request
+- Autoscale for Redis is enabled
+- \[DB Parameters\] Aborting edition displays unsaved value as current
+- DB parameter should display default value when nothing is set yet
+- Panic on zap logger
+- Redis and MSSQL backup restore is not working
+
 ## Release notes - CCX - v1.49.4
 
 ### Customer Bug
