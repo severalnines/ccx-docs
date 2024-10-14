@@ -4,6 +4,10 @@
 <!-- Parent: CCX -->
 
 # Release Changelog
+
+:::danger
+Downgrades are not supported.
+::::
 ## Release notes - CCX - v1.49.4
 
 ### Customer Bug

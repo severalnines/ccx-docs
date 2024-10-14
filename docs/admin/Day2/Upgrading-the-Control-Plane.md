@@ -1,9 +1,13 @@
 # Upgrading the Control Plane
 
+:::danger
+Downgrades are not supported.
+::::
+
+
 The supported upgrade path is to update to each version increment between the released versions.
 E.g, if you are on version 1.45 and the current version is 1.49, you need to apply:
 1.45 -> 1.46 -> 1.47 -> 1.48 -> 1.49
-
 
 Update the helm chart:
 
