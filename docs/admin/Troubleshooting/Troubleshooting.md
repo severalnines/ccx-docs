@@ -1,9 +1,7 @@
 # Troubleshooting
 
 This page describes troubleshooting scenarios.
-:::danger
-Never use the S9S CLI nor the CCUIv2 to delete resources (nodes or datastores). This may lead to stray data.
-::::
+
 ## CCX Error Report
 
 The script to generate an error report is here - https://github.com/severalnines/helm-ccx/tree/main/scripts. Please attach the error report (.tar.gz file) to every ticket created for CCX support. This tremendously helps to diagnose the issue.
@@ -14,10 +12,11 @@ For the CMON managing the CMONDB and CCXDB, see below.
 
 Use kubectl and open a bash terminal on the cmon-master container.
 
-### S9S CLI commands
+### S9S CLI commands 
 
-*WARNING!* Do not add or remove database nodes using the S9s CLI. 
-
+:::danger
+Never use the S9S CLI nor the CCUIv2 to delete resources (nodes or datastores). This may lead to stray data.
+::::
 The 's9s job' commands can be used to debug why a datastore failed to create. Example:
 
 ```bash
