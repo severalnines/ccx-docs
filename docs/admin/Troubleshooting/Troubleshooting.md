@@ -1,7 +1,9 @@
 # Troubleshooting
 
 This page describes troubleshooting scenarios.
-
+:::danger
+Never use the S9S CLI nor the CCUIv2 to delete resources (nodes or datastores). This may lead to stray data.
+::::
 ## CCX Error Report
 
 The script to generate an error report is here - https://github.com/severalnines/helm-ccx/tree/main/scripts. Please attach the error report (.tar.gz file) to every ticket created for CCX support. This tremendously helps to diagnose the issue.
