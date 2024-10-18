@@ -8,6 +8,17 @@
 :::danger
 Downgrades are not supported.
 ::::
+# Release Notes - CCX - v1.50.1
+
+## Bugs
+- Optimize failover time for Always on
+
+# Release Notes - CCX - v1.50.1
+
+## Bugs
+- Concurent backups failures
+- Autoscale switch missing in UI
+
 # Release Notes - CCX - v1.50.0
 
 ## Features
