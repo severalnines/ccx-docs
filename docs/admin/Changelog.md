@@ -4,30 +4,33 @@
 <!-- Parent: CCX -->
 
 # Release Changelog
-
 :::danger
 Downgrades are not supported.
 ::::
-# Release Notes - CCX - v1.50.1
 
-## Bugs
+:::info
+Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane) for more information how to upgrade.
+::::
+## Release Notes - CCX - v1.50.1
+
+### Bugs
 - Optimize failover time for Always on
 
-# Release Notes - CCX - v1.50.1
+## Release Notes - CCX - v1.50.1
 
-## Bugs
+### Bugs
 - Concurent backups failures
 - Autoscale switch missing in UI
 
-# Release Notes - CCX - v1.50.0
+## Release Notes - CCX - v1.50.0
 
-## Features
+### Features
 - Auto-scale volumes
 - Send email notifications to end user
 - TLS v1 Postgres and Redis
 - Cloudstack support
 
-## Task
+### Task
 - Add mariadb 11.4 support
 - Global: tooltip rounding
 - Global: modal rounding
@@ -78,7 +81,7 @@ Downgrades are not supported.
 - Redis deployment missing /data
 - Encrypt data volumes
 
-## Bugs
+### Bugs
 - CCX main page is repeatedly calling for jobs
 - UI: Inconsistent placement of "Connection information"
 - Scale wizard auto reloads before I had time to make my selections
