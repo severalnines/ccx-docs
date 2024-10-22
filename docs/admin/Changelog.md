@@ -134,6 +134,10 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 - Panic on zap logger
 - Redis and MSSQL backup restore is not working
 
+### Known issues
+- Newly created datastore incremental date is invalid (once a day)
+- Failover job is not visible in Event viewer for MSSQL
+
 ## Release notes - CCX - v1.49.4
 
 ### Customer Bug
