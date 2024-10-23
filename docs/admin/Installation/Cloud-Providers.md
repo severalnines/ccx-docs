@@ -340,14 +340,13 @@ The cloudstack provides has to defined under the `cloudstack_vendors`, here is a
                     to_port: 65535
 ```
 
-The `no_expunge` set to false means that the VM, along with all its details, will be destroyed. The `cidr: x.x.x.x/32` in the database_vendors refers to the IP address of the CCX, which connects to and manages the database nodes.
-This will create security rules for every node in the datastore.
+The `no_expunge` set to false means that the VM, along with all its details, will be destroyed. 
 
 - *Network and Zone Configuration:*
 The `network_id` and zone will act as the default values for regions, ensuring consistent configuration across deployments.
 
 - *Database Vendor Settings:*
-The `database_vendors` section defines the default rules required for CMON to connect to the database nodes. The x.x.x.x must be updated to reflect the actual CMON IP address of the current deployment for proper connectivity.
+The `database_vendors` section defines the default rules required for CMON to connect to the database nodes. The cidr: x.x.x.x/32 in database_vendors represents the IP address of the CCX deployment within the Kubernetes cluster, or the NAT gateway IP. This is the source IP that connects to and manages the database nodes across different networks. This will create security rules for every node in the datastore. The x.x.x.x must be updated to reflect the actual IP address of the current deployment for proper connectivity.
 
 #### Cloudstack credentials
 We store Cloudstack credentials in the Kubernetes secrets.
@@ -392,6 +391,9 @@ metadata:
   name: cloudstack-s3
 type: Opaque
 ```
+
+> **Note**
+>For the key MYCLOUD_S3_ENDPOINT: <base64_endpoint>, if you are using an AWS S3 bucket, the endpoint should be provided without the https details.
 
 The secret has to be included in the ccx-values under the cloudSecrets.
 

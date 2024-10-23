@@ -110,6 +110,9 @@ There are two methods to quick start CCX.
   helm repo update
   helm install ccxdeps s9s/ccxdeps --wait --debug
   ```
+> **Note**
+> When using NFS as volume provisioner, NFS servers map requests from unprivileged users to the 'nobody' user on the server, which may result in specific directories being owned by 'nobody'. So Container cannot modify these permissions, therefore it's necessary to enable root_squash on the NFS server to allow proper access.
+
 
 > **Note**
 > Make sure to install the prerequisites in `Prerequisite tool sets for CCX Installation` for ccxdeps.
