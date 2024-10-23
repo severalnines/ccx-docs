@@ -74,7 +74,7 @@ In that case set:
     network_vpc_uuid = ccx_vpc.venus.id
 ```
 
-in the resource "ccx_datastore" section, see also [example_datastore.tf](examples/example_datastore.tf)
+in the resource "ccx_datastore" section, see also [example_datastore.tf](https://github.com/severalnines/terraform-provider-ccx/blob/master/examples/example_datastore.tf)
 
 ### Advanced Usage
 
