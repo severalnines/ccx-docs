@@ -212,7 +212,7 @@ type: Opaque
 ```
 
 :::note
-  For the key MYCLOUD_S3_ENDPOINT: <base64_endpoint>, if you are using an AWS S3 bucket, the endpoint should be provided without the https details.
+  For the key MYCLOUD_S3_ENDPOINT: base64_endpoint, if you are using an AWS S3 bucket, the endpoint should be provided without the https details.
 :::
 
 The secret has to be included in the ccx-values under the cloudSecrets.
