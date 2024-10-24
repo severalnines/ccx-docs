@@ -20,14 +20,14 @@ Ensure the CCX Firewall is updated:
 ### Create a replication user
 Create a replication user with sufficient privileges on the source:
 ```
-`CREATE USER 'repluser'@'%' IDENTIFIED BY '<SECRET>'`;
+CREATE USER 'repluser'@'%' IDENTIFIED BY '<SECRET>';
 GRANT REPLICATION SLAVE ON *.* TO  'repluser'@'%';
 ```
 ### Prepare the replica to replicate from the source
 The replica must be instrucuted to replicate from the source:
 Make sure to change `<SOURCE_IP>`, `<SOURCE_PORT>`, and `<SECRET>`.
 ```
-`CHANGE REPLICATION SOURCE TO SOURCE_HOST=<SOURCE_IP>, SOURCE_PORT=<SOURCE_PORT>, SOURCE_USER='repluser', SOURCE_PASSWORD='<SECRET>', SOURCE_SSL=1; `
+CHANGE REPLICATION SOURCE TO SOURCE_HOST=<SOURCE_IP>, SOURCE_PORT=<SOURCE_PORT>, SOURCE_USER='repluser', SOURCE_PASSWORD='<SECRET>', SOURCE_SSL=1;
 ```
 ### Create a replication filter on the replica
 The replica filter prevents corruption of the datastore.
@@ -49,7 +49,9 @@ sed 's/\sDEFINER=`[^`]*`@`[^`]*`//g' -i dump.sql
 ```
 
 ### Apply the dumpfile on the replica
-`cat dump.sql | mysql -uccxadmin -p -h<REPLICA_PRIMARY>`
+```
+cat dump.sql | mysql -uccxadmin -p -h<REPLICA_PRIMARY>
+```
 
 ### Start the replica
 On the replica do:
