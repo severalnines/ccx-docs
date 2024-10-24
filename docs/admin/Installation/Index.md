@@ -110,10 +110,13 @@ There are two methods to quick start CCX.
   helm repo update
   helm install ccxdeps s9s/ccxdeps --wait --debug
   ```
+:::note
+  When using NFS as volume provisioner, NFS servers map requests from unprivileged users to the 'nobody' user on the server, which may result in specific directories being owned by 'nobody'. So Container cannot modify these permissions, therefore it's necessary to enable root_squash on the NFS server to allow proper access.
+:::
 
-> **Note**
-> Make sure to install the prerequisites in `Prerequisite tool sets for CCX Installation` for ccxdeps.
-
+:::note
+ Make sure to install the prerequisites in `Prerequisite tool sets for CCX Installation` for ccxdeps.
+:::
 ##### Customize your CCX values
 
 Have a look at `values.yaml` and create your own values file to customize your CCX instance.
@@ -134,8 +137,9 @@ ccx:
 
 For testing, you can also add entry in your `/etc/hosts` file for local resolution of `ccx.local` on your machine instead of public FQDN.
 
-> **Note**
-> Get in touch with our s9s representative in case of issues or clarifications.
+:::note
+ Get in touch with our s9s representative in case of issues or clarifications.
+:::
 
 #### Method 2:
 
@@ -157,11 +161,16 @@ helm repo add s9s https://severalnines.github.io/helm-charts/
 helm repo update
 helm install ccx s9s/ccx --wait --debug --values values.yaml
 ```
-Note: Ensure to check all pods, jobs are running without any errors
+:::note
+Ensure to check all pods, jobs are running without any errors.
+:::
 
 :::danger
 Downgrades are not supported.
 ::::
+
+### Cloud Provider Configuration
+To know more about the CCX Cloud Provider Configuration setup, please read [CCX Cloud Provider Configuration](Cloud-Providers.md).
 
 ### Production Environment Configs
 
@@ -170,10 +179,11 @@ Backups needs to be configured for:
 - CMON database (See [mysql](Mysql-Operator-Installation.md))
 - CCX database (See [postgres](Postgres-Operator-Installation.md))
   
-  > **Note**
-  > Severalnines is not responsible for backups that is lost or incorrect configuration
->#### Important Notice: Taking Persistent Volume Snapshots in Production Environment
-> To ensure data integrity and availability in your production environment, it is crucial to take regular snapshots of Persistent Volume Claims (PVCs) for CMON, DB's. Configure snapshot schedule at regular intervals, based on the criticality and update frequency of your data in your cloud environment
+:::note
+   Severalnines is not responsible for backups that is lost or incorrect configuration
+   #### Important Notice: Taking Persistent Volume Snapshots in Production Environment
+   To ensure data integrity and availability in your production environment, it is crucial to take regular snapshots of Persistent Volume Claims (PVCs) for CMON, DB's. Configure snapshot schedule at regular intervals, based on the criticality and update frequency of your data in your cloud environment
+:::
 
 ### Observability
 

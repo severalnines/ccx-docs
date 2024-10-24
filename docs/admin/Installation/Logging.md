@@ -41,6 +41,7 @@ If the FQDN for Loki is not explicitly set, it will default to the value from th
 If the Loki gateway ingress is not found, a warning will be shown when you deploy ccx. Make sure you have updated and deployed ccxdeps, else the logging feature will be disabled.
 :::
 
+
 #### Additional Fluent Bit Output Host Configuration
 
 You can provide additional Fluent Bit output configurations to forward logs to another logging tool by using extraOutputConfig in ccx chart. For example:

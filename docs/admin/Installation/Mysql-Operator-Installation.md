@@ -95,8 +95,9 @@ Next, add the following fields to your backup profile’s `storage.s3` section:
 - `config` – The name of the secret containing your credentials file.
 - `profile` – The name of the config profile to use within the credentials file. This was set to default in the example above.
 
-> **Note**
-> It is recommended to have backup enabled so that it can be restored on cluster failures.
+:::note
+It is recommended to have backup enabled so that it can be restored on cluster failures.
+:::
 
 Once the `ccxdeps-values.yaml` is ready, then run:
 
@@ -127,8 +128,9 @@ mysql-innodbcluster:
 
 Backups created by the operator will automatically be stored in timestamped folders, you should be able to indicate which one to recover by setting the `prefix`.
 
-> **Note**
-> Sometimes the MySQL InnoDB Cluster pod is stuck due to some issues preventing graceful termination of pod such as node deletion. In such cases, the pod is stuck in terminating state. This can be overcome by removing the finalizer from pod's metadata and pod will be in ready state again.
+:::note
+Sometimes the MySQL InnoDB Cluster pod is stuck due to some issues preventing graceful termination of pod such as node deletion. In such cases, the pod is stuck in terminating state. This can be overcome by removing the finalizer from pod's metadata and pod will be in ready state again.
+:::
 
 #### Recovery
 
