@@ -1,6 +1,5 @@
 # Cloud providers
 
-
 ### CCX CloudProvider setup:
 - [Openstack](openstack.md)
 - [Cloudstack](cloudstack.md)
