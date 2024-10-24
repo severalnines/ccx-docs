@@ -1,38 +1,38 @@
 
-## OpenStack
-#### Overview
+# OpenStack
+### Overview
 OpenStack cloud providers are integrated with CCX to offer a scalable, flexible, and highly configurable platform for deploying and managing databases as part of DBaaS offerings. CCX leverages OpenStack’s robust infrastructure capabilities, allowing users to automate the provisioning, scaling, and maintenance of databases, all within an OpenStack environment.
 
 CCX can interface with OpenStack's APIs to simplify database deployment, reduce manual configuration errors, and manage resources more effectively. This enables users to set up and manage cloud-based databases in a dynamic and flexible manner.
 
-## Requirements
+# Requirements
 To ensure full DBaaS functionality and seamless integration with OpenStack, CCX requires specific resources and access via the OpenStack APIs. Below are the key requirements for deploying and managing database services using CCX in an OpenStack environment.
 
 
-#### Openstack Requirements
+### Openstack Requirements
 
-##### Flavors/images for datastores
+#### Flavors/images for datastores
 CCX requires flavors built with Ubuntu 22.04 for the datastores.
 
 For a test/evaluation the following flavors are recommended:
 > 2vCPU, 4GB RAM, 80GB Disk
   4vCPU, 8GB RAM, 100GB Disk
 
-##### Floating IPs
+#### Floating IPs
 To Create a pool of floating IPs. Each VM requires a floating IP. CCX must be able to allocate and manage public IP addresses for database instances, ensuring network connectivity.
 
-##### Storage Volumes
+#### Storage Volumes
 Storage can either be ephemeral or block storage to provide disk storage for database instances. Openstack services such as cinder manages storage volume.
 CCX uses storage volumes for acquiring and attaching storage volumes to VMs.
 
-#####  Security group Configuration
+####  Security group Configuration
 CCX requires the ability to manage security group to create firewall rules to control traffic and secure access to the database VMs.
 Create a security group named ccx-common manually and this name needs to be updated in overriden yaml file.
 `ccx.services.deployer.config.openstack_vendors.MYCLOUD.regions.REGIONNAME.secgrp_name`
 The Security group firewall rule should include a rule to allow CCX ip(CIDR address) to connect to it.
 
-## Configuration
-#####  CCX OpenStack Configuration
+# Configuration
+####  CCX OpenStack Configuration
 To configure OpenStack as a cloud provider in CCX, we need to define the provider in the ccx-values-config.yaml file under the ccx.config.clouds section. Here’s an example configuration:
 
 ```
@@ -172,7 +172,7 @@ openstack_vendors:
            to_port: 65535
 ```
 
-#####  OpenStack Credentials
+####  OpenStack Credentials
 The credentials required for OpenStack API access should be stored in Kubernetes secrets. The required values are 
 
 >   MYCLOUD_USERNAME, 
@@ -204,7 +204,7 @@ cloudSecrets:
   - openstack
 ```
 
-##### S3 Backup Storage
+#### S3 Backup Storage
 For OpenStack S3-compatible backup, create a Kubernetes secret with S3 credentials and configuration:
 
 ```

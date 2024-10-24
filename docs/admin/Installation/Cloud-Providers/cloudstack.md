@@ -1,39 +1,39 @@
 
-## Cloudstack
-###  Overview
+# Cloudstack
+##  Overview
 By supporting CloudStack cloud providers, CCX provides a robust platform to facilitate the deployment and management of database instances as part of DBaaS offerings. 
 This integration leverages CloudStack's infrastructure management capabilities, enabling users to automate database provisioning, scaling, and maintenance, all while 
 benefiting from the agility and flexibility that cloud environments offer.
 
 CCX allows users to leverage CloudStack’s API to automate the creation, configuration, and deployment of databases, reducing manual effort and minimizing the risk of configuration errors.
 
-### Requirements 
+## Requirements 
 To enable full DBaaS functionality and seamless integration with CloudStack, CCX requires specific resources and access via the CloudStack API. Below are the detailed requirements for deploying and managing database services using CCX within a CloudStack environment.
 
 
-### Prerequisites
-#### API Access:
+## Prerequisites
+### API Access:
 CCX requires access to the CloudStack API to interact with the cloud infrastructure programmatically. This enables automated provisioning, management, and scaling of database instances.
 
-#### Required Resources
+### Required Resources
 
 For the proper functioning of CCX with CloudStack, the following resources must be available:
 
-##### Compute Resources (Virtual Machines):
+#### Compute Resources (Virtual Machines):
 CCX needs the ability to create and manage virtual machines (VMs) within CloudStack. These VMs serve as the foundation for hosting database instances and must be provisioned dynamically based on workload requirements.
 
-##### Public IP Addresses:
+#### Public IP Addresses:
 CCX must be able to acquire and assign public IP addresses to the deployed VMs. This ensures proper network connectivity and allows external clients to access the database services hosted on these VMs.
 
-##### Firewall Configuration:
+#### Firewall Configuration:
 CCX requires the ability to create and manage firewall rules for the VMs. This is essential for securing database instances by controlling traffic and defining which ports and protocols are allowed for communication.
 
-##### Volume Management:
+#### Volume Management:
 CCX must be able to acquire and attach storage volumes to the VMs for database storage. Only volumes with configurable size are supported, allowing users to define storage capacity according to their specific database needs.
 The CCX requirements from Cloudstack:
 
-### Configuration
-#### CCX Cloudstack configuration
+## Configuration
+### CCX Cloudstack configuration
 To add a cloudstack providers we need to add new section under `clouds:` in the `ccx-values-config.yaml` config file.
 ```yaml
       - code: mycloud 
@@ -95,7 +95,7 @@ At present, CCX supports a single zone per region, ensuring streamlined resource
 - *Disk Support:*
 CCX supports only disks with configurable, custom sizes. This flexibility allows users to specify disk capacities according to the specific needs of their database workloads, ensuring efficient storage allocation and scaling based on demand.
 
-#### Deployer configuration file ccx-values-deployer
+### Deployer configuration file ccx-values-deployer
 The cloudstack provides has to defined under the `cloudstack_vendors`, here is an example
 ```yaml
         cloudstack_vendors:
@@ -167,7 +167,7 @@ The `network_id` and zone will act as the default values for regions, ensuring c
 - *Database Vendor Settings:*
 The `database_vendors` section defines the default rules required for CMON to connect to the database nodes. The cidr: x.x.x.x/32 in database_vendors represents the IP address of the CCX deployment within the Kubernetes cluster, or the NAT gateway IP. This is the source IP that connects to and manages the database nodes across different networks. This will create security rules for every node in the datastore. The x.x.x.x must be updated to reflect the actual IP address of the current deployment for proper connectivity.
 
-#### Cloudstack credentials
+### Cloudstack credentials
 We store Cloudstack credentials in the Kubernetes secrets.
 In the Kubernetes secret we will have two values for API_KEY and API_SECRET_KEY
 
@@ -193,7 +193,7 @@ The secret has to be included in the ccx-values under the cloudSecrets.
     - cloudstack
 ```
 
-#### S3 backup storage
+### S3 backup storage
 For the Cloudstack S3 backup, we need to create a Kubernetes secret with S3 storage informations and credentials.
 `CLOUDSTACK_S3_INSECURE_SSL` can be set to true if you don't have a valid TLS cert for your s3 endpoint.
 

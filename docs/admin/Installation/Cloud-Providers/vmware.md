@@ -1,6 +1,6 @@
 
-## VMware
-### Overview
+# VMware
+## Overview
 VMware's support for CCX is available for ESXi versions that adhere to the [VMware Product Lifecycle Matrix](https://lifecycle.vmware.com/).
 
 CCX requires the following things enabled on the ESXi side
@@ -16,8 +16,8 @@ CCX requires the following things enabled on the ESXi side
   In the `instances_types` for other cloud vendors we are also defining CPU and RAM but they are only to inform the user about the flavor/instance type.
   In case of VMWare this will actually define the resources for the new Virtual Machines.
 
-### Configuration
-#### Deployer configuration
+## Configuration
+### Deployer configuration
 In the deployer configuration (`ccx-values-deployer.yaml`) we configure how CCX will access the ESXi APIs.
 The VMware configuration is under the deployer section in the VMware_vendors sections.
 
@@ -99,7 +99,7 @@ The secret has to be included in the ccx-values under the cloudSecrets.
     - vmware-s3
 ```
 
-#### Cloud configuration
+### Cloud configuration
 To configure the cloud details like volumes, instance types, the cloud name we will define the new section in
 `ccx-values-config.yaml`
 
@@ -153,7 +153,7 @@ Above is an example of a VMware config.
 
 The one difference between the OpenStack and AWS ones is that here, we specify the CPU (number of CPUs) and memory (in GiB), for instance, types. They are purely artificial. VMware does not have a concept of instance types.
 
-### VMWare custom values
+## VMWare custom values
 VMWare deployments has the ability to overwrite some of the configuration options in the CreateClusterRequestV2 request.
 We can overwrite options that we defined in deployer vmware_vendors
 ```yaml

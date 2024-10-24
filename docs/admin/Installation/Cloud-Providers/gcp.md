@@ -1,7 +1,6 @@
 
-
-## Google Cloud Platform
-### Overview 
+# Google Cloud Platform
+## Overview 
 CCX supports Google Cloud Platform (GCP) as a cloud provider.
 
 It requires the following things enabled on the GCP side:
@@ -34,8 +33,8 @@ compute.operations.list
 
 - A valid image id must be provided. This is typically a public image id of ubuntu 22.04.
 
-### Configuration
-#### Deployer configuration
+## Configuration
+### Deployer configuration
 
 In the deployer configuration (ccx-values-deployer.yaml) we configure how CCX will access the GCP APIs.
 
@@ -173,7 +172,7 @@ volume_types:
       default: 10
 ```
 
-### Secrets 
+## Secrets 
 For the GCP S3 backup, we need to create a Kubernetes secret that will be used for backups.
 
 ```yaml
