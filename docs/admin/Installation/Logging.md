@@ -90,12 +90,15 @@ fluentbit:
         auto_kubernetes_labels on
 ```
 
-> Note: Don't change the input plugin path `[INPUT].Path` and filter record `[FILTER]`.
+:::note
+Don't change the input plugin path `[INPUT].Path` and filter record `[FILTER]`.
+:::
 
 Input plugins, filters are prepared with the desired settings and are recommended default configuration that should be ready to use without any modifications. If you still need to customize it, you can do that but don't change the `[INPUT].Path` and filter record `[FILTER]`.
 
-> Note: Modifications are needed only on 'output plugins'.
-
+:::note
+Modifications are needed only on 'output plugins'.
+:::
 The following configurations are in files/fluent-bit.conf automatically generated if `.Values.fluentbit.enabled` to `true` and `.Values.fluentbit.config` is not defined.
 
 This configuration mounts the fluent-bit.conf configuration file from the ConfigMap into the /etc/fluent-bit/ directory in the host.
