@@ -161,7 +161,9 @@ helm repo add s9s https://severalnines.github.io/helm-charts/
 helm repo update
 helm install ccx s9s/ccx --wait --debug --values values.yaml
 ```
-Note: Ensure to check all pods, jobs are running without any errors
+:::note
+Ensure to check all pods, jobs are running without any errors.
+:::
 
 :::danger
 Downgrades are not supported.

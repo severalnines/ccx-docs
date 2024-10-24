@@ -99,4 +99,6 @@ jobs:
             }
 ```
 
-Note: you need to replace the `<>` placeholder values with your values.
+:::note
+you need to replace the `<>` placeholder values with your values.
+:::
