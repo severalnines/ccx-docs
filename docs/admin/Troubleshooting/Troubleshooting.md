@@ -18,7 +18,7 @@ Use kubectl and open a bash terminal on the cmon-master container.
 Never use the S9S CLI nor the CCUIv2 to add or remove resources (nodes or datastores). This may lead to stray data.
 Do not use the following commands:
 - s9s cluster --[drop|remove-node|add-node|upgrade-cluster|reinstall-node|demote-node|reconfigure-node]
-- s9s node --unregister
+- s9s node --[stop|unregister]
 ::::
 The 's9s job' commands can be used to debug why a datastore failed to create. Example:
 
