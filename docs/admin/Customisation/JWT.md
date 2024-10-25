@@ -15,23 +15,23 @@ A **JWT** contains an associative array with claims about the user and session, 
 
 The private key is used by **CSP** to encrypt the JWT token (see examples). A key pair can be generated with:
 
+ssh-keygen will produce a PKCS#1 RSA private key that starts with -----BEGIN RSA PRIVATE KEY----- and openssl to extract the public key in the desired PEM format
 ```bash
-ssh-keygen -t rsa -b 4096 -f ccx.key
+ssh-keygen -t rsa -b 4096 -m PEM -f ccx.key
+openssl rsa -in ccx.key -pubout -out ccx.key.pub 
 ```
 
-#### Secrets Configuration Example:
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: jwt-public-key
-  namespace: ccx-staging
-type: Opaque
-data:
-  JWT_PUBLIC_KEY_ID: ...
-  JWT_PUBLIC_KEY_PKIX: ...
-  JWT_PUBLIC_KEY_PEM: ...
+#### Secrets Configuration in CCX Helm values:
+you need to set the configuration parameters in `ccx.services.auth` in ccx values.yaml
+```
+      env:
+        JWT_PUBLIC_KEY_ID: 'EXAMPLE_CSP'
+        JWT_PUBLIC_KEY_PKIX: '1'
+        JWT_PUBLIC_KEY_PEM: |-
+            -----BEGIN PUBLIC KEY-----
+            MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxowkw7Zf2pXoehn2CkwQ
+            sHqbASdRp2DENgUEIGj+iqQPMDZor2CD1fVYpVZW+kcQkR9SgIvb+QiSgdHvWegs
+            -----END PUBLIC KEY-----
 ```
 
 #### JWT Environment Variables
@@ -118,7 +118,7 @@ There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 ---
 
 ### Examples of JWT Generation
-
+Run the code by setting the params such as my.ccx.url, Example_CSP, UserID and Private Key
 #### **Go Example:**
 
 ```go
@@ -203,6 +203,8 @@ func main() {
     }
     defer resp.Body.Close()
     log.Print("response status: ", resp.Status)
+	constructedURL := fmt.Sprintf("%s/jwt-login?jwt=%s&issuer=%s", authUrlPrefix, token, "EXAMPLE_CSP")
+	log.Printf("Constructed URL: %s", constructedURL) // Log the constructed URL
 }
 
 var (
