@@ -1,6 +1,6 @@
 # Configuration Management
 
-This section describes the configuration management feature in CCX.
+This section describes the configuration management feature in CCX. This feature gives the end-user self-service capabilities to update the datastore configuration. It is the administrator of CCX who decides which database configuration parameters that can be changed by the end-user.
 
 ## Limitations / Important information
 
