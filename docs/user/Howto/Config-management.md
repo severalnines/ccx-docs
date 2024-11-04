@@ -42,10 +42,6 @@ This is an example, and is subject to change and depends on the configuration of
 The latest saved settings are applied when adding a node (either as part of Scaling, during Lifecycle management, or during automatic repair).
 :::
 
-:::danger
-It is not recommended to update configuration parameters using S9S CLI or ClusterControl UI. If you do that, then the changes will be overwritten by the the latest saved settings when adding a node (either as part of Scaling, during Lifecycle management, or during automatic repair).
-:::
-
 ## Best Practices
 
 - **Understand the impact**: Changing certain parameters can significantly impact the performance and stability of your database. Make sure to test changes in a staging environment if possible.
