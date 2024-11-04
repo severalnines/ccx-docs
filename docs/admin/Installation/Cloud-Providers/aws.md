@@ -5,29 +5,88 @@ By supporting AWS cloud providers, CCX offers a comprehensive platform for deplo
 CCX interacts with AWS APIs to automate the creation, configuration, and management of database instances, minimizing manual intervention and reducing potential for configuration errors.
 
 ## Requirements
-To fully integrate CCX with AWS for DBaaS, the following resources and API access are necessary.
+To fully integrate CCX with AWS for DBaaS, the following resources and Permissions are necessary.
 
 ##  Prerequisites
 
-### Required Resources
-For proper functioning with AWS, CCX needs access to the following resources:
+### Required Permission for Resources
+For proper functioning with AWS, CCX needs access to the resources with permissions:
 
-#### Compute Resources (EC2 Instances):
-CCX requires permission to create and manage EC2 instances within AWS. These instances will host database instances and are provisioned dynamically based on workload demands.
-
-#### Public and Private IP Addresses:
-CCX should have the ability to allocate public and private IP addresses as needed for database instances. Public IPs allow external access, while private IPs ensure secure internal communication.
-
-#### Security Groups:
-CCX needs to create and manage security groups to define access control to the EC2 instances. This includes specifying allowed ports, protocols, and IP ranges for secure communication.
-
-#### Volume Management (EBS):
-CCX requires the ability to create and attach Elastic Block Storage (EBS) volumes to EC2 instances for database storage. Configurable volume sizes allow users to tailor storage capacity to their specific database needs.
+```
+"ec2:RunInstances",
+"ec2:TerminateInstances",
+"ec2:DescribeInstances",
+"ec2:DescribeInstanceStatus",
+"ec2:StartInstances",
+"ec2:StopInstances",
+"ec2:RebootInstances",
+"ec2:CreateVolume",
+"ec2:DeleteVolume",
+"ec2:AttachVolume",
+"ec2:DetachVolume",
+"ec2:DescribeVolumes",
+"ec2:ModifyVolume",
+"ec2:DescribeVolumeStatus",
+"ec2:DescribeSnapshots",
+"ec2:CreateSnapshot",
+"ec2:DeleteSnapshot",
+"ec2:CreateTags",
+"ec2:CreateSecurityGroup",
+"ec2:DeleteSecurityGroup",
+"ec2:DescribeSecurityGroups",
+"ec2:AuthorizeSecurityGroupIngress",
+"ec2:RevokeSecurityGroupIngress",
+"ec2:AuthorizeSecurityGroupEgress",
+"ec2:RevokeSecurityGroupEgress",
+"ec2:AllocateAddress",
+"ec2:ReleaseAddress",
+"ec2:AssociateAddress",
+"ec2:DisassociateAddress",
+"ec2:DescribeAddresses",
+"ec2:CreateVpc",
+"ec2:DeleteVpc",
+"ec2:DescribeVpcs",
+"ec2:CreateSubnet",
+"ec2:DeleteSubnet",
+"ec2:DescribeSubnets",
+"ec2:CreateRouteTable",
+"ec2:DeleteRouteTable",
+"ec2:AssociateRouteTable",
+"ec2:DisassociateRouteTable",
+"ec2:CreateRoute",
+"ec2:DeleteRoute",
+"ec2:DescribeRouteTables",
+"ec2:CreateInternetGateway",
+"ec2:AttachInternetGateway",
+"ec2:DetachInternetGateway",
+"ec2:DeleteInternetGateway",
+"ec2:DescribeInternetGateways",
+"ec2:CreateKeyPair",
+"ec2:DeleteKeyPair",
+"ec2:CreateVpcPeeringConnection",
+"ec2:ModifySubnetAttribute",
+"route53:ChangeResourceRecordSets",
+"route53:ListResourceRecordSets",
+"route53:GetHostedZone",
+"route53:ListHostedZones",
+"s3:CreateBucket",
+"ec2:DeleteVpcPeeringConnection",
+"s3:ListAllMyBuckets",
+"s3:DeleteBucket",
+"s3:ListBucket",
+"s3:GetBucketLocation",
+"s3:PutBucketPolicy",
+"s3:DeleteBucketPolicy",
+"s3:PutBucketAcl",
+"s3:PutObject",
+"s3:GetObject",
+"s3:DeleteObject"
+```
 
 ## Configuration
 #### AWS Provider Configuration
 To add an AWS provider, you need to add a new section under `ccx.config` in the ccx-values-config.yaml file.
-
+Below cloud config is by default in helm-ccx values. You don't need to add this configuration unless you want to change the region.
 ```
     clouds:
       - code: aws
@@ -106,51 +165,51 @@ you need to add a new section under `ccx.services.deployer.config` in the ccx-va
           database_vendors:
             - name: mariadb
               security_groups:
-                - cidr: x.x.x.x/32
+                - cidr: 0.0.0.0/32
                   from_port: 22
                   ip_protocol: tcp
                   to_port: 22
-                - cidr: x.x.x.x/32
+                - cidr: 0.0.0.0/32
                   from_port: 1000
                   ip_protocol: tcp
                   to_port: 65535
             - name: microsoft
               security_groups:
-                - cidr: x.x.x.x/32
+                - cidr: 0.0.0.0/32
                   from_port: 22
                   ip_protocol: tcp
                   to_port: 22
-                - cidr: x.x.x.x/32
+                - cidr: 0.0.0.0/32
                   from_port: 1000
                   ip_protocol: tcp
                   to_port: 65535
             - name: percona
               security_groups:
-                - cidr: x.x.x.x/32
+                - cidr: 0.0.0.0/32
                   from_port: 22
                   ip_protocol: tcp
                   to_port: 22
-                - cidr: x.x.x.x/32
+                - cidr: 0.0.0.0/32
                   from_port: 1000
                   ip_protocol: tcp
                   to_port: 65535
             - name: postgres
               security_groups:
-                - cidr: x.x.x.x/32
+                - cidr: 0.0.0.0/32
                   from_port: 22
                   ip_protocol: tcp
                   to_port: 22
-                - cidr: 37.30.16.41/32
+                - cidr: 0.0.0.0/32
                   from_port: 1000
                   ip_protocol: tcp
                   to_port: 65535
             - name: redis
               security_groups:
-                - cidr: x.x.x.x/32
+                - cidr: 0.0.0.0/32
                   from_port: 22
                   ip_protocol: tcp
                   to_port: 22
-                - cidr: x.x.x.x/32
+                - cidr: 0.0.0.0/32
                   from_port: 1000
                   ip_protocol: tcp
                   to_port: 65535
@@ -162,7 +221,13 @@ The database_vendors section configures default security rules for database inst
 The cidr: x.x.x.x/32 in database_vendors represents the IP address of the CCX deployment within the Kubernetes cluster, or the NAT gateway IP. This is the source IP that connects to and manages the database nodes across different networks. This will create security rules for every node in the datastore. The x.x.x.x must be updated to reflect the actual IP address of the current deployment for proper connectivity.
 
 #### AWS Credentials in Kubernetes Secrets
-AWS credentials need to be stored as Kubernetes secrets. Create secrets for the AWS provider, including access key and secret access key:
+AWS credentials need to be stored as Kubernetes secrets. Create secrets for the AWS provider, including access key and secret access key.
+you can create a aws secret from your existing aws credentials file ~/.aws/credentials.
+
+```
+kubectl create secret generic aws --from-literal=AWS_ACCESS_KEY_ID=$(awk '/aws_access_key_id/{print $NF}' ~/.aws/credentials) --from-literal=AWS_SECRET_ACCESS_KEY=$(awk '/aws_secret_access_key/{print $NF}' ~/.aws/credentials)
+```
+Or you can create secrets manually replacing your access_key and secret_key.
 
 ```
 apiVersion: v1
@@ -182,25 +247,7 @@ These secrets must be included in the ccx-values file under the `ccx.cloudSecret
 ```
 
 #### S3 Backup Storage for AWS
-To enable S3 backups in AWS, configure S3 storage credentials:
+Backups are automatically stored in s3 buckets 
 
-```
-apiVersion: v1
-data:
-  AWS_S3_ACCESSKEY: <base64_access_key>
-  AWS_S3_BUCKETNAME: <base64_bucket_name>
-  AWS_S3_ENDPOINT: <base64_endpoint> #s3 endpoint without https
-  AWS_S3_SECRETKEY: <base64_secret_key>
-  AWS_S3_INSECURE_SSL: <base64_true_or_false>
-kind: Secret
-metadata:
-  name: aws-s3
-type: Opaque
-```
-Include the AWS S3 backup secret in the ccx-values file under the `ccx.cloudSecrets` section
 
-```
-  cloudSecrets:
-    - aws-s3
-```
-This setup allows CCX to fully integrate with AWS, offering automated provisioning, management, and backup of database instances using AWS's powerful cloud services.
+These setup allows CCX to fully integrate with AWS, offering automated provisioning, management, and backup of database instances using AWS's powerful cloud services.
