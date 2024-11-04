@@ -10,7 +10,7 @@ The account details for this are found in the kubernetes secret `admin-users`. (
 
 You need to logout from CCX web-app first or clear the cookies for your `CCX_URL` in a browser.
 
-## Ops-C and ClusterControl UI
+## ClusterControl UI
 
 This is the admin panel for Cluster Control and exposes the functionality of CMON through a web interface (you can also use the `s9s` CLI to interact).
 
@@ -18,10 +18,6 @@ The account details for this are found in the kubernetes secret `cmon-credential
 :::danger
 Never use the ClusterControl UI to delete resources (nodes or datastores). This may lead to stray data.
 ::::
-
-## CCX-MGMT
-
-This is a proxy to an instance of CMON and the credentials for this are logged to stdout upon boot of the container. This is not actively used in current versions of CCX.
 
 ## S9S CLI
 

@@ -8,6 +8,7 @@ An instantion of the docs is available here [https://severalnines.github.io/ccx-
 ## Docusaurus
 1. Install node (e.g `brew install node`)
 2. `npm install`
+3. `yarn add @cmfcmf/docusaurus-search-local`
 3. `npm run build`
 4. `npm start` 
 ## Mkdocs

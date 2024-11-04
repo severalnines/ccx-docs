@@ -4,9 +4,11 @@ This procedure describes how to import data to a MySQL datastore located in CCX.
 - The MySQL Datastore on CCX is denoted as the 'replica'
 - The source of the data is denoted as the 'source'
 
-Note! If you dont want to setup replication, then you can chose to only apply the sections:
+:::note
+If you dont want to setup replication, then you can chose to only apply the sections:
 * Create a database dump file
 * Apply the dumpfile on the replica
+:::
 
 ### Preparations
 Ensure that the source is configured to act as a replication source:
@@ -18,14 +20,14 @@ Ensure the CCX Firewall is updated:
 ### Create a replication user
 Create a replication user with sufficient privileges on the source:
 ```
-`CREATE USER 'repluser'@'%' IDENTIFIED BY '<SECRET>'`;
+CREATE USER 'repluser'@'%' IDENTIFIED BY '<SECRET>';
 GRANT REPLICATION SLAVE ON *.* TO  'repluser'@'%';
 ```
 ### Prepare the replica to replicate from the source
 The replica must be instrucuted to replicate from the source:
 Make sure to change `<SOURCE_IP>`, `<SOURCE_PORT>`, and `<SECRET>`.
 ```
-`CHANGE REPLICATION SOURCE TO SOURCE_HOST=<SOURCE_IP>, SOURCE_PORT=<SOURCE_PORT>, SOURCE_USER='repluser', SOURCE_PASSWORD='<SECRET>', SOURCE_SSL=1; `
+CHANGE REPLICATION SOURCE TO SOURCE_HOST=<SOURCE_IP>, SOURCE_PORT=<SOURCE_PORT>, SOURCE_USER='repluser', SOURCE_PASSWORD='<SECRET>', SOURCE_SSL=1;
 ```
 ### Create a replication filter on the replica
 The replica filter prevents corruption of the datastore.
@@ -47,7 +49,9 @@ sed 's/\sDEFINER=`[^`]*`@`[^`]*`//g' -i dump.sql
 ```
 
 ### Apply the dumpfile on the replica
-`cat dump.sql | mysql -uccxadmin -p -h<REPLICA_PRIMARY>`
+```
+cat dump.sql | mysql -uccxadmin -p -h<REPLICA_PRIMARY>
+```
 
 ### Start the replica
 On the replica do:
