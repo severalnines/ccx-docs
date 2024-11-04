@@ -26,7 +26,6 @@ you need to set the configuration parameters in `ccx.services.auth` in ccx value
 ```
       env:
         JWT_PUBLIC_KEY_ID: 'EXAMPLE_CSP'
-        JWT_PUBLIC_KEY_PKIX: '1'
         JWT_PUBLIC_KEY_PEM: |-
             -----BEGIN PUBLIC KEY-----
             MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxowkw7Zf2pXoehn2CkwQ
@@ -39,7 +38,7 @@ you need to set the configuration parameters in `ccx.services.auth` in ccx value
 | Environment Variable     | Description                                             |
 | ------------------------ | ------------------------------------------------------- |
 | **JWT_PUBLIC_KEY_ID**    | The identifier of the provider, e.g., "EXAMPLE_CSP".    |
-| **JWT_PUBLIC_KEY_PKIX**  | Should be "1" if the key is in PKIX format.             |
+| **JWT_PUBLIC_KEY_PKIX**  | Should be "1" if the key is in PKIX format(Optional)    |
 | **JWT_PUBLIC_KEY_PEM**   | The public key in PEM format (contents of `ccx.key.pub`). |
 
 ---
