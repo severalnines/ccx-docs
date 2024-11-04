@@ -1,0 +1,33 @@
+.md-header {
+    background-color: #0A1250;
+}
+
+[data-md-color-scheme="percona-light"] {
+
+    .md-nav__item .md-nav__link--active,
+    .md-nav__item .md-nav__link--active code {
+        color: #FF00C3;
+    }
+
+    .md-nav__link[for]:focus,
+    .md-nav__link[for]:hover,
+    .md-nav__link[href]:focus,
+    .md-nav__link[href]:hover {
+        color: #FF00C3;
+    }
+}
+
+[data-md-color-scheme="slate"] {
+
+    .md-nav__item .md-nav__link--active,
+    .md-nav__item .md-nav__link--active code {
+        color: #FF3BD1;
+    }
+
+    .md-nav__link[for]:focus,
+    .md-nav__link[for]:hover,
+    .md-nav__link[href]:focus,
+    .md-nav__link[href]:hover {
+        color: #FF3BD1;
+    }
+}
