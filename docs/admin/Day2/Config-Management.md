@@ -9,7 +9,12 @@ This section describes the configuration management feature in CCX.
 - The following list (section below) is not final, but the following parameters and type of parameters must not be changed.
 - We recommend that you contact CCX Support before adding or changing a parameter.
 
-## Non-supported parameters
+:::note
+The parameter settings are applied on scaling and during upgrads (Life-cycle management).
+:::
+
+ 
+## Non-supported parameters and limitations
 
 ### MySQL/Mariadb
 

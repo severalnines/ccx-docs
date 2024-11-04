@@ -38,6 +38,12 @@ This is an example, and is subject to change and depends on the configuration of
 4. Adjust the values as necessary within the defined minimum and maximum limits.
 5. Once you’ve made the required changes, save the new configuration.
 
+
+:::note
+The latest saved settings are applied when adding a node (either as part of Scaling, during Lifecycle management, or during automatic repair).
+:::
+
+
 ## Best Practices
 
 - **Understand the impact**: Changing certain parameters can significantly impact the performance and stability of your database. Make sure to test changes in a staging environment if possible.
