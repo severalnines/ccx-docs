@@ -19,14 +19,14 @@
 
 | variable_name                | variable_value        |
 |------------------------------|---------------------|
-| innodb_buffer_pool_size       | Depends on instance    |
+| innodb_buffer_pool_size       | Depends on instance size    |
 | innodb_flush_log_at_trx_commit| 2                     |
 | innodb_file_per_table         | 1                     |
-| innodb_data_file_path         | Depends on instance    |
+| innodb_data_file_path         | Depends on instance size    |
 | innodb_read_io_threads        | 4                     |
 | innodb_write_io_threads       | 4                     |
 | innodb_doublewrite            | 1                     |
-| innodb_buffer_pool_instances  | Depends on instance|
+| innodb_buffer_pool_instances  | Depends on instance size|
 | innodb_redo_log_capacity      | 8G                    |
 | innodb_thread_concurrency     | 0                     |
 | innodb_flush_method           | O_DIRECT              |
@@ -47,7 +47,7 @@
 | read_rnd_buffer_size        | 512K                |
 | memlock                      | 0                   |
 | sysdate_is_now               | 1                   |
-| max_connections              | Depends on instance   |
+| max_connections              | Depends on instance size   |
 | thread_cache_size            | 512                 |
 | table_open_cache             | 4000                |
 | table_open_cache_instances   | 16                  |
