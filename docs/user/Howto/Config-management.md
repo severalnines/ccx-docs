@@ -38,11 +38,13 @@ This is an example, and is subject to change and depends on the configuration of
 4. Adjust the values as necessary within the defined minimum and maximum limits.
 5. Once you’ve made the required changes, save the new configuration.
 
-
 :::note
 The latest saved settings are applied when adding a node (either as part of Scaling, during Lifecycle management, or during automatic repair).
 :::
 
+:::danger
+It is not recommended to update configuration parameters using S9S CLI or ClusterControl UI. If you do that, then the changes will be overwritten by the the latest saved settings when adding a node (either as part of Scaling, during Lifecycle management, or during automatic repair).
+:::
 
 ## Best Practices
 
