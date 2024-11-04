@@ -18,7 +18,7 @@ The private key is used by **CSP** to encrypt the JWT token (see examples). A ke
 ssh-keygen will produce a PKCS#1 RSA private key that starts with -----BEGIN RSA PRIVATE KEY----- and openssl to extract the public key in the desired PEM format
 ```bash
 ssh-keygen -t rsa -b 4096 -m PEM -f ccx.key
-openssl rsa -in ccx.key -pubout -out ccx.key.pub 
+ssh-keygen -e -f ccx.key -m PEM > ccx.key.pub
 ```
 
 #### Secrets Configuration in CCX Helm values:
