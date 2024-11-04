@@ -157,6 +157,7 @@ Below cloud config is by default in helm-ccx values. You don't need to add this 
 ### Deployer Configuration for AWS
 
 you need to add a new section under `ccx.services.deployer.config` in the ccx-values-deployer.yaml file.
+Below deployer config is by default in helm-ccx values. You don't need to add this configuration unless you want to change the region.
 ```
         aws_vendor:
           regions:
