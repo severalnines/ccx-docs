@@ -9,19 +9,18 @@ The picture below shows the authentication flow:
 A **JWT** contains an associative array with claims about the user and session, and is signed by the issuer with a private key (RSA).
 
 - The `jti` claim is a UUID identifying the session.
-- The `sub` claim uniquely identifies the user. It can be a UUID, an email address, or any other string that uniquely identifies users.
+- The `sub` claim uniquely identifies the user. It can be a project id, an org id, a user id, an email address, or any other string that uniquely identifies your end-user.
 
-**CCX** verifies JWTs using the corresponding public key (RSA), which is stored in the CCX secrets.
+**CCX** verifies JWTs using the corresponding public key (RSA), which is stored in the values file.
 
-The private key is used by **CSP** to encrypt the JWT token (see examples). A key pair can be generated with:
+The private key is used by **CSP** to encrypt the JWT token (see [examples](#examples-of-jwt-generation)). A key pair can be generated with:
 
-ssh-keygen will produce a PKCS#1 RSA private key that starts with -----BEGIN RSA PRIVATE KEY----- and openssl to extract the public key in the desired PEM format
 ```bash
 ssh-keygen -t rsa -b 4096 -m PEM -f ccx.key
 ssh-keygen -e -f ccx.key -m PEM > ccx.key.pub
 ```
 
-#### Secrets Configuration in CCX Helm values:
+#### Public key configuration in CCX Helm values:
 you need to set the configuration parameters in `ccx.services.auth` in ccx values.yaml
 ```
       env:
@@ -35,11 +34,11 @@ you need to set the configuration parameters in `ccx.services.auth` in ccx value
 
 #### JWT Environment Variables
 
-| Environment Variable     | Description                                             |
-| ------------------------ | ------------------------------------------------------- |
-| **JWT_PUBLIC_KEY_ID**    | The identifier of the provider, e.g., "EXAMPLE_CSP".    |
-| **JWT_PUBLIC_KEY_PKIX**  | Should be "1" if the key is in PKIX format(Optional)    |
+| Environment Variable     | Description                                               |
+| ------------------------ | --------------------------------------------------------- |
+| **JWT_PUBLIC_KEY_ID**    | The identifier of the provider, e.g., "EXAMPLE_CSP".      |
 | **JWT_PUBLIC_KEY_PEM**   | The public key in PEM format (contents of `ccx.key.pub`). |
+| **JWT_PUBLIC_KEY_PKIX**  | Should be "1" if the key is in PKIX format (optional).    |
 
 ---
 
