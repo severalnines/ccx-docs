@@ -9,38 +9,36 @@ The picture below shows the authentication flow:
 A **JWT** contains an associative array with claims about the user and session, and is signed by the issuer with a private key (RSA).
 
 - The `jti` claim is a UUID identifying the session.
-- The `sub` claim uniquely identifies the user. It can be a UUID, an email address, or any other string that uniquely identifies users.
+- The `sub` claim uniquely identifies the user. It can be a project id, an org id, a user id, an email address, or any other string that uniquely identifies your end-user.
 
-**CCX** verifies JWTs using the corresponding public key (RSA), which is stored in the CCX secrets.
+**CCX** verifies JWTs using the corresponding public key (RSA), which is stored in the values file.
 
-The private key is used by **CSP** to encrypt the JWT token (see examples). A key pair can be generated with:
+The private key is used by **CSP** to encrypt the JWT token (see [examples](#examples-of-jwt-generation)). A key pair can be generated with:
 
 ```bash
-ssh-keygen -t rsa -b 4096 -f ccx.key
+ssh-keygen -t rsa -b 4096 -m PEM -f ccx.key
+ssh-keygen -e -f ccx.key -m PEM > ccx.key.pub
 ```
 
-#### Secrets Configuration Example:
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: jwt-public-key
-  namespace: ccx-staging
-type: Opaque
-data:
-  JWT_PUBLIC_KEY_ID: ...
-  JWT_PUBLIC_KEY_PKIX: ...
-  JWT_PUBLIC_KEY_PEM: ...
+#### Public key configuration in CCX Helm values:
+you need to set the configuration parameters in `ccx.services.auth` in ccx values.yaml
+```
+      env:
+        JWT_PUBLIC_KEY_ID: 'EXAMPLE_CSP'
+        JWT_PUBLIC_KEY_PEM: |-
+            -----BEGIN PUBLIC KEY-----
+            MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxowkw7Zf2pXoehn2CkwQ
+            sHqbASdRp2DENgUEIGj+iqQPMDZor2CD1fVYpVZW+kcQkR9SgIvb+QiSgdHvWegs
+            -----END PUBLIC KEY-----
 ```
 
 #### JWT Environment Variables
 
-| Environment Variable     | Description                                             |
-| ------------------------ | ------------------------------------------------------- |
-| **JWT_PUBLIC_KEY_ID**    | The identifier of the provider, e.g., "EXAMPLE_CSP".    |
-| **JWT_PUBLIC_KEY_PKIX**  | Should be "1" if the key is in PKIX format.             |
+| Environment Variable     | Description                                               |
+| ------------------------ | --------------------------------------------------------- |
+| **JWT_PUBLIC_KEY_ID**    | The identifier of the provider, e.g., "EXAMPLE_CSP".      |
 | **JWT_PUBLIC_KEY_PEM**   | The public key in PEM format (contents of `ccx.key.pub`). |
+| **JWT_PUBLIC_KEY_PKIX**  | Should be "1" if the key is in PKIX format (optional).    |
 
 ---
 
@@ -118,7 +116,7 @@ There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 ---
 
 ### Examples of JWT Generation
-
+Run the code by setting the params such as my.ccx.url, Example_CSP, UserID and Private Key
 #### **Go Example:**
 
 ```go
@@ -203,6 +201,8 @@ func main() {
     }
     defer resp.Body.Close()
     log.Print("response status: ", resp.Status)
+	constructedURL := fmt.Sprintf("%s/jwt-login?jwt=%s&issuer=%s", authUrlPrefix, token, "EXAMPLE_CSP")
+	log.Printf("Constructed URL: %s", constructedURL) // Log the constructed URL
 }
 
 var (
