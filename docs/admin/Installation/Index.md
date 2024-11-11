@@ -54,7 +54,7 @@ you can enable by setting it to true by using below command.
   helm install ccxdeps s9s/ccxdeps --debug --set ingressController.enabled=true --set external-dns.enabled=true
 ```
 
-## Openstack Requirements
+### Cloud Requirements
 
 #### Flavors/images for datastores
 
@@ -64,13 +64,15 @@ For a test/evaluation the following flavors are recommended:
 - 2vCPU, 4GB RAM, 80GB Disk
 - 4vCPU, 8GB RAM, 100GB Disk
 
-#### Floating IPs
+Also, the easiest if there is a default login account called 'ubuntu' on the image.
 
-Create a pool of floating IPs. Each VM requires a floating IP.
+#### Floating IPs / Public IPs
+
+Create a pool of floating IPs (public IPs). Each VM requires a floating IP/public IP.
 
 #### Disk Space
 
-Disk space can either be ephemeral or block storage.
+Disk space can either be ephemeral or block storage. We recommend block storage as block storage devices can be scaled.
 
 ## Methods to Easy Install/Quickstart CCX Installation
 
@@ -84,7 +86,7 @@ There are two methods to quick start CCX.
   By default CCX will install with the cloud vendor AWS - only thing you need to provide is cloud secrets!
   If you want to customize your installation, please see the `values.yaml` and follow the guide.
 
-  **This is recommendend only for development environment.**
+  **This is recommendend only for development environment. It is a great way to make sure you have working control plane**
 
   ##### Create secrets
 
@@ -141,7 +143,7 @@ For testing, you can also add entry in your `/etc/hosts` file for local resoluti
  Get in touch with our s9s representative in case of issues or clarifications.
 :::
 
-#### Method 2:
+### Method 2:
 
 - ##### Run the Installation bash script
   Clone the repo [`helm-ccx`](https://github.com/severalnines/helm-charts.git) and run the script
