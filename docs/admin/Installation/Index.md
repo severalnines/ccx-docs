@@ -29,7 +29,7 @@ A namespace must be configured for the CCX K8s services to operate.
 example: `production`
 
 ### Helm Charts
-The Helm charts are located in [https://artifacthub.io/packages/helm/clustercontrol/ccx/](https://artifacthub.io/packages/helm/clustercontrol/ccx/). 
+The Helm charts are located in [https://artifacthub.io/packages/helm/severalnines/ccx](https://artifacthub.io/packages/helm/severalnines/ccx).
 The source respository is located in [https://github.com/severalnines/helm-charts](https://github.com/severalnines/helm-charts). The three charts used below are:
 - ccx
 - ccxdeps
