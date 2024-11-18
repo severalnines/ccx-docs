@@ -11,6 +11,19 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane) for more information how to upgrade.
 ::::
+
+## Release Notes - CCX - v1.50.5
+
+### improvements
+- Autoscale is enabled by default for new datastores
+
+### Bugs
+- Duplicated VPCs issue
+- MSSQL - missing ccxadmin user after failover
+- Multiple parameters change is changing only one
+- Password reset issue
+- Increase pg wal_keep to 1024 
+
 ## Release Notes - CCX - v1.50.3
 
 ### Bugs
