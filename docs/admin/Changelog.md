@@ -14,6 +14,12 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 
 ## Release Notes - CCX - v1.50.5
 
+### Bugs
+- Password present in multiple logfiles
+- Loglines are extended repeatedly until the service restarts.
+
+## Release Notes - CCX - v1.50.5
+
 ### improvements
 - Autoscale is enabled by default for new datastores
 
