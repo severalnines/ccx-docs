@@ -2,7 +2,7 @@
 
 ## SSL Modes
 
-CCX supports currently two SSL modes:
+CCX currently supports connections to MariaDB in two SSL modes:
 
 1. `REQUIRED`: This mode requires an SSL connection. If a client attempts to connect without SSL, the server rejects the connection.
 
@@ -10,7 +10,7 @@ CCX supports currently two SSL modes:
 
 ### CA Certificate
 
-The Certificate Authority (CA) certificate can be downloaded using an API call or through the user interface on page `https://{your_ccx_domain}/projects/default/data-stores/{datastore_id}/settings`.
+The Certificate Authority (CA) certificate required for `VERIFY_CA` mode can be downloaded from your datastore on CCX using an API call or through the user interface on page `https://{your_ccx_domain}/projects/default/data-stores/{datastore_id}/settings`.
 This certificate is used for the `VERIFY_CA` SSL mode.
 
 
@@ -30,6 +30,7 @@ mysql --ssl-mode=VERIFY_CA --ssl-ca=ca.pem -u username -p -h hostname
 ```
 
 ## require_secure_transport
+This is a MariaDB setting that governs if connections to the datastore are required to use SSL. You can change this setting in CCX in Settings -> DB Parameters
 
 | Scenario                                   | Server Parameter Settings                                   | Description                                                                                                                                                                                                                          |
 |--------------------------------------------|------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
