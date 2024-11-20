@@ -12,7 +12,7 @@ Downgrades are not supported.
 Please read this section [Upgrading the Control Plane](/docs/admin/Day2/Upgrading-the-Control-Plane) for more information how to upgrade.
 ::::
 
-## Release Notes - CCX - v1.50.5
+## Release Notes - CCX - v1.50.6
 
 ### Bugs
 - Password present in multiple logfiles
