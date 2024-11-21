@@ -2,6 +2,75 @@
 
 CCX is a comprehensive data management and storage solution that offers a range of features including flexible node configurations, scalable storage options, secure networking, and robust observability tools. It supports various deployment types to cater to different scalability and redundancy needs, alongside comprehensive management functions for users, databases, nodes, and firewalls. The CCX project provides a versatile platform for efficient data handling, security, and operational management, making it suitable for a wide array of applications and workloads.
 
+# Quickstart
+## Add Severalnines Helm Chart repository
+```
+helm repo add s9s https://severalnines.github.io/helm-charts/
+helm repo update
+```
+
+## Installation
+
+```
+# Install CCX dependencies
+helm install ccxdeps s9s/ccxdeps --debug
+# Install CCX
+helm install ccx s9s/ccx --debug --wait
+```
+
+If you do **NOT** have nginx ingress controller installed in your kubernetes cluster (very common in minikube or docker for desktop).You can install one that comes with `ccxdeps` chart like so:
+
+```
+# Install CCX dependencies
+helm install ccxdeps s9s/ccxdeps --debug --set ingressController.enabled=true
+# Install CCX
+helm install ccx s9s/ccx --debug --wait
+```
+
+Please note that this will install CCX on `ccx.localhost`.
+
+## Configuring your CCX installation
+
+### Providing cloud credentials
+
+To be able to deploy datastores to a cloud provider (AWS by default) you need to provide cloud credentials.
+Cloud credentials should be created as kubernetes secrets in format specified in - https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template.yaml
+
+To setup cloud credentials for AWS (default provider) you can run the following one-liner:
+
+```
+# Create k8s secret from AWS credentials stored in ~/.aws/credentials
+kubectl create secret generic aws --from-literal=AWS_ACCESS_KEY_ID=$(awk 'tolower($0) ~ /aws_access_key_id/ {print $NF; exit}' ~/.aws/credentials) --from-literal=AWS_SECRET_ACCESS_KEY=$(awk 'tolower($0) ~ /aws_secret_access_key/ {print $NF; exit}' ~/.aws/credentials)
+```
+
+Upgrade CCX to apply new config:
+
+```
+helm upgrade --install ccx s9s/ccx --debug --wait --set ccx.cloudSecrets[0]=aws
+```
+
+
+### Setting up public access - custom domain name
+
+Make sure that you have ingress controller in your cluster and you are able to setup externally facing load balancers and that either your domain name points to the ingress IP or you have external DNS configured in your cluster.
+
+Simply run:
+
+```
+# Install CCX
+helm install ccx s9s/ccx --debug --wait --set ccxFQDN=ccx.example.com
+```
+
+### Further config
+
+Please have a look at the helm values and minimal recommended values for CCX
+
+https://github.com/severalnines/helm-charts/blob/main/charts/ccx/minimal-values.yaml
+
+https://github.com/severalnines/helm-charts/blob/main/charts/ccx/values.yaml
+
+
+
 ## Architecture Overview
 
 A K8s Control plane responsible for the life-cycle of the datastores, backend databases and tools responsible for metadata such as users, datastores, and other resources.
@@ -26,7 +95,7 @@ CCX requires Kubernetes Cluster Version to be >=1.22.
 #### Namespace
 
 A namespace must be configured for the CCX K8s services to operate.
-example: `production`
+example: `ccx`
 
 ### Helm Charts
 The Helm charts are located in [https://artifacthub.io/packages/helm/severalnines/ccx](https://artifacthub.io/packages/helm/severalnines/ccx).
@@ -74,103 +143,6 @@ Create a pool of floating IPs (public IPs). Each VM requires a floating IP/publi
 
 Disk space can either be ephemeral or block storage. We recommend block storage as block storage devices can be scaled.
 
-## Methods to Easy Install/Quickstart CCX Installation
-
-There are two methods to quick start CCX.
-
-### Method 1:
-
-- ##### QuickStart with AWS
-
-  If you wish to quickly install CCX in dev environment, you can use provided `ccxdeps` helm chart to install and configure dependencies.
-  By default CCX will install with the cloud vendor AWS - only thing you need to provide is cloud secrets!
-  If you want to customize your installation, please see the `values.yaml` and follow the guide.
-
-  **This is recommendend only for development environment. It is a great way to make sure you have working control plane**
-
-  ##### Create secrets
-
-  For a super quick start you can create a `aws` secret from your existing aws credentials file `~/.aws/credentials`.
-
-  ```
-  kubectl create secret generic aws --from-literal=AWS_ACCESS_KEY_ID=$(awk '/aws_access_key_id/{print $NF}' ~/.aws/credentials) --from-literal=AWS_SECRET_ACCESS_KEY=$(awk '/aws_secret_access_key/{print $NF}' ~/.aws/credentials)
-  ```
-
-  Otherwise you can create secrets manually or by copying a [`secrets-template.yaml`](https://github.com/severalnines/helm-ccx/blob/main/secrets-template.yaml) and putting your secrets in.
-  For AWS cloud make sure to setup `aws` secret.
-  For Openstack make sure to setup `mycloud-openstack` secret replacing `mycloud` with your cloud code.
-  Apply secrets by running:
-
-  ```
-  kubectl apply -f secrets-template.yaml
-  ```
-
-  ##### Install CCX along with dependencies
-
-  ```sh
-  helm repo add s9s https://severalnines.github.io/helm-charts/
-  helm repo update
-  helm install ccxdeps s9s/ccxdeps --wait --debug
-  ```
-:::note
-  When using NFS as volume provisioner, NFS servers map requests from unprivileged users to the 'nobody' user on the server, which may result in specific directories being owned by 'nobody'. So Container cannot modify these permissions, therefore it's necessary to enable root_squash on the NFS server to allow proper access.
-:::
-
-:::note
- Make sure to install the prerequisites in `Prerequisite tool sets for CCX Installation` for ccxdeps.
-:::
-##### Customize your CCX values
-
-Have a look at `values.yaml` and create your own values file to customize your CCX instance.
-The very minimal `values.yaml` could be
-
-```yaml
-sessionDomain: mycloud.com
-ccxFQDN: ccx.mycloud.com
-ccFQDN: cc.mycloud.com
-cmon:
-  license: ZHVwYQ== #YOUR CMON LICENSE SHOULD BE BASE64 ENCODED HERE
-# this section is for configuring specifics of the CCX system
-ccx:
-  # list of k8s secrets containing cloud credentials
-  cloudSecrets:
-    - aws
-```
-
-For testing, you can also add entry in your `/etc/hosts` file for local resolution of `ccx.local` on your machine instead of public FQDN.
-
-:::note
- Get in touch with our s9s representative in case of issues or clarifications.
-:::
-
-### Method 2:
-
-- ##### Run the Installation bash script
-  Clone the repo [`helm-ccx`](https://github.com/severalnines/helm-charts.git) and run the script
-  `./charts/ccx/scripts/ccx-yaml-gen.sh`
-  You will be prompted with user inputs. please choose the option or paste parameters carefully.
-  This will install the `ccxdeps` which comes with prerequisite tool-sets for CCX Installation and generate CCX `values.yaml` file for CCX installation.
-  After the values.yaml file are generated. you can review your changes and run commands in [Install CCX](#install-ccx) section.
-
-Those are the two methods which you can do quickstart install for ccx.
-
-### Install CCX
-
-To install ccx, run this command
-
-```
-helm repo add s9s https://severalnines.github.io/helm-charts/
-helm repo update
-helm install ccx s9s/ccx --wait --debug --values values.yaml
-```
-:::note
-Ensure to check all pods, jobs are running without any errors.
-:::
-
-:::danger
-Downgrades are not supported.
-::::
-
 ### Cloud Provider Configuration
 To know more about the CCX Cloud Provider Configuration setup, please read [CCX Cloud Provider Configuration](Cloud-Providers.md).
 
@@ -187,11 +159,11 @@ Backups needs to be configured for:
    To ensure data integrity and availability in your production environment, it is crucial to take regular snapshots of Persistent Volume Claims (PVCs) for CMON, DB's. Configure snapshot schedule at regular intervals, based on the criticality and update frequency of your data in your cloud environment
 :::
 
-### Observability
 
-To know more about the monitoring setup, please read [Observability](Observability.md).
+## Day 2:
+#### Observability
 
-### Day 2:
+- [Observability](Observability.md).
 - [Configuration Management](/admin/Day2/Config-Management.md)
 - [Lifecycle Management](/admin/Day2/Lifecycle-Management.md)
 - [Upgrading the Controlplane](/admin/Day2/Upgrading-the-Control-Plane.md)
