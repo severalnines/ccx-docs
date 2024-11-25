@@ -13,7 +13,7 @@ helm repo update
 
 ```
 # Install CCX dependencies
-helm install ccxdeps s9s/ccxdeps --debug
+helm install ccxdeps s9s/ccxdeps --debug --wait
 # Install CCX
 helm install ccx s9s/ccx --debug --wait
 ```
@@ -22,7 +22,7 @@ If you do **NOT** have nginx ingress controller installed in your kubernetes clu
 
 ```
 # Install CCX dependencies
-helm install ccxdeps s9s/ccxdeps --debug --set ingressController.enabled=true
+helm install ccxdeps s9s/ccxdeps --debug --wait --set ingressController.enabled=true
 # Install CCX
 helm install ccx s9s/ccx --debug --wait
 ```
