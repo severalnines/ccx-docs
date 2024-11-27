@@ -18,6 +18,15 @@
     .md-footer-meta {
         background-color: var(--s9-light-primary-color);
     }
+
+    .md-search-result__link:focus,
+    .md-search-result__link:hover {
+        background-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .md-search-result__more>summary:hover>div {
+        background-color: rgba(0, 0, 0, 0.08);
+    }
 }
 
 [data-md-color-scheme="slate"] {
