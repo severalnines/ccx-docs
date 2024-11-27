@@ -7,7 +7,8 @@ This guide explains how to install Docker Desktop, enable Kubernetes, configure 
 ## Prerequisites
 
 - A system with **Docker Desktop** installed.
-- AWS credentials available.
+- AWS CLI [AWS installation guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+- AWS credentials.
 - **Helm** installed on your system. If not, follow the [Helm installation guide](https://helm.sh/docs/intro/install/).
 
 ---
@@ -27,6 +28,11 @@ This guide explains how to install Docker Desktop, enable Kubernetes, configure 
 
     ```bash
     kubectl cluster-info
+    ```
+    The output of this command should look something like this:
+    ```
+    Kubernetes control plane is running at https://127.0.0.1:6443
+    CoreDNS is running at https://127.0.0.1:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
     ```
 
 4. Ensure that the `docker-desktop` context is selected:
@@ -75,7 +81,12 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
       --from-literal=AWS_ACCESS_KEY_ID=$(awk 'tolower($0) ~ /aws_access_key_id/ {print $NF; exit}' ~/.aws/credentials) \
       --from-literal=AWS_SECRET_ACCESS_KEY=$(awk 'tolower($0) ~ /aws_secret_access_key/ {print $NF; exit}' ~/.aws/credentials)
     ```
-
+    Verify the secret is available:
+    ```
+        kubectl get secrets aws
+        NAME   TYPE     DATA   AGE
+        aws    Opaque   2      24s
+    ```
 ---
 
 
@@ -87,10 +98,21 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
     helm repo add s9s https://severalnines.github.io/helm-charts/
     helm repo update
     ```
+    and you will see:
+    ```
+    "s9s" has been added to your repositories
+    Hang tight while we grab the latest from your chart repositories...
+    ...Successfully got an update from the "s9s" chart repository
+    Update Complete. ⎈Happy Helming!⎈
+    ```
 
 2. Deploy CCXDEPS and CCX using the following command:
     ```bash
     helm upgrade --install ccxdeps s9s/ccxdeps --debug --wait
+    ```
+    Create the ingress:
+    ```bash
+    helm upgrade --install ccxdeps s9s/ccxdeps --debug --set ingressController.enabled=true
     ```
 
     ```bash
