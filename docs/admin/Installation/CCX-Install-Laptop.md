@@ -90,7 +90,7 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
 
 2. Deploy CCXDEPS and CCX using the following command:
     ```bash
-    helm upgrade --install ccxdeps s9s/ccxdeps --debug --wait
+    helm upgrade --install ccxdeps s9s/ccxdeps --debug --wait --set ingressController.enabled=true
     ```
 
     ```bash
