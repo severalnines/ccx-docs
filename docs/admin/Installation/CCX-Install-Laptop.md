@@ -78,19 +78,8 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
 
 ---
 
-## Step 5: Configure Hosts File
 
-1. Edit your system's `/etc/hosts` file to include the following entry:
-
-    ```plaintext
-    127.0.0.1    localhost    ccx.local
-    ```
-
-2. Save and close the file.
-
----
-
-## Step 6: Deploy CCX Using Helm
+## Step 5: Deploy CCX Using Helm
 
 1. Add the required Helm repository:
 
@@ -107,15 +96,14 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
     ```bash
     helm upgrade --install ccx s9s/ccx \
       --debug --wait \
-      --set 'ccx.cloudSecrets[0]=aws' \
-      --set ccxFQDN=ccx.local
+      --set 'ccx.cloudSecrets[0]=aws'
     ```
 
 ---
 
 ## Verification
 
-1. Once the deployment is complete, verify the CCX installation by accessing `https://ccx.local` in your web browser.
+1. Once the deployment is complete, verify the CCX installation by accessing `https://ccx.localhost` in your web browser.
 2. Use the following command to confirm that all pods are running successfully:
 
     ```bash
