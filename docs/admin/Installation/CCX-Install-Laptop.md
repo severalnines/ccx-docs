@@ -6,21 +6,14 @@ This guide explains how to install Docker Desktop, enable Kubernetes, configure 
 
 ## Prerequisites
 
-- A system with **Docker Desktop** installed.
-- AWS CLI [AWS installation guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+- **Docker Desktop**, you can download Docker Desktop from the [official Docker website](https://www.docker.com/products/docker-desktop/).
+- AWS CLI. See the [AWS installation guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 - AWS credentials.
 - **Helm** installed on your system. If not, follow the [Helm installation guide](https://helm.sh/docs/intro/install/).
 
 ---
 
-## Step 1: Install Docker Desktop
-
-- Download Docker Desktop from the [official Docker website](https://www.docker.com/products/docker-desktop/).
-
-
----
-
-## Step 2: Enable Kubernetes in Docker Desktop
+## Step 1: Enable Kubernetes in Docker Desktop
 
 1. Open Docker Desktop and navigate to **Settings > Kubernetes**.
 2. Check the box **Enable Kubernetes** and click **Apply & Restart**.
@@ -42,7 +35,7 @@ This guide explains how to install Docker Desktop, enable Kubernetes, configure 
     ```
 
 ---
-## Step 3: Create and Switch to a Namespace
+## Step 2: Create and Switch to a Namespace
 
 1. Create a new namespace for CCX:
 
@@ -56,7 +49,7 @@ This guide explains how to install Docker Desktop, enable Kubernetes, configure 
     kubectl config set-context --current --namespace=ccx
     ```
 
-## Step 4: Configure AWS Credentials
+## Step 3: Configure AWS Credentials
 
 CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credentials need to be securely provided to Kubernetes as a secret.
 
@@ -90,7 +83,7 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
 ---
 
 
-## Step 5: Deploy CCX Using Helm
+## Step 4: Deploy CCX Using Helm
 
 1. Add the required Helm repository:
 
