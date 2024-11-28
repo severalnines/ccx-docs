@@ -1,4 +1,4 @@
-# Installing Docker Desktop and Configuring Kubernetes for CCX on Laptop
+# Install CCX on Laptop
 
 This guide explains how to install Docker Desktop, enable Kubernetes, configure AWS credentials for deploying CCX's datastore in AWS, and deploy CCX on the Kubernetes cluster.
 
