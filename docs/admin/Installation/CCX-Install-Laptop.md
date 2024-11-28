@@ -127,7 +127,7 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
 
     helm upgrade --install ccx s9s/ccx \
       --debug --wait \
-      --set 'ccx.cloudSecrets[0]=aws'
+      --set 'ccx.cloudSecrets[0]=aws' \
       --set 'ccx.cidr=N.N.N.N/32'
     ```
     :::note
