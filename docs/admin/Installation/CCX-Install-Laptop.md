@@ -1,11 +1,11 @@
-# Install CCX on Laptop
+# Install CCX on a Laptop
 
 This guide explains how to install Docker Desktop, enable Kubernetes, configure AWS credentials for deploying CCX's datastore in AWS, and deploy CCX on the Kubernetes cluster.
 
 ---
 
 ## Prerequisites
-
+- **kubectl** installed and on the PATH, [get kubectl here](https://kubernetes.io/docs/tasks/tools/#kubectl).
 - **Docker Desktop**, you can download Docker Desktop from the [official Docker website](https://www.docker.com/products/docker-desktop/).
 - AWS CLI. See the [AWS installation guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 - AWS credentials.
