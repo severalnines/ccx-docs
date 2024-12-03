@@ -11,6 +11,12 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](/docs/admin/Day2/Upgrading-the-Control-Plane) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.50.8
+CMON version: 2.2.0-11405
+### CMON Bugs
+- Postgres - multizone environment.
+- Spamlogging failed queries cmon.log
+- Multiple concurrent full backups race condition
 
 ## Release Notes - CCX - v1.50.7
 
