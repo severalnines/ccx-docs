@@ -6,6 +6,11 @@ This page describes troubleshooting scenarios.
 
 The script to generate an error report is here - https://github.com/severalnines/helm-ccx/tree/main/scripts. Please attach the error report (.tar.gz file) to every ticket created for CCX support. This tremendously helps to diagnose the issue.
 
+```
+wget https://github.com/severalnines/helm-ccx/blob/main/scripts/gather-logs.sh
+./gather-logs.sh
+```
+
 For the CMON managing the CMONDB and CCXDB, see below.
 
 ## CMON (Controller of Datastores)
@@ -112,7 +117,7 @@ s9s account --cluster-id=NNN --create --account='ccxadmin:PASSWORD@%' --privileg
 s9s account --cluster-id=NNN --create --account='ccxadmin:PASSWORD@%' --privileges='NOSUPERUSER, CREATEROLE, LOGIN, CREATEDB'
 ```
 
-### Rebuildint a failed replica
+### Rebuilding a failed replica
 In some cases it is wanted to rebuild a replica.
 ```bash
 s9s replication --cluster-id=NNN --stage --master="PUBLIC_ADDRESSS_OF_MASTER" --slave="PUBLIC_ADDRESSS_OF_REPLICA_TO_BE_REBUILT
