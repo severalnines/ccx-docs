@@ -161,6 +161,11 @@ Do not use this UI to delete clusters or add and remove nodes. Please see the [T
 ## Next steps
 - [Installation guide](/docs/admin/Installation/)
 
+## Troubleshooting
+- If you experience sudden glitches or pod failures, you can try allocate more resoures too Docker Desktop. You can allocated more resources under `Settings->Resources->Advanced`.
+- [Troubleshooting guide](/docs/admin/Troubleshooting/Troubleshooting).
+
+
 ---
 
 This document provides step-by-step instructions to set up Docker Desktop, Kubernetes, and CCX with a datastore deployed in AWS. For further details, refer to the official [CCX documentation](https://severalnines.github.io/ccx-docs/).
