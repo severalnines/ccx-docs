@@ -12,6 +12,11 @@ Downgrades are not supported.
 Please read this section [Upgrading the Control Plane](/docs/admin/Day2/Upgrading-the-Control-Plane) for more information how to upgrade.
 ::::
 
+## Release Notes - CCX - v1.50.7
+
+### Bugs
+- User cannot update credit card info when wrong was inserted
+
 ## Release Notes - CCX - v1.50.6
 
 ### Bugs
