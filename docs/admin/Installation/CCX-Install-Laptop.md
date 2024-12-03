@@ -138,6 +138,29 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
     kubectl get pods
     ```
 
+## Accessing the frontends
+### CCX frontend
+The CCX frontend is the end-user interface and allows the end-user to create and manage datastores. The necessary infrastructure (VMs, volumes, etc) are created and managed by CCX.
+1. Navigate to `https://ccx.localhost` in your web browser.
+2. Register a new user. In this configuration, no confirmation email will be sent and you will need to go to `https://ccx.localhost` and login with your email address and password.
+
+### CC frontend
+The CC frontend is an administrative interface and allows the CCX administrator to manage datastores. 
+1. Navigate to `https://cc.localhost` in your web browser.
+2. Login with the CC credentials, which are stored in Kubernets secrets:
+```
+    kubectl get secret cmon-credentials  -o jsonpath='{.data.cmon-user}' | base64 -d
+```
+```    
+    kubectl get secret cmon-credentials  -o jsonpath='{.data.cmon-password}' | base64 -d
+```    
+:::danger
+Do not use this UI to delete clusters or add and remove nodes. Please see the [Troubleshooting guide](/docs/admin/Troubleshooting/).
+:::
+
+## Next steps
+- [Installation guide](/docs/admin/Installation/)
+
 ---
 
 This document provides step-by-step instructions to set up Docker Desktop, Kubernetes, and CCX with a datastore deployed in AWS. For further details, refer to the official [CCX documentation](https://severalnines.github.io/ccx-docs/).

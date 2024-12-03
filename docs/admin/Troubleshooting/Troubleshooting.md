@@ -12,11 +12,11 @@ For the CMON managing the CMONDB and CCXDB, see below.
 
 Use kubectl and open a bash terminal on the cmon-master container.
 
-### S9S CLI commands 
+### S9S CLI commands  and CC UI commands
 
 :::danger
-Never use the S9S CLI nor the CCUIv2 to add or remove resources (nodes or datastores). This may lead to stray data.
-Do not use the following commands:
+Never use the S9S CLI nor the CCUIv2 to add or remove resources (nodes or datastores). ***This may lead to stray data***.
+Do not use the following commands (and corresponding commands in the ClusterConrol UI):
 - s9s cluster --[drop|remove-node|add-node|upgrade-cluster|reinstall-node|demote-node|reconfigure-node]
 - s9s node --[stop|unregister]
 ::::
