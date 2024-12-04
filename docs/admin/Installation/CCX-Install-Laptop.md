@@ -164,7 +164,7 @@ Do not use this UI to delete clusters or add and remove nodes. Please see the [T
 - [Troubleshooting guide](/docs/admin/Troubleshooting/Troubleshooting).
 
 ## Limitations
-- Backups are not supported. A license to CMON is required. 
+- Backups are not supported. A license to CMON is required. Please contact [sales@severalnines.com](mailto:sales@severalnines.com).
 
 ## Next steps
 - [Installation guide](/docs/admin/Installation/).
