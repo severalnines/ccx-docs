@@ -5,6 +5,7 @@ This guide explains how to install Docker Desktop, enable Kubernetes, configure 
 ---
 
 ## Prerequisites
+- a laptop/desktop with atleast 4 cores and 8GB of RAM.
 - **kubectl** installed and on the PATH, [get kubectl here](https://kubernetes.io/docs/tasks/tools/#kubectl).
 - **Docker Desktop**, you can download Docker Desktop from the [official Docker website](https://www.docker.com/products/docker-desktop/).
 - AWS CLI. See the [AWS installation guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
@@ -17,8 +18,8 @@ This guide explains how to install Docker Desktop, enable Kubernetes, configure 
 ## Step 1: Enable Kubernetes in Docker Desktop
 
 1. Open Docker Desktop and navigate to **Settings > Kubernetes**.
-2. Check the box **Enable Kubernetes** and click **Apply & Restart**.
-3. Wait for Kubernetes to initialize. You can verify this by running:
+2. Check the box **Enable Kubernetes** and click **Apply & Restart**. We have tested these instructions with Kubernetes v1.30.5.
+3. Wait for Kubernetes to initialize. It may take some time for Kubernetes to be Started. You can verify this by running:
 
     ```bash
     kubectl cluster-info
@@ -100,11 +101,11 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
     Update Complete. ⎈Happy Helming!⎈
     ```
 
-2. Deploy CCXDEPS and CCX using the following command:
+2. Deploy CCXDEPS using the following command:
     ```bash
     helm upgrade --install ccxdeps s9s/ccxdeps --debug --wait --set ingressController.enabled=true
     ```
-    
+3. Deploy CCX:
     :::danger
     This setup is only for demo and development purposes and the installtion will only work for the specified CIDR or 0.0.0.0/0 if no CIDR is set.
     For production and testing we recommend [to follow the installation guide](docs/admin/Installation/Index) and overriding the values.yaml with your settings. If you set the CIDR below then CCX will only be able to access the datastores from this CIDR.
@@ -142,7 +143,7 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
 ### CCX frontend
 The CCX frontend is the end-user interface and allows the end-user to create and manage datastores. The necessary infrastructure (VMs, volumes, etc) are created and managed by CCX.
 1. Navigate to `https://ccx.localhost` in your web browser.
-2. Register a new user. In this configuration, no confirmation email will be sent and you will need to go to `https://ccx.localhost` and login with your email address and password.
+2. Register a new user. In this configuration, no confirmation email will be sent and you will need to go back to `https://ccx.localhost` (you can press Back in the browser) and login with your email address and password.
 
 ### CC frontend
 The CC frontend is an administrative interface and allows the CCX administrator to manage datastores. 
@@ -158,14 +159,13 @@ The CC frontend is an administrative interface and allows the CCX administrator 
 Do not use this UI to delete clusters or add and remove nodes. Please see the [Troubleshooting guide](/docs/admin/Troubleshooting/).
 :::
 
-## Next steps
-- [Installation guide](/docs/admin/Installation/)
-
 ## Troubleshooting
 - If you experience sudden glitches or pod failures, you can try allocate more resoures too Docker Desktop. You can allocated more resources under `Settings->Resources->Advanced`.
+- If you experience issues deploying, reset the environment (Settings->Kubernetes, Reset Kubernetes Cluster), increase resources, and try again.
 - [Troubleshooting guide](/docs/admin/Troubleshooting/Troubleshooting).
 
-
+## Next steps
+- [Installation guide](/docs/admin/Installation/).
 ---
 
 This document provides step-by-step instructions to set up Docker Desktop, Kubernetes, and CCX with a datastore deployed in AWS. For further details, refer to the official [CCX documentation](https://severalnines.github.io/ccx-docs/).
