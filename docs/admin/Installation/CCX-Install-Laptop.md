@@ -9,7 +9,7 @@ This guide explains how to install Docker Desktop, enable Kubernetes, configure 
 - **kubectl** installed and on the PATH, [get kubectl here](https://kubernetes.io/docs/tasks/tools/#kubectl).
 - **Docker Desktop**, you can download Docker Desktop from the [official Docker website](https://www.docker.com/products/docker-desktop/).
 - **AWS CLI**, see the [AWS installation guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
-- **AWS credentials**, allowing you to create VMs, volumes, security groups, networks etc..
+- **AWS credentials**, allowing you to create VMs, volumes, security groups, networks, S3, etc..
 - **Helm** installed on your system. If not, follow the [Helm installation guide](https://helm.sh/docs/intro/install/).
 
 ---
