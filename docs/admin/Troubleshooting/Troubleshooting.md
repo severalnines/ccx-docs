@@ -6,17 +6,22 @@ This page describes troubleshooting scenarios.
 
 The script to generate an error report is here - https://github.com/severalnines/helm-ccx/tree/main/scripts. Please attach the error report (.tar.gz file) to every ticket created for CCX support. This tremendously helps to diagnose the issue.
 
+```
+wget https://github.com/severalnines/helm-ccx/blob/main/scripts/gather-logs.sh
+./gather-logs.sh
+```
+
 For the CMON managing the CMONDB and CCXDB, see below.
 
 ## CMON (Controller of Datastores)
 
 Use kubectl and open a bash terminal on the cmon-master container.
 
-### S9S CLI commands 
+### S9S CLI commands  and CC UI commands
 
 :::danger
-Never use the S9S CLI nor the CCUIv2 to add or remove resources (nodes or datastores). This may lead to stray data.
-Do not use the following commands:
+Never use the S9S CLI nor the CCUIv2 to add or remove resources (nodes or datastores). ***This may lead to stray data***.
+Do not use the following commands (and corresponding commands in the ClusterConrol UI):
 - s9s cluster --[drop|remove-node|add-node|upgrade-cluster|reinstall-node|demote-node|reconfigure-node]
 - s9s node --[stop|unregister]
 ::::
@@ -112,7 +117,7 @@ s9s account --cluster-id=NNN --create --account='ccxadmin:PASSWORD@%' --privileg
 s9s account --cluster-id=NNN --create --account='ccxadmin:PASSWORD@%' --privileges='NOSUPERUSER, CREATEROLE, LOGIN, CREATEDB'
 ```
 
-### Rebuildint a failed replica
+### Rebuilding a failed replica
 In some cases it is wanted to rebuild a replica.
 ```bash
 s9s replication --cluster-id=NNN --stage --master="PUBLIC_ADDRESSS_OF_MASTER" --slave="PUBLIC_ADDRESSS_OF_REPLICA_TO_BE_REBUILT
