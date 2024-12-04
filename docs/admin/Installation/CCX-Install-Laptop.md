@@ -8,9 +8,8 @@ This guide explains how to install Docker Desktop, enable Kubernetes, configure 
 - System requirements: a laptop/desktop with atleast 4 cores and 8GB of RAM, 20GB of free storage.
 - **kubectl** installed and on the PATH, [get kubectl here](https://kubernetes.io/docs/tasks/tools/#kubectl).
 - **Docker Desktop**, you can download Docker Desktop from the [official Docker website](https://www.docker.com/products/docker-desktop/).
-- AWS CLI. See the [AWS installation guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
-- AWS credentials.
-- **kubectl**, you can download kubectl from the [official kubernetes website](https://kubernetes.io/releases/download/).
+- **AWS CLI**, see the [AWS installation guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+- **AWS credentials**, allowing you to create VMs, volumes, security groups, networks etc..
 - **Helm** installed on your system. If not, follow the [Helm installation guide](https://helm.sh/docs/intro/install/).
 
 ---
