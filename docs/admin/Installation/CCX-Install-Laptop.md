@@ -120,8 +120,10 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
     ```
     **Using a custom CIDR N.N.N.N/32 (access is allowed only from *this* CIDR):**
     ```bash
-    curl ifconfig.me # the IP is the N.N.N.N 
+    curl ifconfig.me  
 
+    # Replace the N.N.N.N below with the output (not includingt the %) of the curl ifconfig.me command.
+ 
     helm upgrade --install ccx s9s/ccx \
       --debug --wait \
       --set 'ccx.cloudSecrets[0]=aws' \
