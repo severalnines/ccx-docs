@@ -78,6 +78,9 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
     Verify the secret is available:
     ```
         kubectl get secrets aws
+    ```
+    The output of this command should look something like this:
+    ```
         NAME   TYPE     DATA   AGE
         aws    Opaque   2      24s
     ```
