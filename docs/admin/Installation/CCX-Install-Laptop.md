@@ -118,7 +118,7 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
       --debug --wait \
       --set 'ccx.cloudSecrets[0]=aws'
     ```
-    **Using a customer CIDR N.N.N.N/32 (access is allowed only from *this* CIDR):**
+    **Using a custom CIDR N.N.N.N/32 (access is allowed only from *this* CIDR):**
     ```bash
     curl ifconfig.me # the IP is the N.N.N.N 
 
