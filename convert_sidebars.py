@@ -107,14 +107,28 @@ def main():
     # Convert the sidebar items to MkDocs nav
     mkdocs_nav = convert_to_mkdocs_nav(items)
 
+    # Append additional links to mkdocs_nav
+    additional_links = [
+        {"CCX": "https://severalnines.com/ccx/"},
+        {"Resources": "https://severalnines.com/resources/"},
+        {"Blog": "https://severalnines.com/blog/"},
+        {"Podcast": "https://severalnines.com/podcast/"},
+        {"Support": "https://support.severalnines.com/hc/en-us"},
+        {"About Us": "https://severalnines.com/about-us/"}
+    ]
+    mkdocs_nav.extend(additional_links)
+
+
     # Create the complete mkdocs configuration
     mkdocs_config = {
         'site_name': 'CCX Documentation',
         'site_description': 'Documentation',
         'site_url': '',
-        'copyright': 'Severalnines AB, &#169; 2024',
+        'copyright': 'Copyright &copy; 2014-2024 Severalnines AB. All rights reserved.',
+        'copyright_msg': 'Severalnines, ClusterControl, and CCX are registered trademarks in the US, UK, and EU. The 3rd-party trademarks on this site are property of their respective owners and are used for referential purposes only.',
         'theme': {
             'name': 'material',
+            'custom_dir': 'docs/overrides',
             'palette': [
                 {
                     'media': '(prefers-color-scheme: light)',
@@ -142,13 +156,18 @@ def main():
                 'navigation.top',
                 'content.tabs.link',
                 'content.code.copy',
+                'navigation.tabs',
                 'navigation.tracking',
                 'content.action.edit',
                 'content.action.view',
                 'content.code.copy'
             ],
             'logo': 'assets/ccx.png',
-            'favicon': 'assets/favicon.png'
+            'favicon': 'assets/favicon.png',
+            'font': {
+                'text': 'Nunito Sans',
+                'code': 'IBM Plex Mono'
+            },
         },
         'markdown_extensions': [
             {'codehilite': {'guess_lang': True, 'use_pygments': True}},
@@ -157,7 +176,23 @@ def main():
             'pymdownx.superfences'
         ],
         'nav': mkdocs_nav,
-        'extra_css': ['stylesheets/extra.css']
+        'mandatory_links': [
+            {'Terms of Service': 'https://severalnines.com/ccx/terms/'},
+            {'Service Level Agreement': 'https://severalnines.com/ccx/sla/'},
+            {'Data Processing Agreement': 'https://severalnines.com/ccx/dpa/'},
+            {'Privacy Policy': 'https://severalnines.com/privacy/'}
+        ],
+        'cookie_link_title': 'Cookies Settings',
+        'extra_css': ['stylesheets/extra.css'],
+        'extra_javascript': ['javascripts/extra.js'],
+        'extra': {
+            'social': [
+                {'icon': 'fontawesome/brands/linkedin-in', 'link': 'https://www.linkedin.com/company/severalnines/'},
+                {'icon': 'fontawesome/brands/x-twitter', 'link': 'https://twitter.com/severalnines/'},
+                {'icon': 'fontawesome/brands/facebook-f', 'link': 'https://www.facebook.com/severalnines/'},
+                {'icon': 'fontawesome/brands/youtube', 'link': 'https://www.youtube.com/c/Severalnines/'}
+            ]
+        },
     }
 
     # Custom YAML dumper to preserve indentation and format lists
