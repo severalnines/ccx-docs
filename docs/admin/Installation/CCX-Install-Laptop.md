@@ -110,7 +110,7 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
 3. Deploy CCX:
     :::danger
     This setup is only for demo and development purposes and the installtion will only work for the specified CIDR or 0.0.0.0/0 if no CIDR is set.
-    For production and testing we recommend [to follow the installation guide](docs/admin/Installation/Index) and overriding the values.yaml with your settings. If you set the CIDR below then CCX will only be able to access the datastores from this CIDR.
+    For production and testing we recommend [to follow the installation guide](/docs/admin/Installation) and overriding the values.yaml with your settings. If you set the CIDR below then CCX will only be able to access the datastores from this CIDR.
     :::
     **Using the CIDR 0.0.0.0/0 (access is allowed from everywhere, which might be a security risk):**
     ```bash
