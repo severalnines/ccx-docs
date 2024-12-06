@@ -1,9 +1,11 @@
 site_name: CCX Documentation
 site_description: Documentation
 site_url: ''
-copyright: Severalnines AB, &#169; 2024
+copyright: Copyright &copy; 2014-2024 Severalnines AB. All rights reserved.
+copyright_msg: 'Severalnines, ClusterControl, and CCX are registered trademarks in the US, UK, and EU. The 3rd-party trademarks on this site are property of their respective owners and are used for referential purposes only.'
 theme:
   name: material
+  custom_dir: docs/overrides
   palette:
     # Light mode
     - media: '(prefers-color-scheme: light)'
@@ -30,8 +32,12 @@ theme:
     - content.action.edit
     - content.action.view
     - content.code.copy
+    - navigation.tabs
   logo: assets/ccx.png
   favicon: assets/favicon.png
+  font:
+    text: Nunito Sans
+    code: IBM Plex Mono
 markdown_extensions:
   - codehilite:
       guess_lang: true
@@ -40,6 +46,7 @@ markdown_extensions:
   - pymdownx.snippets
   - pymdownx.superfences
 nav:
+  - Home: /
   - Admin Guide:
       - Introduction: admin/Index.md
       - Installation:
@@ -141,6 +148,29 @@ nav:
       - Technical:
           - Api: user/Technical/API.md
           - Terraform: user/Technical/Terraform.md
+  - CCX: https://severalnines.com/ccx/
+  - Resources: https://severalnines.com/resources/
+  - Blog: https://severalnines.com/blog/
+  - Podcast: https://severalnines.com/podcast/
+  - Support: https://support.severalnines.com/hc/en-us
+  - About Us: https://severalnines.com/about-us/
+mandatory_links:
+  - Terms of Service: https://severalnines.com/ccx/terms/
+  - Service Level Agreement: https://severalnines.com/ccx/sla/
+  - Data Processing Agreement: https://severalnines.com/ccx/dpa/
+  - Privacy Policy: https://severalnines.com/privacy/
+cookie_link_title: Cookies Settings
 extra_css:
   - stylesheets/extra.css
-
+extra_javascript:
+  - javascripts/extra.js
+extra:
+  social:
+    - icon: fontawesome/brands/linkedin-in
+      link: https://www.linkedin.com/company/severalnines/
+    - icon: fontawesome/brands/x-twitter
+      link: https://twitter.com/severalnines/
+    - icon: fontawesome/brands/facebook-f 
+      link: https://www.facebook.com/severalnines/
+    - icon: fontawesome/brands/youtube 
+      link: https://www.youtube.com/c/Severalnines/

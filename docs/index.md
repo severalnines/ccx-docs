@@ -1,7 +1,8 @@
 ---
-sidebar_position: 1
+template: home.html
+hide:
+  - navigation
+  - toc
 ---
 
-* [Admin Guide](admin/Index.md)
-* [User Guide](user/Index.md)
-
+Welcome to CCX Documentation
