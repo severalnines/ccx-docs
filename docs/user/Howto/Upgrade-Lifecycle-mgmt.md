@@ -21,3 +21,5 @@ This option will start the upgrade now.
 The upgrade will start at a time (in UTC) and on a weekday which suits the application.
 Please note, that for primary-replica configurations, the update will cause the current primary to be changed.
 
+# Upgrade database major version
+To upgrade the database major version from e.g MariaDB 10.6 to 10.11, you need to create a new datastore from backup, alternatively take mysqldump or pgdump and apply it to your new datastore.
