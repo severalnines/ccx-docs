@@ -242,3 +242,4 @@ function example() {
 }
 
 example();
+```

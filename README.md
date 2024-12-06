@@ -18,10 +18,11 @@ An instantion of the docs is available here [https://severalnines.github.io/ccx-
 
 ## Updating sidebar in mkdocs
 - Please update the sidebars.ts
-- You can now convert the sidebar.ts to mkdocs compatible nav structure:
+- You can now convert the sidebar.ts to mkdocs compatible nav structure. After, run the script to convert admonitions:
 ```
 node convert_sidebars.js
-python3 convert_sidebars.py > mkdocs-nav.yml
+python3 convert_sidebars.py > mkdocs.yml
+python3 convert_admonitons.py
 ```
 
 # Website

@@ -173,7 +173,12 @@ def main():
             {'codehilite': {'guess_lang': True, 'use_pygments': True}},
             'pymdownx.inlinehilite',
             'pymdownx.snippets',
-            'pymdownx.superfences'
+            'pymdownx.superfences',
+            'admonition',
+            'pymdownx.details',
+            'pymdownx.superfences',
+            'pymdownx.tabbed'
+
         ],
         'nav': mkdocs_nav,
         'mandatory_links': [
