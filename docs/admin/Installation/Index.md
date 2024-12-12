@@ -2,6 +2,12 @@
 
 CCX is a comprehensive data management and storage solution that offers a range of features including flexible node configurations, scalable storage options, secure networking, and robust observability tools. It supports various deployment types to cater to different scalability and redundancy needs, alongside comprehensive management functions for users, databases, nodes, and firewalls. The CCX project provides a versatile platform for efficient data handling, security, and operational management, making it suitable for a wide array of applications and workloads.
 
+# Architecture Overview Diagram 
+
+
+![CCX architecture](../images/ccx-architecture.png)
+
+
 # Quickstart
 
 For laptop/desktop installation instructions please visit [Install CCX on a Laptop](/docs/admin/Installation/CCX-Install-Laptop).
