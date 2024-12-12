@@ -117,8 +117,9 @@ Unused parameter groups can be deleted to maintain a clean configuration environ
 3. Select **Delete**.
 4. Confirm the deletion.
 
-**Note:** A parameter group cannot be deleted if it is assigned to a datastore.
-
+:::note 
+A parameter group cannot be deleted if it is assigned to a datastore.
+:::
 ---
 
 ### 6. Synchronization
