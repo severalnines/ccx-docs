@@ -1,5 +1,6 @@
 # Parameter Groups
 *Introduced in v.1.51*
+
 Parameter Groups is a powerful new feature introduced in version 1.51 of CCX. It enables users to manage and fine-tune database parameters within a group, simplifying configuration and ensuring consistency across datastores.
 
 ## Overview
