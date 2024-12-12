@@ -190,6 +190,7 @@ const sidebars: SidebarsConfig = {
             'user/Howto/Scale-a-Datastore',
             'user/Howto/Promote-a-replica',
             'user/Howto/Restore-backup',
+            'user/Howto/Parameter-group',
             'user/Howto/Create-Datastore-From-Backup',
             'user/Howto/Upgrade-Lifecycle-mgmt',
             'user/Howto/Database-User-management',
