@@ -1,5 +1,8 @@
 # Database configuration in CCX
-
+:::note
+*Deprecated in v1.51 in favor of parameter groups* 
+Please see to [Parameter Groups](Parameter-group)
+::: 
 In CCX, you have the ability to fine-tune your database performance by adjusting various **DB Parameters**. These parameters control the behavior of the database server and can impact performance, resource usage, and compatibility.
 
 ![img](../images/change_db_config.png)
