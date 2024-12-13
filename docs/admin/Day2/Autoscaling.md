@@ -10,7 +10,7 @@ If enabled for a datastore, and the datastore has any node that exceeds a define
 
 This disk increase may be repeated multiple times if the disk usage continues to exceed the threshold after each increase.
 
-If the end-user has enabled notifications are for the datastore, the designated email addresses will receive a notification when the datastore storage is scaled up. The email notification is configured by the end-user under the [Datastore Settings](/docs/user/Howto/Datastore-settings#notifications-in-ccx).
+If the end-user has enabled notifications for a datastore then the designated email addresses will receive a notification when the datastore storage is scaled up. Email notifications is configured by the end-user under the [Datastore Settings](/docs/user/Howto/Datastore-settings#notifications-in-ccx).
 
 
 ## Configuration
