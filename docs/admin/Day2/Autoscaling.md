@@ -10,9 +10,10 @@ If enabled for a datastore, and the datastore has any node that exceeds a define
 
 This disk increase may be repeated multiple times if the disk usage continues to exceed the threshold after each increase.
 
-## Configuration
+If the end-user has enabled notifications are for the datastore, the designated email addresses will receive a notification when the cluster is scaled up. The email notification is configured by the end-user under the [Datastore Settings](/docs/user/Howto/Datastore-settings#notifications-in-ccx).
 
-If notifications are enabled for the datastore, the designated email addresses will receive a notification when the cluster is scaled up.
+
+## Configuration
 
 The threshold and percentage values are defined in helm values as `autoscaling.storage.threshold` and `autoscaling.storage.percentage`.
 
