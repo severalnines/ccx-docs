@@ -1,4 +1,4 @@
-# Observality
+# Observability
 
 CCX delivers the observability stack as a separate deployment available as a Helm chart here - https://github.com/severalnines/observability/.
 
