@@ -40,6 +40,10 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: 'doc',
+              id:'admin/Installation/architecture'
+            },
+            {
+              type: 'doc',
               id:'admin/Installation/CCX-Install-Laptop'
             },
             {

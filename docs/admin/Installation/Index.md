@@ -6,7 +6,7 @@ CCX is a comprehensive data management and storage solution that offers a range 
 
 
 ![CCX architecture](../images/ccx-architecture.png)
-
+For a more details please read the [architecture](/docs/admin/Installation/architecture).
 
 # Quickstart
 
