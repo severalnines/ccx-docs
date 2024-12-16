@@ -5,8 +5,8 @@ The services are responsible for authentication, state handling, monitoring, job
 In this section we will cover the most core concepts in CCX.
 ![CCX architecture](../images/ccx-architecture.png)
 
-## Controlplane - Core services and functionality
-
+## Controlplane
+This section describes the Controlplane, which runs in K8s.
 ### Jobs
 Actions taken on CCX is a handled as a job and is initiated by the end-user or the system automatically:
 
@@ -63,7 +63,7 @@ CCX DB is managed by an operator in K8s, but it can be an externally managed dat
 #### External DNS
 Each database node in a datastores has a FQDN. Also, there is an FQDN pointing to the primary writeable database node. This makes it easy for application developers as they only need to connect to a single endpoint; if the primary fails, then the DNS is updated to point to the new primary.
 
-Moreover, [ExernalDNS offers an interface to a number of DNS providers](https://github.com/kubernetes-sigs/external-dns?tab=readme-ov-file#the-latest-release). If you have a DNS provider that is not present in the list of DNS providers, then you need to create a zone in a supported DNS provider, e.g CloudFlare or Route53.
+Moreover, [ExternalDNS offers an interface to a number of DNS providers](https://github.com/kubernetes-sigs/external-dns?tab=readme-ov-file#the-latest-release). If you have a DNS provider that is not present in the list of DNS providers, then you need to create a zone in a supported DNS provider, e.g CloudFlare or Route53.
 
 Read more about [ExternalDNS](/docs/admin/Installation/Dynamic-DNS).
 
@@ -73,15 +73,25 @@ CCX uses popular tools and techniques for observability. The tools are outlined 
 VictoriaMetrics is used to scrape exporters. Exporters are installed on all database. See below for more information.
 
 #### Loki
-Loki is used to store log files forwared from the database VMs. See below for more information.
+Loki is used to store log files forwarded from the database VMs. See below for more information.
 
 #### Grafana
 Grafana is used for dashboards.
 
-### API Access
-CCX services can be consumed using a REST API or a Terraform Provider.
+### Authentication, Frontends and API Access
+CCX services can be consumed using the CCX UI, a REST API or a Terraform Provider.
+#### Authentication
+Authentication to CCX is handled by the services `ccx-ui-auth` and `ccx-auth-service`.
+Authentication mechanism consists of:
+- Username / password
+- Oauth2 credentials (the CCX terraform provider uses this).
+- JWT - for UI and API integration.
+#### CCX UI
+The CCX UI can be customized and white-labeled. The CCX UI runs in a POD called `ccx-ui-app`.
+#### CCX Admin UI
+The CCX Admin UI provides basic administration features. It runs in a pod called `ccx-ui-admin`.
 #### REST API
-[Swagger](https://ccx.s9s-dev.net/api/docs/current/index.html).
+There is [Swagger](https://ccx.s9s-dev.net/api/docs/current/index.html) documentation describing the API.
 #### Terraform Provider
 Datastores can be created and scaled using the [Terraform provider](https://github.com/severalnines/terraform-provider-ccx). 
 
