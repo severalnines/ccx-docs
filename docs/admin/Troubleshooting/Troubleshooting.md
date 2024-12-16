@@ -24,21 +24,25 @@ Attach the generated `.tar.gz` file to the CCX support ticket.
 
 ## Long-Running or Stuck Datastore
 Clusters may get stuck in a locked state if a job is interrupted unexpectedly. Use the following steps to resolve hanging jobs:
-Run `ccxctl` by executing inside the stores pod. Note that `ccxctl` is available from version 1.50+.
+Note that `ccxctl` is available from version 1.50+.
+
 ```bash
-# Step 1: Check the datastore state and get the job-id in field `Active Job:`
+# Step 1: Run `ccxctl` by executing inside the stores pod.
+kubectl exec -it deployment/ccx-stores-service -- sh
+
+# Step 2: Check the datastore state and get the job-id in field `Active Job:`
 ccxctl datastore state <datastore-id>
 
 # Output Example:
 # Active Job: 2e3fe81b-2fd9-40f0-b561-a40f9fded92
 
-# Step 2: Check the job state using the job-id from the output
+# Step 3: Check the job state using the job-id from the output
 ccxctl job state <job-id>
 
-# Step 3: Mark the job as failed if it is stuck
+# Step 4: Mark the job as failed if it is stuck
 ccxctl job kill <job-id>
 
-# Step 4: Unlock the datastore after resolving the job
+# Step 5: Unlock the datastore after resolving the job
 ccxctl datastore unlock <datastore-id>
 ```
 
@@ -78,19 +82,17 @@ For prior versions, navigate to the CC UI:
 Disable readonly for the nodes that are labeled Readonly.
 
 ## Disk Autoscaling Issues
-Disk autoscaling is enabled by default in CCX. It can be configured using the following setting in the Helm CCX values file:
-```yaml
-autoscaling.storage.enabled: true
-```
-Ensure that the observability stack is deployed in the same namespace as CCX.
+Disk autoscaling is enabled by default in CCX. The system will automatically increase the storage size by 20% when the used space exceeds 75% of the allocated storage
+##### CCX UI Configuration:
+Navigate to Datastore UUID -> Settings -> Auto scaling storage size and ensure the toggle is set to ON.
+
+##### Monitoring Alert:
+To check alerts for disk space scaling, run the following command:
 ```bash
-# This will show if the monitoring stack is deployed
-helm status ccx-monitoring
+kubectl port-forward alertmanager-0 19093:9093
 ```
-We recommend using our monitoring charts. If it is deployed in a different namespace, update the `webhook_config_url` in the values file to include the CCX deployed namespace:
-```bash
-http://ccx-stores-listener-svc.<namespace>.svc:18097/alert-manager
-```
+Then, open your browser and go to http://localhost:19093.
+Search for the alert alertname="HostAutoScaleDiskSpaceReached" by choosing the receiver as `Receiver: webhook-alerts`.
 
 ## Troubleshooting Datastore Backups Failing
 To debug failed datastore backups:
@@ -113,14 +115,16 @@ s9s job --job-id=NNN --log
 The `s9s job` commands are useful for diagnosing why a backup failed.
 
 ## Troubleshooting CCX Database Logs Visibility
-If database logs are not visible, ensure the following:
+If database logs are not visible, ensure the following to upgrade the ccxdeps:
 ```bash
-# Step 1: Update and Deploy ccxdeps charts in the same namespace
+# Step 1: Verify ccxdeps-loki service exist and pod is running.
+kubectl get svc | grep ccxdeps-loki
+kubectl get pods | grep ccxdeps-loki-gateway
+
+# If the above service is not running, then update the ccxdeps
+# Step 2: Update and Deploy ccxdeps charts
 helm repo update
 helm upgrade --install ccxdeps s9s/ccxdeps --debug
-
-# Step 2: Verify ccxdeps-loki service is running
-kubectl get svc -n <namespace> | grep ccxdeps-loki
 ```
 
 ## Troubleshooting Metrics Scraping in VictoriaMetrics
@@ -130,27 +134,19 @@ If metrics are not being scraped or targets are unreachable, ensure to deploy ou
 helm repo update
 helm upgrade --install ccxdeps s9s/ccxdeps --debug
 
-# Step 2: Verify metrics in the cmon-master container
-kubectl exec -it cmon-master-0 -- bash
+# Step 2: Verify Metrics in VictoriaMetrics Targets
+#Forward the port for the VictoriaMetrics deployment:
 
-# Check for metrics with the "cmon_cluster" prefix
-curl http://127.0.0.1:9954/metrics | grep -i cmon_cluster
+kubectl port-forward deployments/victoria-metrics 18428:8428
 ```
-Check exporters are running inside datastore nodes.
-Navigate to CC UI:
-    - **Clusters** -> **Select Datastore ID** -> **Nodes** -> **Actions** -> **SSH Console**
+Open your browser and navigate to `http://localhost:18428/`.
+Click on Targets and ensure the cmon-sd active targets are in the Up state.
+
+
+If no scrape targets are not found, the issue may be due to exporters not running on the datastore servers.
 ```bash
-# Check if exporters are running for the respective DB
-systemctl status mssql_exporter.service #for MSSQL DB
-systemctl status node_exporter.service #for node exporter
-systemctl status process_exporter.service #for process exporter
-systemctl status redis_exporter.service #for Redis DB
-systemctl status postgres_exporter.service #for Postgres DB
-systemctl status mysqld_exporter.service #for MySQL DB
-```
-If no metrics are still returned, the issue may be due to exporters not running on the datastore servers.
-```bash
-# If exporters are not running, then deploy agents commands
+# If exporters are not running inside datastores, then deploy agents commands
+kubectl exec -it cmon-master-0 -- bash
 s9s cluster --cluster-id=<cluster-id> --deploy-agents --log
 ```
 
