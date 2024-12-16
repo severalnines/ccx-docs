@@ -229,7 +229,7 @@ When using NFS as a volume provisioner, NFS servers map requests from unprivileg
 When a datastore is created, service records of the ExternalName type are created, for example:
 `usr-a1b3aaec-0f58-4347-80ab-27e386af2208-primary-svc`
 ```bash
-kubectl get svc usr-a1b3aaec-0f58-4347-80ab-27e386af2208-primary-svc -o jsonpath='{.metadata.annotations}'
+kubectl describe svc usr-a1b3aaec-0f58-4347-80ab-27e386af2208-primary-svc
 ```
 Annotations `external-dns.alpha.kubernetes.io/hostname` specify the hostname managed by an external DNS provider. The DNS record for this service should point to the corresponding `external-dns.alpha.kubernetes.io/target`.
 To verify if the DNS records are created or updated properly:
