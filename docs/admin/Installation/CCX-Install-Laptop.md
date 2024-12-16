@@ -167,6 +167,7 @@ Do not use this UI to delete clusters or add and remove nodes. Please see the [T
 - If you experience sudden glitches or pod failures, you can try allocate more resoures too Docker Desktop. You can allocated more resources under `Settings->Resources->Advanced`.
 - If you experience issues deploying, reset the environment (Settings->Kubernetes, Reset Kubernetes Cluster), increase resources, and try again.
 - [Troubleshooting guide](/docs/admin/Troubleshooting).
+- Problems? [Create a GitHub issue](https://github.com/severalnines/ccx-docs/issues).
 
 ## Limitations
 - Backups are not supported. A license to CMON is required. Please contact [sales@severalnines.com](mailto:sales@severalnines.com).
