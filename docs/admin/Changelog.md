@@ -11,6 +11,11 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](/docs/admin/Day2/Upgrading-the-Control-Plane) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.50.9
+CMON version: 2.2.0-11542
+### CMON Bugs
+- MSSQL - Create backup for databases with - in name
+
 ## Release Notes - CCX - v1.50.8
 CMON version: 2.2.0-11405
 ### CMON Bugs
