@@ -8,7 +8,7 @@ In this section we will cover the most core concepts in CCX.
 ## Controlplane - Core services and functionality
 
 ### Jobs
-Almost every action taken on CCX is a handled as a job and is initiated by the end-user or the system automatically:
+Actions taken on CCX is a handled as a job and is initiated by the end-user or the system automatically:
 
 - Deployment and destruction of a datastore
 - Scaling (data nodes and volumes)
@@ -23,9 +23,9 @@ The jobs are managed by a service called `ccx-runner-service`
 Deployment of a datastore is executed as a job. Moreover, one component called the CCX deployer is responsible for infrastructure creation and destruction.
 Creating a datastore involves the following steps:
 - create the VM
-- create network and attach to the VM
-- allocate a public ip and and attac
-- create storage and attach to the vm
+- create network and attach to the VM.
+- allocate a public ip and and attach to the VM.
+- create storage and attach to the VM.
 - update ExternalDNS.
 
 If any resource cannot be allocated, then the creation will fail, and it is up to the deployment job to retry.
@@ -112,6 +112,6 @@ Metris are sampled using exporters which are scraped by VictoriaMetrics. The fol
 - process_exporter, used by the CMON Controller, and provides information about running processes.
 - db_exporter, where db refers to the database specific type of exporter, e.g redis, mysql, postgres, etc.
 
-### S3 Stoorage (object storage)
+### S3 Storage (object storage)
 An S3 compatible storage is required. If there is no existing S3 compatible storage, and Minio can be configured.
 The S3 storage stores backups.
