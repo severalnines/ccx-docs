@@ -68,7 +68,7 @@ This command deletes all associated resources, including:
 - Credentials
 ```
 :::danger
-> Note: This action is irreversible. Use caution when applying this command.
+> This actions are irreversible. Use caution when applying above commands.
 :::
 
 ## Cluster in Readonly State
