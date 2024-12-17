@@ -1,6 +1,3 @@
-# Troubleshooting
-This page describes troubleshooting scenarios.
-
 # CCX Troubleshooting Guide
 This guide helps you troubleshoot and resolve common issues in CCX. Follow the steps outlined below to diagnose problems and apply fixes.
 
