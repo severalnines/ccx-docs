@@ -114,10 +114,10 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
 
 3. Deploy CCX:
 
-    :::danger
+:::danger
 
-    This setup is only for demo and development purposes and the installtion will only work for the specified CIDR or 0.0.0.0/0 if no CIDR is set. For production and testing we recommend [to follow the installation guide](Index.md) and overriding the values.yaml with your settings. If you set the CIDR below then CCX will only be able to access the datastores from this CIDR.
-    :::
+This setup is only for demo and development purposes and the installtion will only work for the specified CIDR or 0.0.0.0/0 if no CIDR is set. For production and testing we recommend [to follow the installation guide](Index.md) and overriding the values.yaml with your settings. If you set the CIDR below then CCX will only be able to access the datastores from this CIDR.
+:::
 
     **Using the CIDR 0.0.0.0/0 (access is allowed from everywhere, which might be a security risk):**
     
@@ -140,11 +140,10 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
       --set 'ccx.cidr=N.N.N.N/32'
     ```
 
-    :::note
+:::note
+If you move the laptop/computer where the installation is made to another location, then you must login to the AWS Console and add that network to the security group.
+:::
 
-    If you move the laptop/computer where the installation is made to another location, then you must login to the AWS Console and add that network to the security group.
-
-    :::
 ---
 
 ## Verification
@@ -174,16 +173,11 @@ The CC frontend is an administrative interface and allows the CCX administrator 
 
     ```bash
     kubectl get secret cmon-credentials  -o jsonpath='{.data.cmon-user}' | base64 -d
-    ```
-
-    ```bash
     kubectl get secret cmon-credentials  -o jsonpath='{.data.cmon-password}' | base64 -d
     ```
 
 :::danger
-
 Do not use this UI to delete clusters or add and remove nodes. Please see the [Troubleshooting guide](../Troubleshooting/Troubleshooting.md).
-
 :::
 
 ## Troubleshooting
