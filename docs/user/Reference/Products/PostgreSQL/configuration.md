@@ -15,7 +15,7 @@ These settings cannot be changed as it affects system stability
 
 ### Max connections
 The maximum number of connections depends on the instance size.
-The number of connections can be scaled by adding a new database secondary allowing of a larger instance size. The new replica can then be promoted to the new primary. See [Promoting a replica](/docs/user/Howto/Promote-a-replica) for more information.
+The number of connections can be scaled by adding a new database secondary allowing of a larger instance size. The new replica can then be promoted to the new primary. See [Promoting a replica](../../../Howto/Promote-a-replica.md) for more information.
 | Instance size (GiB RAM)       | Max connections |
 | ------------- |-------------|
 | < 4 | 100 |

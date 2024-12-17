@@ -11,7 +11,7 @@ For a more details please read the [architecture](architecture.md).
 
 ## Quickstart
 
-For laptop/desktop installation instructions please visit [Install CCX on a Laptop](/docs/admin/Installation/CCX-Install-Laptop).
+For laptop/desktop installation instructions please visit [Install CCX on a Laptop](CCX-Install-Laptop.md).
 
 ### Add Severalnines Helm Chart repository
 
@@ -159,7 +159,7 @@ Disk space can either be ephemeral or block storage. We recommend block storage 
 
 ### Cloud Provider Configuration
 
-To know more about the CCX Cloud Provider Configuration setup, please read [CCX Cloud Provider Configuration](Cloud-Providers.md).
+To know more about the CCX Cloud Provider Configuration setup, please read [CCX Cloud Provider Configuration](Cloud-Providers/Cloud-Providers.md).
 
 ### Production Environment Configs
 
@@ -183,7 +183,7 @@ Backups needs to be configured for:
 ### Observability
 
 - [Observability](Observability.md).
-- [Configuration Management](/admin/Day2/Config-Management.md)
-- [Lifecycle Management](/admin/Day2/Lifecycle-Management.md)
-- [Upgrading the Controlplane](/admin/Day2/Upgrading-the-Control-Plane.md)
+- [Configuration Management](../Day2/Config-Management.md)
+- [Lifecycle Management](../Day2/Lifecycle-Management.md)
+- [Upgrading the Controlplane](../Day2/Upgrading-the-Control-Plane.md)
 

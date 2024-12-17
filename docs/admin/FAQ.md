@@ -11,7 +11,7 @@ Yes, the UI can be white-labeled.
 2022
 
 ### What database version does CCX support?
-Here is a list of [supported database versions](/docs/user/Reference/Supported-Databases).
+Here is a list of [supported database versions](../user/Reference/Supported-Databases.md).
 
 ### Do you support MongoDB?
 
@@ -23,7 +23,7 @@ Yes.
 
 ### What other clouds do you support?
 
-Please see the [features](/docs/user/) for information.
+Please see the [features](Index.md) for information.
 
 ### Are there any specific dependencies between CCX and OpenStack/VMware?
 
