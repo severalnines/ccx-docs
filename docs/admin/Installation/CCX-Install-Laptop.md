@@ -65,6 +65,7 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
     ```
 
     Provide the following details:
+
     - AWS Access Key ID
     - AWS Secret Access Key
     - Default Region
@@ -79,12 +80,12 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
     ```
     Verify the secret is available:
     ```
-        kubectl get secrets aws
+    kubectl get secrets aws
     ```
     The output of this command should look something like this:
     ```
-        NAME   TYPE     DATA   AGE
-        aws    Opaque   2      24s
+    NAME   TYPE     DATA   AGE
+    aws    Opaque   2      24s
     ```
 ---
 
@@ -114,6 +115,7 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
 3. Deploy CCX:
 
     :::danger
+
     This setup is only for demo and development purposes and the installtion will only work for the specified CIDR or 0.0.0.0/0 if no CIDR is set. For production and testing we recommend [to follow the installation guide](Index.md) and overriding the values.yaml with your settings. If you set the CIDR below then CCX will only be able to access the datastores from this CIDR.
     :::
 
@@ -137,9 +139,11 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
       --set 'ccx.cloudSecrets[0]=aws' \
       --set 'ccx.cidr=N.N.N.N/32'
     ```
-    
+
     :::note
-     If you move the laptop/computer where the installation is made to another location, then you must login to the AWS Console and add that network to the security group.
+
+    If you move the laptop/computer where the installation is made to another location, then you must login to the AWS Console and add that network to the security group.
+
     :::
 ---
 
@@ -168,15 +172,18 @@ The CC frontend is an administrative interface and allows the CCX administrator 
 1. Navigate to `https://cc.localhost` in your web browser.
 2. Login with the CC credentials, which are stored in Kubernets secrets:
 
-    ```
+    ```bash
     kubectl get secret cmon-credentials  -o jsonpath='{.data.cmon-user}' | base64 -d
     ```
-    ```    
+
+    ```bash
     kubectl get secret cmon-credentials  -o jsonpath='{.data.cmon-password}' | base64 -d
-    ```    
+    ```
 
 :::danger
+
 Do not use this UI to delete clusters or add and remove nodes. Please see the [Troubleshooting guide](../Troubleshooting/Troubleshooting.md).
+
 :::
 
 ## Troubleshooting
@@ -195,5 +202,5 @@ Do not use this UI to delete clusters or add and remove nodes. Please see the [T
 - [Installation guide](Index.md).
 ---
 
-This document provides step-by-step instructions to set up Docker Desktop, Kubernetes, and CCX with a datastore deployed in AWS. For further details, refer to the official [CCX documentation](https://ccxdocs.severalnines.com/ccx-docs/).
+This document provides step-by-step instructions to set up Docker Desktop, Kubernetes, and CCX with a datastore deployed in AWS. For further details, refer to the official [CCX documentation](https://ccxdocs.severalnines.com/).
 
