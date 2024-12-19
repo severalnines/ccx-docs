@@ -5,6 +5,7 @@ This guide explains how to install Docker Desktop, enable Kubernetes, configure 
 ---
 
 ## Prerequisites
+
 - **System requirements**: a laptop/desktop with atleast 4 cores and 8GB of RAM, 20GB of free storage.
 - **Docker Desktop**, you can download Docker Desktop from the [official Docker website](https://www.docker.com/products/docker-desktop/).
 - **kubectl** installed and on the PATH, [get kubectl here](https://kubernetes.io/docs/tasks/tools/#kubectl).
@@ -36,6 +37,7 @@ This guide explains how to install Docker Desktop, enable Kubernetes, configure 
     ```
 
 ---
+
 ## Step 2: Create and Switch to a Namespace
 
 1. Create a new namespace for CCX:
@@ -50,11 +52,11 @@ This guide explains how to install Docker Desktop, enable Kubernetes, configure 
     kubectl config set-context --current --namespace=ccx
     ```
 
+---
+
 ## Step 3: Configure AWS Credentials
 
 CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credentials need to be securely provided to Kubernetes as a secret.
-
-### Steps
 
 1. Run the following command to configure your AWS credentials:
 
@@ -63,6 +65,7 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
     ```
 
     Provide the following details:
+
     - AWS Access Key ID
     - AWS Secret Access Key
     - Default Region
@@ -77,12 +80,12 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
     ```
     Verify the secret is available:
     ```
-        kubectl get secrets aws
+    kubectl get secrets aws
     ```
     The output of this command should look something like this:
     ```
-        NAME   TYPE     DATA   AGE
-        aws    Opaque   2      24s
+    NAME   TYPE     DATA   AGE
+    aws    Opaque   2      24s
     ```
 ---
 
@@ -104,21 +107,28 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
     ```
 
 2. Deploy CCXDEPS using the following command:
+    
     ```bash
     helm upgrade --install ccxdeps s9s/ccxdeps --debug --wait --set ingressController.enabled=true
     ```
+
 3. Deploy CCX:
-    :::danger
-    This setup is only for demo and development purposes and the installtion will only work for the specified CIDR or 0.0.0.0/0 if no CIDR is set.
-    For production and testing we recommend [to follow the installation guide](/docs/admin/Installation) and overriding the values.yaml with your settings. If you set the CIDR below then CCX will only be able to access the datastores from this CIDR.
-    :::
+
+:::danger
+
+This setup is only for demo and development purposes and the installtion will only work for the specified CIDR or 0.0.0.0/0 if no CIDR is set. For production and testing we recommend [to follow the installation guide](Index.md) and overriding the values.yaml with your settings. If you set the CIDR below then CCX will only be able to access the datastores from this CIDR.
+:::
+
     **Using the CIDR 0.0.0.0/0 (access is allowed from everywhere, which might be a security risk):**
+    
     ```bash
     helm upgrade --install ccx s9s/ccx \
       --debug --wait \
       --set 'ccx.cloudSecrets[0]=aws'
     ```
+    
     **Using a custom CIDR N.N.N.N/32 (access is allowed only from *this* CIDR):**
+    
     ```bash
     curl ifconfig.me  
 
@@ -129,9 +139,11 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
       --set 'ccx.cloudSecrets[0]=aws' \
       --set 'ccx.cidr=N.N.N.N/32'
     ```
-    :::note
-    If you move the laptop/computer where the installation is made to another location, then you must login to the AWS Console and add that network to the security group.
-    :::
+
+:::note
+If you move the laptop/computer where the installation is made to another location, then you must login to the AWS Console and add that network to the security group.
+:::
+
 ---
 
 ## Verification
@@ -144,38 +156,46 @@ CCX uses AWS credentials to deploy its datastore in the AWS cloud. These credent
     ```
 
 ## Accessing the frontends
+
 ### CCX frontend
+
 The CCX frontend is the end-user interface and allows the end-user to create and manage datastores. The necessary infrastructure (VMs, volumes, etc) are created and managed by CCX.
+
 1. Navigate to `https://ccx.localhost` in your web browser.
 2. Register a new user. In this configuration, no confirmation email will be sent and you will need to go back to `https://ccx.localhost` (you can press Back in the browser) and login with your email address and password.
 
 ### CC frontend
+
 The CC frontend is an administrative interface and allows the CCX administrator to manage datastores. 
+
 1. Navigate to `https://cc.localhost` in your web browser.
 2. Login with the CC credentials, which are stored in Kubernets secrets:
-```
+
+    ```bash
     kubectl get secret cmon-credentials  -o jsonpath='{.data.cmon-user}' | base64 -d
-```
-```    
     kubectl get secret cmon-credentials  -o jsonpath='{.data.cmon-password}' | base64 -d
-```    
+    ```
+
 :::danger
-Do not use this UI to delete clusters or add and remove nodes. Please see the [Troubleshooting guide](/docs/admin/Troubleshooting/).
+Do not use this UI to delete clusters or add and remove nodes. Please see the [Troubleshooting guide](../Troubleshooting/Troubleshooting.md).
 :::
 
 ## Troubleshooting
+
 - If you experience sudden glitches or pod failures, you can try allocate more resoures too Docker Desktop. You can allocated more resources under `Settings->Resources->Advanced`.
 - If you experience issues deploying, reset the environment (Settings->Kubernetes, Reset Kubernetes Cluster), increase resources, and try again.
-- [Troubleshooting guide](/docs/admin/Troubleshooting).
+- [Troubleshooting guide](../Troubleshooting/Troubleshooting.md).
 - Problems? [Create a GitHub issue](https://github.com/severalnines/ccx-docs/issues).
 
 ## Limitations
+
 - Backups are not supported. A license to CMON is required. Please contact [sales@severalnines.com](mailto:sales@severalnines.com).
 
 ## Next steps
+
 - [Installation guide](/docs/admin/Installation/).
 - Visit [Severalnines.com](https://severalnines.com/ccx/) for more information about Severalnines, and CCX in general.
----
 
-This document provides step-by-step instructions to set up Docker Desktop, Kubernetes, and CCX with a datastore deployed in AWS. For further details, refer to the official [CCX documentation](https://severalnines.github.io/ccx-docs/).
+
+This document provides step-by-step instructions to set up Docker Desktop, Kubernetes, and CCX with a datastore deployed in AWS. For further details, refer to the official [CCX documentation](https://ccxdocs.severalnines.com/).
 

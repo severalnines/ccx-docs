@@ -1,35 +1,45 @@
 # Database configuration in CCX
+
 :::note
 *Deprecated in v1.51 in favor of parameter groups* 
-Please see to [Parameter Groups](Parameter-group)
+Please see to [Parameter Groups](Parameter-group.md)
 ::: 
+
 In CCX, you have the ability to fine-tune your database performance by adjusting various **DB Parameters**. These parameters control the behavior of the database server and can impact performance, resource usage, and compatibility.
 
 ![img](../images/change_db_config.png)
 
 ## Available DB Parameters
+
 This is an example, and is subject to change and depends on the configuration of CCX.
+
 1. **group_concat_max_len**
+
    - **Description**: Specifies the maximum allowed result length of the `GROUP_CONCAT()` function.
    - **Max**: 104857600 | **Min**: 1024 | **Default**: 1024
 
 2. **interactive_timeout**
+
    - **Description**: Sets the number of seconds the server waits for activity on an interactive connection before closing it.
    - **Max**: 28800 | **Min**: 3000 | **Default**: 28800
 
 3. **max_allowed_packet**
+
    - **Description**: Specifies the maximum size of a packet or a generated/intermediate string.
    - **Max**: 1073741824 | **Min**: 536870912 | **Default**: 536870912
 
 4. **sql_mode**
+
    - **Description**: Defines the SQL mode for MySQL, which affects behaviors such as handling of invalid dates and zero values.
    - **Default**: `ONLY_FULL_GROUP_BY, STRICT_TRANS_TABLES, NO_ZERO_IN_DATE, NO_ZERO_DATE, ERROR_FOR_DIVISION_BY_ZERO, NO_ENGINE_SUBSTITUTION`
 
 5. **table_open_cache**
+
    - **Description**: Sets the number of open tables for all threads.
    - **Max**: 10000 | **Min**: 4000 | **Default**: 4000
 
 6. **wait_timeout**
+
    - **Description**: Defines the number of seconds the server waits for activity on a non-interactive connection before closing it.
    - **Max**: 28800 | **Min**: 3000 | **Default**: 28800
 
