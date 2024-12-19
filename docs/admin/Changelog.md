@@ -139,7 +139,7 @@ CMON version: 2.2.0-11405
 - Spelling error on the signup page
 - cmon-sd panic on fail response from cmon
 - Too little disk for Safespring volume
-- Lintasarta: Missing cmon host
+-  Missing cmon host
 - Clicking on CCX logo does not always lead to the "homepage"
 - Command error, will retry
 - Restore backup fails on VMWare
@@ -166,9 +166,9 @@ CMON version: 2.2.0-11405
 - Privileges are concatenated in the User List
 - \[VMWare\] cloud-init domain not set
 - Volume size OR IOPS cannot be changed on AWS io1 volume type
-- \[Softbank\] Multiply network does not work on Softbank VMWare
+- Multiply network does not work on VMWare
 - Clicking on "Settings" redirects to main page
-- \[Softbank\] create\_restore\_dir error
+- Create\_restore\_dir error
 - Autoscale Storage button reverts automatically
 - Nodes info and settings are being reset at every request
 - Autoscale for Redis is enabled
@@ -925,7 +925,6 @@ CMON version - 1.9.8-7463
 - Node information is missing instance type and volume type
 - Fixed a bug where S3 backup buckets are not being deleted
 - Datastore details on admin panel are not displayed properly
-- [1.38 Github issues - complete list](https://github.com/severalnines/ccx-elastx/issues?q=is%3Aopen+is%3Aissue+label%3A1.38)
 
 ## Release notes - CCX - v1.37.0. (28th of April)
 

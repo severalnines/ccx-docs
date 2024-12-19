@@ -174,6 +174,7 @@ Do not use this UI to delete clusters or add and remove nodes. Please see the [T
 
 ## Next steps
 - [Installation guide](/docs/admin/Installation/).
+- Visit [Severalnines.com](https://severalnines.com/ccx/) for more information about Severalnines, and CCX in general.
 ---
 
 This document provides step-by-step instructions to set up Docker Desktop, Kubernetes, and CCX with a datastore deployed in AWS. For further details, refer to the official [CCX documentation](https://severalnines.github.io/ccx-docs/).
