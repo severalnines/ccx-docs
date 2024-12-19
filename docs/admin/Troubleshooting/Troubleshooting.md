@@ -46,7 +46,7 @@ ccxctl datastore unlock <datastore-id>
 ## Inconsistent Hosts
 If a `create datastore` or `add node` job terminates unexpectedly, some hosts might become inconsistent. This can leave dangling resources in the cloud or mismatches between CCX and controllers.
 
-### Dangling Resources (on Cloud Provider Side)
+### Orphaned Resources (on Cloud Provider Side)
 #### Inconsistent Hosts
 ```bash
 # Identify inconsistent hosts in the datastore
