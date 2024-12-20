@@ -3,26 +3,3 @@
 {% block extrahead %}
 <!-- head items here if neccesary for indexing -->
 {% endblock %}
-
-{% block footer %}
-<div class="page-footer">
-    <div class="md-footer-meta__inner md-grid">
-        <div class="mandatory-links-container">
-            <ul class="mandatory-links">
-                {% for mandatory in config.mandatory_links %}
-                {% for linktext, linkurl in mandatory.items() %}
-                <li><a href="{{ linkurl }}" title="{{ linktext }}">{{ linktext }}</a></li>
-                {% endfor %}
-                {% endfor %}
-                <li id='ppms_cm_privacy_settings' data-editor-centralize='true' data-main-container='true'
-                    data-root='true'>
-                    <a id='ppms-aec7896d-352f-4054-93f0-87f377ea6355' data-disable-select='true'>
-                        <span id='ppms_cm_privacy_settings_button'>{{ config.cookie_link_title }}</span>
-                    </a>
-        </div>
-        </ul>
-    </div>
-</div>
-</div>
-{{ super() }}
-{% endblock %}
