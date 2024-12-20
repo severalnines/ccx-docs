@@ -119,10 +119,19 @@
     font-weight: bold;
 }
 
+.separator {
+    width: calc(100% - 1.6rem);
+    max-width: calc(61rem - 1.6rem);
+    height: 1px;
+    background-color: rgba(255, 255, 255, .6);
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .page-footer .mandatory-links-container {
     width: 100%;
     margin: auto .6rem;
-    padding: .4rem 0 0;
+    padding: .34rem 0 0;
 }
 
 .page-footer .mandatory-links {
