@@ -27,26 +27,31 @@ Also, prepare the replica with the databases you wish to replicate from the sour
 Ensure the CCX Firewall is updated:
 * Add the replication source as a Trusted Source in the Firewall section of the CCX UI.
 
-### Create a replication user
+### Create a replication user on the source
 Create a replication user with sufficient privileges on the source:
 ```
 CREATE USER 'repluser'@'%' IDENTIFIED BY '<SECRET>';
 GRANT REPLICATION SLAVE ON *.* TO 'repluser'@'%';
 ```
+
 ### Prepare the replica to replicate from the source
 The replica must be instrucuted to replicate from the source.
 Make sure to change `<SOURCE_IP>`, `<SOURCE_PORT>`, and `<SECRET>`.
+Run the following on the *source*:
 ```
 CHANGE MASTER TO MASTER_HOST=<SOURCE_IP>, MASTER_PORT=<SOURCE_PORT>, MASTER_USER='repluser', MASTER_PASSWORD='<SECRET>', MASTER_SSL=1;
 ```
 
-### Create a database dump file
-The database dump contains the data that you wish to import into the replica. Only partial dumps are possible. The dump must not contains any mysql or other system datbases.
-On the source, issue the following command. Change ADMIN, SECRET and DATABASES:
+### Create a database dump file of the source
+The database dump contains the data that you wish to import into the replica. Only partial dumps are possible. The dump must not contains any mysql or other system databases.
+:::danger
+The dump must not contains any mysql or other system databases.
+:::
+On the *source*, issue the following command. Change ADMIN, SECRET and DATABASES:
 ```
 mysqldump -uADMIN -p<SECRET>   --master-data --single-transaction --triggers --routines --events --databases DATABASES > dump.sql`
 ```
-Important! If your database dump contains SPROCs, triggers or events, then you must replace DEFINER:
+If your database dump contains SPROCs, triggers or events, then you must replace DEFINER. This may take a while:
 ```
 sed 's/\sDEFINER=`[^`]*`@`[^`]*`//g' -i dump.sql
 ```

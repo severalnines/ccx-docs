@@ -17,14 +17,14 @@ Ensure that the source is configured to act as a replication source:
 Ensure the CCX Firewall is updated:
 * Add the replication source as a Trusted Source in the Firewall section of the CCX UI.
 
-### Create a replication user
+### Create a replication user on the source
 Create a replication user with sufficient privileges on the source:
 ```
 CREATE USER 'repluser'@'%' IDENTIFIED BY '<SECRET>';
 GRANT REPLICATION SLAVE ON *.* TO  'repluser'@'%';
 ```
 ### Prepare the replica to replicate from the source
-The replica must be instrucuted to replicate from the source:
+The replica must be instructed to replicate from the source:
 Make sure to change `<SOURCE_IP>`, `<SOURCE_PORT>`, and `<SECRET>`.
 ```
 CHANGE REPLICATION SOURCE TO SOURCE_HOST=<SOURCE_IP>, SOURCE_PORT=<SOURCE_PORT>, SOURCE_USER='repluser', SOURCE_PASSWORD='<SECRET>', SOURCE_SSL=1;
@@ -38,7 +38,7 @@ CHANGE REPLICATION FILTER REPLICATE_IGNORE_DB=(mysql,sys, performance_schema);
 ```
 
 ### Create a database dump file
-The database dump contains the data that you wish to import into the replica. Only partial dumps are possible. The dump must not contains any mysql or other system datbases.
+The database dump contains the data that you wish to import into the replica. Only partial dumps are possible. The dump must not contains any mysql or other system databases.
 On the source, issue the following command. Change USER, SECRET and DATABASES:
 ```
 mysqldump --set-gtid-purged=OFF -uUSER -pSECRET   --master-data --single-transaction --triggers --routines --events  --databases DATABASES > dump.sql
