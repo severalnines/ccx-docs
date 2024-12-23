@@ -2,7 +2,7 @@
 ## Supported extentions
 | Extension       | Postgres version |
 | ------------- |-------------|
-| vector | 15 and later |
+| vector (pgvector) | 15 and later |
 | postgis | 15 and later |
 
 ## Creating an extension
