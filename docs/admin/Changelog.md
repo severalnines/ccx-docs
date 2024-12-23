@@ -11,6 +11,11 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+
+## Release Notes - CCX - v1.50.10
+### Bugs
+- Nodes disappear from ccx UI
+
 ## Release Notes - CCX - v1.50.9
 CMON version: 2.2.0-11542
 ### CMON Bugs

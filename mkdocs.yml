@@ -33,6 +33,7 @@ theme:
     - content.action.view
     - content.code.copy
     - navigation.tabs
+    - navigation.footer
   logo: assets/ccx.png
   favicon: assets/favicon.png
   font:
