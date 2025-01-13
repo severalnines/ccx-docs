@@ -12,6 +12,195 @@ Downgrades are not supported.
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
 
+# Release Notes - CCX - v1.51.1
+
+## New Features
+
+### **Parameter Groups for Database Management**
+- Introduced **Parameter Groups** to simplify database parameter management.
+
+### **Database Logs in Events Viewer**
+- Added a **Database Logs** section to the Events Viewer/UI.
+
+### **Create Datastore from backup***
+- Can be restored form incremental backup and what is more to different cloud, region or storage type
+
+### **Tasks & UI Improvements**
+
+- **Round all pop-ups with a radius of 8px**  
+  Rounded all pop-ups to align with new design standards.
+
+- **Add Replica Lag - Frontend**  
+  Implemented frontend support for displaying and monitoring replica lag.
+
+- **Flags icons**  
+  Updated all flag icons to use the new flag-pack design.
+
+- **Upgrade v2**  
+  - Allow operators to set a deadline for upgrades.  
+  - Automatic upgrade after deadline is met (if non-empty deadline).  
+  - Send customer email reminders for pending enforced upgrades.  
+  - Use maintenance window for enforced upgrades.
+
+- **global - Notification popup should be lower not to hide user settings**  
+  Adjusted notification pop-up position to ensure user settings remain visible.
+
+- **Top Queries - colors are bad after expand**  
+  Reworked colors and column sizing for better readability in expanded view.
+
+- **Get rid of `CCX_BILLING_NETWORK` env variable**  
+  Removed redundant logic since billing network tracking is now always enabled.
+
+- **Update the primer color with the latest one (#160482)**  
+  Updated the primary purple color for buttons, radios, checkboxes, and switches.
+
+- **Update the UI components corners radius**  
+  - Small components (e.g., checkboxes, tags): 2px corner radius.  
+  - Inputs, dropdowns, grouped components: 8px corner radius.  
+  - Larger elements: 16px corner radius.
+
+- **Replace the old illustration with the new one**  
+  Swapped out obsolete product illustrations with new branding assets.
+
+- **Update the current Sign up/Sign in flows**  
+  Refreshed login and registration to comply with the latest brand guidelines.
+
+- **Replace the Ant design icons with those from Untitled UI**  
+  Transitioned from Ant icons to Untitled UI icons for a unified icon set.
+
+- **Create user without a database**  
+  Added a “Create Database” checkbox (not checked by default) to allow user creation without DB.
+
+- **Add "per second" to postgresql metrics**  
+  Updated PostgreSQL metric graphs to explicitly show operations “per second” (p/s).
+
+- **Parameter Group**  
+  Core feature: allow creation, reading, updating, and deleting parameter groups.
+
+- **Create cluster from backup v2**  
+  - Select backups, choose a different cloud/region, and retain instance size.  
+  - Validate vendor/version matching for Redis, MySQL, etc.
+
+- **Integrate Loki with the CCX Application**  
+  Implemented a service to query Loki’s API for recent database/system logs.
+
+- **Create a Logs Tab in CCX UI**  
+  Dedicated UI tab to display logs with refresh/download functionality.
+
+- **Reboot database Node**  
+  - Added a “Reboot node” action using the existing `reboot` cmon job.  
+  - Future steps include switchover if the primary is rebooted.
+
+- **Make Postgres SUPERUSER configurable**  
+  Added a SUPERUSER checkbox when creating a new PostgreSQL user, with caution prompts.
+
+- **Change Date and Time field to a single DateTime Picker from antd**  
+  Streamlined PITR (Point-In-Time Recovery) form with one combined DateTime field.
+
+- **Auto save datastore setting changes instead of the save button**  
+  Removed manual “Save” button in settings; changes now auto-save.
+
+- **Add billing report API documentation to swagger**  
+  Exposed billing report endpoints in Swagger.
+
+- **Parameter group database schema**  
+  Added schema for storing parameter group data in the DB.
+
+- **Parameter group grpc methods**  
+  gRPC endpoints to manage parameter groups.
+
+- **Parameter group http handlers**  
+  Added HTTP handlers for parameter group creation, updates, and deletions.
+
+- **Scale volume - more logs**  
+  Improved logging for volume scaling operations.
+
+- **Create a docs for db logs on ccx-docs**  
+  Documented db logging capabilities in ccx-docs.
+
+- **Add reboot node job description and icon to UI**  
+  UI improvements for the `JOB_TYPE_REBOOT_NODE` event.
+
+- **Scale nodes: Availability zone is selectable, but there is only one**  
+  Simplified UI for single-AZ scenarios by hiding unnecessary selection fields.
+
+- **Redirect to error page if resource not found**  
+  If a user navigates to an unknown resource, they are redirected to a user-friendly error page.
+
+- **Improve datastore wizard defaults and information about replicas**  
+  - Clearer warnings for 1-primary setups without a replica.  
+  - Default selection now includes Primary/Replica.  
+  - Better labeling and disclaimers for failover readiness.
+
+- **Apply parameters groups for the datastores**  
+  Automated applying parameter groups to existing or new datastores.
+
+- **Modify existing groups**  
+  Allow changes to parameter groups. If applied to a datastore, changes propagate accordingly.
+
+- **Update the log gathering script to include new/renamed services**  
+  Adjusted gather-logs script to account for service name updates since 1.48.
+
+- **Backend API gives 500 when it should be Not Found 404**  
+  Corrected HTTP status codes for missing datastore or resource endpoints.
+
+- **Datastore from backup: backend validation**  
+  Validates Redis memory, MySQL ephemeral volumes, etc., to ensure correct sizing.
+
+- **Make Autoscale volume default enabled**  
+  If volume autoscaling is enabled in Helm, new datastores default to autoscale=on.
+
+- **Possibility to create new datastores from incremental backups - MariaDB/MySQL**  
+  Exposed incremental backups in the UI’s “Create Datastore from Backup” flow.
+
+- **Move all cluster statuses together**  
+  Consolidated status mapping in a single code location to reduce duplication across services.
+
+- **Add /auth/admin-login to swagger.**  
+  Documented admin login endpoints in Swagger, found under `/admin`.
+
+- **Filters and pagination**  
+  Enhanced listing UIs (e.g., datastores, nodes) with search filters and pagination.
+
+- **DB Params Group Frontend**  
+  Added a dedicated UI in Settings to manage DB Param Groups (create, edit, delete).
+
+- **Recover from All servers are Read Only**  
+  - If disk usage > 90%, the datastore is set to read-only.  
+  - When usage is back to normal, CCX resets the datastore to read-write.
+
+- **CLI tools for CCX**  
+  `ccxctl cluster state/unlock/remove`, `ccxctl job state/kill`, etc. for operational tasks.
+
+- **Datastore from backup - allow user to change volume type**  
+  Lifted volume-type restrictions, provided it’s not smaller than the existing used size.
+
+---
+
+### **Bugs**
+
+- **Reset password is not working**  
+  Fixed a 401 issue when attempting to reset passwords via email links.
+
+- **Deployments stuck in deploying status forever**  
+  Corrected state transitions so a failed deployment eventually marks as “failed” instead of hanging.
+
+- **CCX updates k8s services every minute**  
+  Reduced unnecessary `Service` updates, lowering API calls to Kubernetes.
+
+- **Backend - forbid creating VPCs on non-AWS clouds**  
+  Removed “Create VPC” capability from CSPs that do not support it.
+
+- **Connection assistant displaying `{your_port}`**  
+  Fixed placeholder to show the actual DB port instead of `{your_port}`.
+
+- **Backup schedule: increment backup crontab schedule is wrong**  
+  Set correct interval to 15/30/60 minutes for incremental backups.
+
+- **Edit storage is accessible for ephemeral storage**  
+  Disabled volume-editing for ephemeral storage as it was never intended.
+
+
 ## Release Notes - CCX - v1.50.10
 ### Bugs
 - Nodes disappear from ccx UI
