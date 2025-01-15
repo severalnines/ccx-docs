@@ -14,16 +14,16 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 
 # Release Notes - CCX - v1.51.2
 
-## New Features
+## Features
 
-### **Parameter Groups for Database Management**
-- Introduced **Parameter Groups** to simplify database parameter management.
+- **Parameter Groups for Database Management**
+  - Introduced **Parameter Groups** to simplify database parameter management.
 
-### **Database Logs in Events Viewer**
-- Added a **Database Logs** section to the Events Viewer/UI.
+- **Database Logs in Events Viewer**
+  - Added a **Database Logs** section to the Events Viewer/UI.
 
-### **Create Datastore from backup***
-- Can be restored form incremental backup and what is more to different cloud, region or storage type
+- **Create Datastore from backup***
+  - Can be restored form incremental backup and what is more to different cloud, region or storage type
 
 ### **Tasks & UI Improvements**
 
