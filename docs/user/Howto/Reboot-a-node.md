@@ -1,0 +1,20 @@
+# Reboot database node
+The reboot command is found under the action menu of a databse node, on the Nodes page.
+![Reboot node](../images/reboot.png)
+
+
+Selecting "Reboot" triggers a restart of the chosen replica. Use this option when:
+- the replica needs to be refreshed due to performance issues
+- for maintenance purposes. 
+
+:::danger
+- Ensure all tasks linked with the node are concluded before initiating a reboot to prevent data loss.
+- Only authorized personnel should perform actions within the administration panel to maintain system integrity.
+::: 
+
+:::note
+Please note that rebooting may cause temporary unavailability.
+:::
+
+## Important Notes
+

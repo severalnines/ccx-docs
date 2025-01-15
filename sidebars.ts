@@ -193,6 +193,7 @@ const sidebars: SidebarsConfig = {
             'user/Howto/Config-management',
             'user/Howto/Scale-a-Datastore',
             'user/Howto/Promote-a-replica',
+            'user/Howto/Reboot-a-node',
             'user/Howto/Restore-backup',
             'user/Howto/Parameter-group',
             'user/Howto/Create-Datastore-From-Backup',
@@ -201,6 +202,7 @@ const sidebars: SidebarsConfig = {
             'user/Howto/Database-Db-management',
             'user/Howto/Firewall',
             'user/Howto/Event-viewer',
+            'user/Howto/Logs-Viewer',
             'user/Howto/Terraform-provider',
 
           ],
