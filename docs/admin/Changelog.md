@@ -25,7 +25,7 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 - **Create Datastore from backup***
   - Can be restored form incremental backup and what is more to different cloud, region or storage type
 
-### **Tasks & UI Improvements**
+## **Tasks & UI Improvements**
 
 - **Round all pop-ups with a radius of 8px**  
   Rounded all pop-ups to align with new design standards.
@@ -177,7 +177,7 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 
 ---
 
-### **Bugs**
+## **Bugs**
 
 - **Reset password is not working**  
   Fixed a 401 issue when attempting to reset passwords via email links.
