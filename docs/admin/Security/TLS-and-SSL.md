@@ -1,8 +1,14 @@
-# Security - in-transit(TLS/SSL) 
+# Security 
+This section describes:
+- Security - in-transit(TLS/SSL)
+- Security -  At-rest
 
-CCX uses Transport Layer Security (TLS) and Secure Sockets Layer (SSL) to secure the communication between the MySQL server and clients. Here's how the process works:
+## Security - in-transit(TLS/SSL) 
 
-## Certificate Generation
+CCX uses Transport Layer Security (TLS) and Secure Sockets Layer (SSL) to secure the communication between the database server and clients. 
+This feature cannot be disabled.
+
+### Certificate Generation
 
 1. **CA Certificate Generation**: CCX creates a self-signed Certificate Authority (CA) certificate. This certificate is stored in Kubernetes secrets.
 
@@ -12,7 +18,7 @@ CCX uses Transport Layer Security (TLS) and Secure Sockets Layer (SSL) to secure
 
 4. **UI for CA Certificate**: In addition to the API, CCX also provides a user interface to download the CA certificate. This can be found in the datastore settings tab.
 
-## MySQL Specifications
+### MySQL Specifications
 
 SSL is required for all users. The following SSL modes are supported:
 
@@ -24,5 +30,5 @@ Unsecured connections can only be established for users that use the `mysql_nati
 
 Please note that CCX will not start if the CA certificate is not found in the Kubernetes secrets. This is to ensure that all connections are secured with SSL.
 
-# Security -  At-rest
-Volumes are created using LUKS to encrypt the filesystem.
+## Security -  At-rest
+Volumes are created using LUKS to encrypt the filesystem. This feature cannot be disabled.
