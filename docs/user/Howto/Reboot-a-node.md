@@ -14,8 +14,7 @@ Selecting "Reboot" triggers a restart of the chosen replica. Use this option whe
 ::: 
 
 :::note
-Please note that rebooting may cause temporary unavailability.
+- Please note that rebooting may cause temporary unavailability.
+- In Valkey, then the primary may failover to a secondary if the reboot takes more than 30 seconds.
 :::
-
-## Important Notes
 
