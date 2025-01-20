@@ -1,4 +1,6 @@
 # Reboot database node
+*Introduced in v.1.51*
+
 The reboot command is found under the action menu of a databse node, on the Nodes page.
 ![Reboot node](../images/reboot.png)
 
@@ -15,6 +17,6 @@ Selecting "Reboot" triggers a restart of the chosen replica. Use this option whe
 
 :::note
 - Please note that rebooting may cause temporary unavailability.
-- In Valkey, then the primary may failover to a secondary if the reboot takes more than 30 seconds.
+- In Valkey,  the primary may failover to a secondary if the reboot takes more than 30 seconds.
 :::
 
