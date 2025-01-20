@@ -6,6 +6,7 @@ The reboot command is found under the action menu of a databse node, on the Node
 Selecting "Reboot" triggers a restart of the chosen replica. Use this option when:
 - the replica needs to be refreshed due to performance issues
 - for maintenance purposes. 
+- For some parameters, any change to the parameter value in a parameter group only takes effect after a reboot.
 
 :::danger
 - Ensure all tasks linked with the node are concluded before initiating a reboot to prevent data loss.
