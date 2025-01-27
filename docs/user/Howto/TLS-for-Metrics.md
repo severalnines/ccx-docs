@@ -2,7 +2,7 @@
 
 ## Overview
 
-To enhance security, it is required to use TLS for accessing metrics. This document outlines how the metrics served securely using TLS for each exporter.
+To enhance security, using TLS for accessing metrics is recommended. This document outlines how the metrics served securely using TLS for each exporter. Each node typically has a Node Exporter and a corresponding database-specific exporter to provide detailed metrics.
 
 ## Metrics Endpoint Format
 
@@ -15,7 +15,7 @@ https://CCX_URL/metrics/<storeID>/<nodeName>/<exporterType>
 
 ### How to Access Exporter Metrics
 
-To access the metrics securely, follow the steps:
+To access metrics securely, you can inspect the automatically generated rules in the Ingress resource and access the metrics via HTTPS.
 
 
  **Inspect the Rules in the Ingress and access the metrics securely via HTTPS**:
