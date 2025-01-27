@@ -12,6 +12,12 @@ Downgrades are not supported.
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
 
+## Release Notes - CCX - v1.51.4
+
+### Bugs
+
+- Create datastore from backup from older db version then the newest one available
+
 ## Release Notes - CCX - v1.51.3
 
 ### Bugs
