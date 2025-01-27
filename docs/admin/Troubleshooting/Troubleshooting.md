@@ -243,3 +243,16 @@ If you are using an external-dns controller, check its logs for errors or issues
 kubectl logs deployment/external-dns
 ```
 
+### Access Exporter Metrics
+
+To access metrics securely, you can inspect the automatically generated rules in the Ingress resource and access the metrics via HTTPS.
+
+
+ **Inspect the Rules in the Ingress and access the metrics securely via HTTPS**:
+   - Identify the ingress resource corresponding to your exporter. For example, the ingress name will follow the format `usr-<storeID>-ingress`.
+   - Use the command to view the rules for the metrics ingress.
+    ```
+    kubectl get ingress -o json 2> /dev/null| jq -r '.items[] | .spec.rules[] | .host as $host | .http.paths[] | ( $host + .path)' | sort | grep metrics
+    ```
+
+This command will show the ingress url for accessing metrics.
