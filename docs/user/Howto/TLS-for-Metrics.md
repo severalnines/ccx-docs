@@ -11,7 +11,7 @@ Metrics for each exporter is served on:
 ```
 https://CCX_URL/metrics/<storeID>/<nodeName>/<exporterType>
 ```
-Where <nodeName> is short name, not full fqdn.
+Where nodeName is short name, not full fqdn.
 
 
 ### Exporter Type Examples:
