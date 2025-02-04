@@ -216,6 +216,11 @@ const sidebars: SidebarsConfig = {
               id: 'user/Reference/Datastore-Statuses',
               label: "Datastore Statuses",
             },
+            {
+              type: 'doc',
+              id: 'user/Reference/Notifications',
+              label: "Notifications",
+            },
             'user/Reference/Glossary',
             {
               type: 'doc',

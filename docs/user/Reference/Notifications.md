@@ -1,6 +1,6 @@
 # Notifications
 CCX notifies users by email in case of certain events.
-Recepients can be configured on the [Datastore Settings](../Howto/Datastore-settings.md) page or in the Datastore wizard.
+Recepients can be configured on the [Datastore Settings](/docs/user/Howto/Datastore-settings#notifications-in-ccx) page or in the Datastore wizard.
 
  
 | **Alert** | **Description** | **Action Required?** |
