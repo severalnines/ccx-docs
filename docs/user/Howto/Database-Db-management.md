@@ -69,4 +69,4 @@ To delete or drop a database:
 ## Troubleshooting
 ### Drop database hangs,  the icon is spinning in the frontend.
 Check if there are locks preventing the database from being deleted. 
-- In MySQL, the DROP DATABASE will hang if there is a metadata lock on the database or a table/resource in the database.
+- In MySQL, the DROP DATABASE will hang if there is a metadata lock on the database or a table/resource in the database. Use SHOW PROCESSLIST in the mysql/mariadb client to identify the lock. Either release the lock, KILL the connection, or wait for the lock to be released.
