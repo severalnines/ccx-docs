@@ -204,7 +204,7 @@ const sidebars: SidebarsConfig = {
             'user/Howto/Event-viewer',
             'user/Howto/Logs-Viewer',
             'user/Howto/Terraform-provider',
-
+            'user/Howto/TLS-for-Metrics'
           ],
         },
         {
