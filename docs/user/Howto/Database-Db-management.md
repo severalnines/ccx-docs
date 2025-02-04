@@ -22,6 +22,12 @@ Once databases are created, you can view the list of databases in the **Database
 
 To create a new database in the CCX platform:
 
+:::note
+- **PostgreSQL Database Owner:** When creating a database in PostgreSQL, ensure that a valid user is selected as the owner of the database.
+- **MySQL Database Management:** MySQL database creation does not require specifying an owner, but all other functions (listing, deleting) remain similar.
+:::
+
+
 1. **Navigate to the Databases Tab:**
    - Click on the **Databases** section from the main dashboard.
 
@@ -42,6 +48,10 @@ To create a new database in the CCX platform:
 
 ## Dropping a Database
 
+:::note
+- **MySQL/MariaDb Database locks / metadata locks:** The DROP DATABASE will hang if there is a metadata lock on the database or a table/resource in the database. Use `SHOW PROCESSLIST`in the mysql client to identify the lock. Either release the lock, KILL the connection, or wait for the lock to be released.
+:::
+
 To delete or drop a database:
 
 1. **Locate the Database:**
@@ -56,8 +66,7 @@ To delete or drop a database:
 3. **Confirm Deletion:**
    - Click **OK** to proceed. **WARNING:** All data in the database will be lost.
 
-
-## Notes
-- **PostgreSQL Database Owner:** When creating a database in PostgreSQL, ensure that a valid user is selected as the owner of the database.
-- **MySQL Database Management:** MySQL database creation does not require specifying an owner, but all other functions (listing, deleting) remain similar.
-
+## Troubleshooting
+### Drop database hangs,  the icon is spinning in the frontend.
+Check if there are locks preventing the database from being deleted. 
+- In MySQL, the DROP DATABASE will hang if there is a metadata lock on the database or a table/resource in the database.
