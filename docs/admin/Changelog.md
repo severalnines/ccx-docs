@@ -12,6 +12,17 @@ Downgrades are not supported.
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
 
+# Release notes - CCX - v1.51.5
+
+### Bugs
+
+- The hostname and hostname\_internal values are empty in remove node jobs
+- Customer datastore parameters being reset after auto upgrade
+- CCX creates more nodes than expected size
+- CCXCTL missing from 1.51
+- ccx runner service is leaking private keys
+- Use cluster UUID instead of node UUID VM names
+
 ## Release Notes - CCX - v1.51.4
 
 ### Bugs
