@@ -12,6 +12,14 @@ Downgrades are not supported.
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
 
+# Release notes - CCX - v1.51.6
+
+### Customer Bug
+
+- extra node in cmon
+- wrong DNS configuration
+- AddNode when connection to cloud breaks 
+
 # Release notes - CCX - v1.51.5
 
 ### Bugs
