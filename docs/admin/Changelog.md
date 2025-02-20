@@ -12,6 +12,13 @@ Downgrades are not supported.
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
 
+# Release notes - CCX - v1.51.7
+
+### Customer Bug
+
+- Customer datastore parameters being reset after auto upgrade
+- Deploy wizard - going back from network to resources breaks the wizard
+
 # Release notes - CCX - v1.51.6
 
 ### Customer Bug
