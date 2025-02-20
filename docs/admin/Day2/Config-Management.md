@@ -65,6 +65,8 @@ A new parameter can be added by adding a new section to the yaml file:
       description: "`<DESCRIPTION>`"
       type: "`<TYPE>`"
       default_value: `<DEFAULT_VALUE>`
+      allowed_values:
+        - <ALLOWED_VALUE>
       validation_options: "min=`<MIN_VALUE>`,max=`<MAX_VALUE>`"
       vendors:
         - `<SUPPORTED_VENDOR>`
@@ -76,6 +78,7 @@ A new parameter can be added by adding a new section to the yaml file:
 - `<DESCRIPTION>` - a decription of the configuration parameter.
 - `<TYPE>` - the datatype of the value of the configuration parameter. Supported types are "number" and "text".
 - `<DEFAULT_VALUE>` - the default value of the configuration parameter.
+- `<ALLOWED_VALUE>` - only values defined as allowed values can be set by user otherwise validation will be triggered
 - `<SUPPORTED_VENDOR>` - the vendor that supports this configuration parameter.
 - `<MIN_VALUE>`/`<MAX_VALUE>` - The validation_options applies to parameters of the type "number" and sets an upper and lower bound of the value of the configuration parameter.
 
@@ -91,6 +94,13 @@ config:
       default_value:
         "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_E\
         NGINE_SUBSTITUTION"
+      allowed_values:
+        - ONLY_FULL_GROUP_BY
+        - STRICT_TRANS_TABLES
+        - NO_ZERO_IN_DATE
+        - NO_ZERO_DATE
+        - ERROR_FOR_DIVISION_BY_ZERO
+        - NO_ENGINE_SUBSTITUTION
       vendors:
         - "percona"
     - name: sql_mode
