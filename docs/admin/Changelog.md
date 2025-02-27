@@ -12,7 +12,7 @@ Downgrades are not supported.
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
 
-# Release Notes - CCX - v1.52.0
+## Release Notes - CCX - v1.52.0
 
 ### New Features
 
@@ -233,7 +233,7 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 - **Incomplete `sql_mode` Defaults for MySQL/MariaDB**  
   Updated default and allowed `sql_mode` values for MySQL 8, MariaDB 10.11, and 11.4 to match upstream documentation.
 
-# Release notes - CCX - v1.51.7
+## Release notes - CCX - v1.51.7
 
 ### Customer Bug
 
@@ -248,7 +248,7 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 - wrong DNS configuration
 - AddNode when connection to cloud breaks 
 
-# Release notes - CCX - v1.51.5
+## Release notes - CCX - v1.51.5
 
 ### Bugs
 
