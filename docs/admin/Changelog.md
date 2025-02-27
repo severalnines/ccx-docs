@@ -12,6 +12,227 @@ Downgrades are not supported.
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
 
+# Release Notes - CCX - v1.52.0
+
+### New Features
+
+- **Add Replica Lag for Async Replication**  
+  Displays replication lag for MySQL, MariaDB, and PostgreSQL replicas in the nodes tab.
+
+- **New UI for Selecting Instances**  
+  Improves the process of choosing instance types in the deployment workflow.
+
+- **Improved CCX Admin UI Delete Confirmation**  
+  Enhances delete dialogs to include identifying datastore information, reducing the risk of accidental deletions.
+
+- **Collect MySQL Slow Query Logs**  
+  Integrates slow query log collection into Fluent Bit for easier troubleshooting and analysis.
+
+- **Helm Preflight Checks**  
+  Adds hooks and checks to fail fast if certain credentials or configurations are invalid, providing clearer error messages.
+
+- **Backup Source Selection (Primary or Replica)**  
+  Lets users choose whether backups run on the primary node or a replica for MySQL, MariaDB, and PostgreSQL.
+
+- **Configurable Pricing in YAML**  
+  Allows prices or cost-related configurations to be defined in YAML instead of relying on external references.
+
+- **Extended Event Log for “Enabling Read Only” Job**  
+  Captures and displays why nodes were put in read-only mode, including disk space threshold messages.
+
+- **Keycloak API Integration (PoC)**  
+  Begins integration of Keycloak for user and realm management, laying groundwork for external authentication.
+
+- **Switch to `pgx` Driver for PostgreSQL**  
+  Uses the `pgx` library to support `target_session_attrs=read-write`, helping detect read-only nodes more reliably.
+
+- **Multi-AZ (Multiple Availability Zones) Support**  
+  Offers the ability to deploy nodes across multiple zones for greater resilience.
+
+- **Terraform Provider Enhancements**  
+  - Supports creating and assigning parameter groups.  
+  - Accepts `mysql` as a valid vendor name (in addition to legacy `percona`).  
+  - Various bug fixes around node sizing, maintenance hours, and datastore destruction.
+
+- **Return Backup Metrics in Usage/Billing**  
+  Exposes backup counts and sizes along with other usage metrics.
+
+- **TLS for Exporters**  
+  Enables secure connections for database/exporter metrics using HTTPS endpoints.
+
+- **KubeVirt Integration**  
+  - Adds KubeVirt as a supported CSP vendor.  
+  - Allows creation and deletion of KubeVirt cluster nodes.  
+  - Supports adding/removing volumes and managing provider-specific templates.
+
+- **Ubuntu 24.04 Support**  
+  Adds images and compatibility checks for Ubuntu 24.04 when provisioning.
+
+- **S3 Bucket Management**  
+  Adds ability to create and delete S3 buckets natively within CCX.
+
+- **Ordered Data Volume & VM Creation**  
+  Ensures data volumes are fully created before provisioning the associated VM (in KubeVirt and similar providers).
+
+- **Load Balancer Rate Limiting**  
+  Implements throttling logic to avoid hitting cloud provider rate limits during fast or large-scale deployments.
+
+- **Use of Exposed Ports from Deployer Config**  
+  Dynamically fetches and applies port settings from the deployer configuration for KubeVirt.
+
+- **Piwik PRO Analytics**  
+  Integrates privacy-conscious analytics to track user signups and measure engagement without exposing personal data.
+
+- **`net.ipv4.conf.all.rp_filter` = 0 for MSSQL**  
+  Adjusts kernel parameter for MSSQL deployments that require relaxed reverse path filtering.
+
+- **Use Cluster UUID for VM Naming**  
+  Prefers cluster UUID instead of node UUID in CloudStack (and similar) to standardize VM names.
+
+- **“Cache22” Replaces “Redis” Branding**  
+  Removes references and logos of Redis to comply with legal requirements, adopting an internal “Cache22” brand.
+
+- **Exponential Backoff in Repair Jobs**  
+  Applies a retry strategy with increasing wait times for certain automated cluster repair operations.
+
+- **Improved Backup Schedule Configuration**  
+  Shifts from selecting a single node to choosing “auto” or “prefer replica,” making backups more flexible.
+
+- **Job System Enhancements**  
+  Refines the underlying job orchestration for greater stability, visibility, and scale.
+
+- **Refined Datastore Recommendations**  
+  Updates the default recommended cluster configurations (for single vs. multi-node) and labeling in the UI.
+
+
+### Tasks
+
+- **Rework S3 Credentials for Backups**  
+  Consolidates multiple S3 credentials into a single or region-based credential in most deployments.
+
+- **Rename `ccx-datastore-storage`**  
+  Renames the service to a simpler “datastores” component in the codebase and directory structure.
+
+- **Nodes List & Scale Modals**  
+  Implements “Nodes list,” “Scale nodes,” and “Scale volume” modals for more transparent cluster scaling.
+
+- **Upgrade Procedure v2**  
+  Revisits the auto-upgrade flow, moving away from scheduling upgrades via manual timestamps.
+
+- **Cleanup of `db_parameter_tests`**  
+  Removes obsolete or duplicated tests, consolidating parameter checks.
+
+
+### Bugs
+
+- **Invalid DB Parameter Acceptance**  
+  Fixed an issue allowing invalid DB parameters to be saved, causing cluster errors.
+
+- **Missing Validation for Backup Retention**  
+  The UI now properly enforces valid backup retention periods.
+
+- **Occasional State Worker Panic**  
+  Addressed a nil-pointer dereference in the state worker leading to random panics.
+
+- **Disk Resize Email Formatting**  
+  Corrected alerts that incorrectly showed “resized from 50GB to 50GB” even when the size changed.
+
+- **Double-Promote Node in MSSQL**  
+  Prevented duplicate “promote node” jobs from running when changing volumes on MSSQL AlwaysOn clusters.
+
+- **Ephemeral Volume Change Validation**  
+  Added checks to forbid switching from “ephemeral” to a standard volume type after deployment (and vice versa) when unsupported.
+
+- **Panic on Backup Schedules (`makeslice: cap out of range`)**  
+  Resolved an overflow bug when reading certain schedule data from CMON.
+
+- **Terraform Cannot Destroy Failed Datastores**  
+  Fixed internal references so a datastore that failed during creation can still be destroyed via Terraform.
+
+- **Maintenance Window Shifting in Terraform**  
+  Corrected an issue where updating the node count in Terraform also changed maintenance hours unexpectedly.
+
+- **Random Datastore Ordering**  
+  Ensured the datastore list is sorted (by creation time) rather than appearing in random order.
+
+- **Datastore “Unknown” or “Unreachable” During Deployment**  
+  Improved status transitions to remain in “Deploying” until fully validated.
+
+- **Flag Icons Scrambled on Delete**  
+  Refresh logic now correctly updates flags and icons after deleting a datastore from the list.
+
+- **Duplicate DB Parameter Group Names**  
+  Added both frontend and backend checks to prevent accidental name collisions.
+
+- **Cannot Delete DB Parameter Group if Datastore is Deleting**  
+  Allowed parameter group removal if all associated datastores are already in “deleting” state.
+
+- **Wizard Crash on Cloud Switch**  
+  Fixed a UI crash when switching cloud providers mid-wizard.
+
+- **Scaling Redis Nodes in GCP**  
+  Addressed rate-limit and context-cancellation issues when adding multiple nodes quickly.
+
+- **No Reboot Indicator in Datastore Overview**  
+  The UI now shows an in-progress job status during a node reboot operation.
+
+- **Redis Primary Reboot Failure**  
+  Revised the logic that previously rejected reboot jobs on a node hosting multiple processes.
+
+- **KubeVirt AddNode Memory Passing**  
+  Ensured memory sizing is properly included when adding KubeVirt nodes.
+
+- **Redis Data Volume Size Mismatch**  
+  Corrected an error that assigned incorrect sizes to Redis volumes.
+
+- **Region and CSP Misalignment**  
+  Standardized the layout so cloud region info aligns properly in the UI.
+
+- **Creating DB Parameter Group Fails for MariaDB/MySQL**  
+  Fixed improper validation of `require_secure_transport` for these vendors.
+
+- **Empty Volume Code Validation**  
+  Prevented invalid volume code “blank” entries during cluster creation.
+
+- **MSSQL AlwaysOn Node Config Not Preselected**  
+  The recommended multi-node setting is now auto-selected if it’s the only valid choice.
+
+- **Residual Entries in Deployer DB After Delete**  
+  Ensured cluster metadata is fully removed from the deployer database on datastore deletion.
+
+- **Vulnerable JS Library & Missing SRI**  
+  Updated front-end dependencies and added Subresource Integrity (SRI) checks for external scripts.
+
+- **CloudStack Add Volume Panic**  
+  Added safer logic when tagging or attaching volumes in CloudStack to prevent nil-pointer panics.
+
+- **Excessive Node Creation**  
+  Fixed a reconciliation bug that occasionally spawned more nodes than requested.
+
+- **IOPS Charts Unit Label**  
+  Changed misleading “p/s” label to “IOPS” for disk throughput metrics.
+
+- **Resource Cleanup on Network Failures**  
+  Improved rollback/cleanup steps when adding a node fails due to a dropped cloud connection.
+
+- **Missing Backup Sub-Tab**  
+  Restored the sub-tab that displays the name/details of each configured backup.
+
+- **Legacy DB Parameter View Default Values**  
+  Corrected a UI bug that always showed the default value instead of the currently applied value.
+
+- **Removing a Node with an Active Backup Schedule**  
+  No longer deletes the entire schedule; scheduling is adjusted to “auto” if the chosen replica is removed.
+
+- **Parameter Group Sync Always “Pending”**  
+  Fixed the logic so the sync status properly reflects “success,” “failed,” or “pending.”
+
+- **Intermittent PANIC Alerts**  
+  Added guards and logging improvements to handle unexpected corner cases more gracefully.
+
+- **Incomplete `sql_mode` Defaults for MySQL/MariaDB**  
+  Updated default and allowed `sql_mode` values for MySQL 8, MariaDB 10.11, and 11.4 to match upstream documentation.
+
 # Release notes - CCX - v1.51.7
 
 ### Customer Bug
