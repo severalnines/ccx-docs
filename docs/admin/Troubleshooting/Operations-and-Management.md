@@ -13,15 +13,15 @@ You need to logout from CCX web-app first or clear the cookies for your `CCX_URL
 ### CCX Admin API
 
 #### Basic Auth
-The following Admin API endpoints requires Basic Auth authentication method to work.
-- Billing usage → GET /admin/datastores/billing/usage/{type}
+The following Admin API endpoints requires Basic Auth authentication method to work:
+- Billing usage → GET /admin/datastores/billing/usage/\{type\}
 - Users count → GET /admin/users/count
 - Datastores count → GET /admin/datastores/count
 
 The credentials can be found in the kubernetes secret `admin-basic-auth`.
 To create a Basic Authentication Header we can use this command
 
-```
+```shell
 BASIC_AUTH=$(kubectl get secret admin-basic-auth -o json | jq -r '(.data.ADMIN_AUTH_USERNAME | @base64d) + ":" + (.data.ADMIN_AUTH_PASSWORD | @base64d)' | tr -d '\n' | base64) printf "Authorization: Basic %s" $BASIC_AUTH
 ```
 
