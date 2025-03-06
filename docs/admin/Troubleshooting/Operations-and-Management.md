@@ -21,7 +21,7 @@ The following Admin API endpoints requires Basic Auth authentication method to w
 The credentials can be found in the kubernetes secret `admin-basic-auth`.
 To create a Basic Authentication Header we can use this command
 
-```shell
+```
 BASIC_AUTH=$(kubectl get secret admin-basic-auth -o json | jq -r '(.data.ADMIN_AUTH_USERNAME | @base64d) + ":" + (.data.ADMIN_AUTH_PASSWORD | @base64d)' | tr -d '\n' | base64) printf "Authorization: Basic %s" $BASIC_AUTH
 ```
 
