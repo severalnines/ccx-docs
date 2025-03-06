@@ -18,7 +18,7 @@ The following Admin API endpoints requires Basic Auth authentication method to w
 - Users count → GET /admin/users/count
 - Datastores count → GET /admin/datastores/count
 
-The credentials can be found in the kubernetes secret `admin-users`, they are the same as for `CCX Admin UI`.
+The credentials can be found in the kubernetes secret `admin-basic-auth`.
 To create a Basic Authentication Header we can use this command
 
 ```shell
