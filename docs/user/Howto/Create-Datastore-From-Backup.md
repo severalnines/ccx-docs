@@ -1,4 +1,3 @@
-# Create a datastore from backup
 # Create datastore from backup
 In CCX, it is possible to create a new datastore from a backup
 Supported databases: MySQL, MariaDb, Postgres.

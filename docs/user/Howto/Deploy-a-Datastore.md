@@ -34,5 +34,5 @@ High-availability is facilitated with Redis replication and Redis Sentinels.
 ### Scaling
 Redis can be created with one node (no high-availability) but can later be scaled with read-replicas.
 
-# MS SQLServer
-Microsoft SQLServer 2022. Special license restrictions apply and this option may not be available.
+## MS SQLServer
+Microsoft SQLServer 2022. Special license restrictions apply and this option may not be available in all CCX implementations.

@@ -18,4 +18,4 @@
 | Multi-Primary | Multiple `Nodes` deployed with the same role, all of them acting as the `Primary`. This topology is not supported by all `Databases` | Clustered | Operations |
 | Status | The last known status of your `Datastore`. For details of the possible statuses, see [here](./Datastore-Statuses.md) | State | Operations |
 | Maintenance | The application of critical security updates to your `Datastore`. These are applied in your `Maintenance Window` which can be configured per `Datastore`. |  | Operations |
-| Monitoring | This is the metrics of the hardware and software for your `Datastore`. These can be accessed in the CCX Dashboard and can be shown per `Node`. For details of the metrics available, see [here](./Observability/Metrics/README.md). |  | Observability |
+| Monitoring | This is the metrics of the hardware and software for your `Datastore`. These can be accessed in the CCX Dashboard and can be shown per `Node`. For details of the metrics available, see [here](./Observability/Metrics/Introduction.md). |  | Observability |
