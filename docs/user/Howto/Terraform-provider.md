@@ -58,13 +58,14 @@ resource "ccx_datastore" "luna_mysql" {
 	type           = "replication"
 	db_vendor      = "mysql"
 	tags           = ["new", "test"]
-	cloud_provider = "aws"
-	cloud_region   = "eu-north-1"
-	instance_size  = "m5.large"
+	cloud_provider = "CCX_CLOUD"
+	cloud_region   = "CCX-REGION-1"
+	instance_size  = "MEGALARGE"
 	volume_size    = 80
-	volume_type    = "gp2"
+	volume_type    = "MEGAFAST"
 	parameter_group = ccx_parameter_group.asteroid.id
 }
 ```
+Replace CCX_CLOUD, CCX-REGION-1, MEGALARGE and, MEGAFAST,  with actual values depending on the cloud infrastructure available.
 
 For more information visit the [terraform-provider-ccx](https://github.com/severalnines/terraform-provider-ccx) github page.
