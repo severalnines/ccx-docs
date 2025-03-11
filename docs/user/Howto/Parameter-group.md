@@ -90,6 +90,7 @@ From this view, users can:
 
 
 ![Parameter group actions](../images/pg_actions_on_a_parameter_group.png)
+
 ---
 
 ### 4. Editing a Parameter Group
