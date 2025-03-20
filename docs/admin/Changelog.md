@@ -28,9 +28,6 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 - **Collect MySQL Slow Query Logs**  
   Integrates slow query log collection into Fluent Bit for easier troubleshooting and analysis.
 
-- **Helm Preflight Checks**  
-  Adds hooks and checks to fail fast if certain credentials or configurations are invalid, providing clearer error messages.
-
 - **Backup Source Selection (Primary or Replica)**  
   Lets users choose whether backups run on the primary node or a replica for MySQL, MariaDB, and PostgreSQL.
 
