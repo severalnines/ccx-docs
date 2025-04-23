@@ -22,7 +22,7 @@ To allow connections from a specific IP address or range, you need to create a t
 
 **Click on Create Trusted Source:**
    - A form will appear prompting you to enter the following details:
-     - **Source IP:** Specify the IP address or CIDR range to allow.
+     - **Source IP:** Specify the IP address or CIDR range to allow. It is possible to specify a semicolon-separated list of CIDRs. If no CIDR is specified, then /32 is automatically added to the IP address.
      - **Description:** Add a description to identify the source (e.g., "My office", "Data Center").
    
    After filling out the details, click **Create** to add the trusted source.
@@ -32,7 +32,9 @@ To allow connections from a specific IP address or range, you need to create a t
 
 ## Viewing and Managing Trusted Sources
 
-### Managing Open Ports for Each Trusted Source
+### Managing Open Ports for Each Trusted Source.
+
+**TLS access to exporter metrics are described in this [section](docs/user/Howto/TLS-for-Metrics.md).**
 
 Each trusted source can have specific ports opened for services. To manage the ports:
 

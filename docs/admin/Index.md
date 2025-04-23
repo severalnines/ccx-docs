@@ -26,6 +26,7 @@ Our platform is compatible with a diverse array of database types, including:
 - MySQL
 - PostgreSQL
 - Redis
+- Valkey
 - Microsoft SQL Server
 
 ### Node Configurations
