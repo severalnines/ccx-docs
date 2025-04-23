@@ -24,7 +24,7 @@ terraform {
   required_providers {
     ccx = {
       source  = "severalnines/ccx"
-      version = "~> 0.3.1"
+      version = "~> 0.4.7"
     }
   }
 }
@@ -68,4 +68,18 @@ resource "ccx_datastore" "luna_mysql" {
 ```
 Replace CCX_CLOUD, CCX-REGION-1, MEGALARGE and, MEGAFAST,  with actual values depending on the cloud infrastructure available.
 
-For more information visit the [terraform-provider-ccx](https://github.com/severalnines/terraform-provider-ccx) github page.
+For more information and examples, visit the [terraform-provider-ccx](https://github.com/severalnines/terraform-provider-ccx) github page.
+
+### Features
+The following settings can be updated:
+- Add and remove nodes
+- Volume type
+- Volume size
+- Notifications
+- Maintenance time
+- Modify firewall (add/remove) entries. Multiple entries can be specified with a comma-separated list.
+
+### Limitations
+- Change the existing parameter group is not possible after initial creation, however you can create a new parameter group and reference that.
+- It is not possible to change instance type.
+- Changing availability zone is not possible.
