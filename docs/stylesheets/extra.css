@@ -98,7 +98,7 @@
 
 .mdx-container.hero .mdx-hero {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     gap: 24px;
 }
 
@@ -111,8 +111,8 @@
     font-size: 1.6rem;
     font-weight: 800;
     color: #fff;
-    margin: 0 0 4px;
-    line-height: 1.55;
+    margin: 0 0 6px;
+    line-height: 1.2;
 }
 
 .mdx-hero__content span {
@@ -237,8 +237,6 @@
 
     .mdx-container.hero .mdx-hero__content h1 {
         font-size: 1.9rem;
-        margin: 0 0 6px;
-        line-height: 1.6;
     }
 
     .page-footer .mandatory-links {
