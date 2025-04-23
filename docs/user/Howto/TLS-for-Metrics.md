@@ -59,7 +59,6 @@ Where nodeName is short name, not full fqdn.
     - **URL**: `https://ccx.example.com/metrics/<storeID>/<nodeName>/mysqld_exporter`
 
 6. **NodeExporter**:
-
     - **URL**: `https://ccx.example.com/metrics/<storeID>/<nodeName>/node_exporter`
-
+   
 By serving metrics over HTTPS with TLS, we ensure secure monitoring access for customers. 
