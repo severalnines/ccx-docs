@@ -32,7 +32,6 @@ Where nodeName is short name, not full fqdn.
    - **URL**: `https://CCX_URL/metrics/<storeID>/<nodeName>/mysqld_exporter`
 
 6. **NodeExporter**:
-
    - **URL**: `https://CCX_URL/metrics/<storeID>/<nodeName>/node_exporter`
    
 

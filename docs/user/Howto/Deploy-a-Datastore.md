@@ -36,7 +36,6 @@ High-availability is facilitated with Redis replication and Redis Sentinels.
 ### Scaling
 Redis can be created with one node (no high-availability) but can later be scaled with read-replicas.
 
-
 ## Valkey
 Valkey is an in-memory data structure store.
 ### High-availability
