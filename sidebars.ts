@@ -249,6 +249,7 @@ const sidebars: SidebarsConfig = {
                     'user/Reference/Observability/Metrics/MySQL-and-MariaDB',
                     'user/Reference/Observability/Metrics/PostgreSQL',
                     'user/Reference/Observability/Metrics/Redis',
+                    'user/Reference/Observability/Metrics/Valkey',
                     'user/Reference/Observability/Metrics/System',
                   ],
                 },
@@ -314,6 +315,15 @@ const sidebars: SidebarsConfig = {
                     'user/Reference/Products/Redis/backup',
                     'user/Reference/Products/Redis/configuration',
                     'user/Reference/Products/Redis/User-Management',
+                  ],
+                },
+                {
+                  type: 'category',
+                  label: 'Valkey',
+                  items: [
+                    'user/Reference/Products/Valkey/backup',
+                    'user/Reference/Products/Valkey/configuration',
+                    'user/Reference/Products/Valkey/User-Management',
                   ],
                 },
               ],

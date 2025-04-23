@@ -81,12 +81,6 @@ Please have a look at the helm values and minimal recommended values for CCX
 
 
 
-## Architecture Overview
-
-A K8s Control plane responsible for the life-cycle of the datastores, backend databases and tools responsible for metadata such as users, datastores, and other resources.
-
-![img](../images/ccx-architecture.png)
-
 ## Kubernetes cluster
 
 ### K8s Control Plane Requirements
