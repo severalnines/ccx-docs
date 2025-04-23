@@ -3,9 +3,9 @@
 ![img](../images/deploy.png)
 
 ## MySQL or MariaDB
-MySQL 8.0 is recommended for general purpose. 
-MariaDB is recommended if you are migrating from an existing MariaDB system.
-Moreover, MySQL 8.0 offers a more sophisticated privilege system which makes database administration easier.
+MySQL 8.4 is recommended if you are migrating from an existing MySQL system.
+MariaDB 11.4 is recommended if you are migrating from an existing MariaDB system.
+MySQL 8.4 offers a more sophisticated privilege system which makes database administration easier, wheres 
 
 ### High-availability
 MySQL and MariaDB offers two configurations for High-availability.
@@ -27,12 +27,22 @@ High-availability is facilitated with PostgreSQL streaming replication
 ### Scaling
 PostgreSQL can be created with one node (no high-availability) but can later be scaled with read-replicas.
 
-## Redis
-Redis is an in-memory data structure store.
+## Cache22 (aka Redis)
+*deprecated* 
+
+Cache22 is an in-memory data structure store.
 ### High-availability
 High-availability is facilitated with Redis replication and Redis Sentinels.
 ### Scaling
 Redis can be created with one node (no high-availability) but can later be scaled with read-replicas.
+
+
+## Valkey
+Valkey is an in-memory data structure store.
+### High-availability
+High-availability is facilitated with Valkey replication and Valkey Sentinels.
+### Scaling
+Valkey can be created with one node (no high-availability) but can later be scaled with read-replicas.
 
 ## MS SQLServer
 Microsoft SQLServer 2022. Special license restrictions apply and this option may not be available in all CCX implementations.
