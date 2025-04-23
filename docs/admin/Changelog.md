@@ -11,8 +11,43 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.53.0
 
-## Release Notes - CCX - v1.52.0
+### New Features
+- **Valkey support**  
+- **MySQL 8.4 replication** (Percona Server 8.4)  
+- **Point‑in‑time (binlog) backups uploaded to s3**
+- **Bulk firewall edits** – paste comma/semicolon‑separated IP/CIDR lists  
+- **Automatic CMON trial licence** fetched on first‑user signup  
+- Admin CSV export now includes **Datastore UUID**
+- Default parameter list refreshed (`collation_server = utf8mb4_0900_ai_ci`)  
+
+### Bugs
+- “Last used” for OAuth credentials updates correctly  
+- OpenStack auto‑scaled volumes keep original type  
+- Removed phantom nodes & incorrect DNS after DR  
+- Datastore list no longer disappears on API hiccups  
+- Fixed: Monitoring tab flicker, Cache22 backup‑method label, Valkey parameter picker, CPU graph “singularities”
+- Closed security findings
+- Multiple panic fixes in **state‑worker**, **notification‑service**, **stores**  
+
+### Improvements
+- CPU charts normalised to **0–100 %**  
+- RAM chart direction fixed (higher = more used)  
+- Disk‑I/O utilisation units corrected  
+- Valkey dashboards added 
+- Redis Sentinel & bus ports (26379/16379) no longer exposed  
+- Exporters can serve over TLS; helper scripts added  
+- Axios upgraded to 1.7.3 (CVE‑2024‑45832)  
+- **Vault removed** – code, flags, Helm templates & migration jobs deleted (K8s secrets since v1.49)  
+
+
+## Release Notes - CCX - v1.52.3
+
+### CMON bugs
+- fixed race condition that may not show all clusters deployed
+
+## Release Notes - CCX - v1.52.2
 
 ### New Features
 
@@ -27,9 +62,6 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 
 - **Collect MySQL Slow Query Logs**  
   Integrates slow query log collection into Fluent Bit for easier troubleshooting and analysis.
-
-- **Helm Preflight Checks**  
-  Adds hooks and checks to fail fast if certain credentials or configurations are invalid, providing clearer error messages.
 
 - **Backup Source Selection (Primary or Replica)**  
   Lets users choose whether backups run on the primary node or a replica for MySQL, MariaDB, and PostgreSQL.
