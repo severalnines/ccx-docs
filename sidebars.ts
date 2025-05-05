@@ -291,6 +291,7 @@ const sidebars: SidebarsConfig = {
                     'user/Reference/Products/MySQL/restore',
                     'user/Reference/Products/MySQL/configuration',
                     'user/Reference/Products/MySQL/Importing-Data',
+                    'user/Reference/Products/MySQL/Importing-Data-from-AWS-RDS',
                     'user/Reference/Products/MySQL/limitations',
                     'user/Reference/Products/MySQL/TLS-Connection',
                     'user/Reference/Products/MySQL/User-Management',
