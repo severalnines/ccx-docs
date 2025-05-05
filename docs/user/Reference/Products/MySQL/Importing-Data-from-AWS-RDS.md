@@ -74,6 +74,9 @@ mysqldump -uadmin -p   -hdatabase-1.cluster-cqc4xehkpymd.eu-north-1.rds.amazonaw
 ```
 Wait for it to complete.
 
+## Unblock Writes to the RDS Writer Instance
+At this stage it is safe to enable application writes again.
+
 ## Load the dump on the replica
 
 ### Create a replication filter on the replica
@@ -95,8 +98,6 @@ sed 's/\sDEFINER=`[^`]*`@`[^`]*`//g' -i dump.sql
 ```
 cat dump.sql | mysql -uccxadmin -p -hCCX_PRIMARY
 ```
-## Unblock Writes to the RDS Writer Instance
-At this stage it is safe to enable application writes again.
 
 ## Connect the CCX Primary to the RDS Writer Instance
 The CCX Primary must be instructed to replicate from the RDS Writer. We have from the earlier step binlog file and position:
