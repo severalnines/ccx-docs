@@ -26,11 +26,11 @@ If you dont want to setup replication, then you can chose to only apply the sect
 
 ## Preparations
 * Create a datastore on CCX. Please note that you can also replicate from MySQL 8.0 to MySQL 8.4.
-* Get the endpoint of the CCX Primary (under the Nodes section).  ![sd](../../../images/ccx-primary.png) . Then endpoint in our case is `db-9bq15.471ed518-8524-4f37-a3b2-136c68ed3aa6.user-ccx.s9s-dev.net`.
+* Get the endpoint of the CCX Primary (under the Nodes section).  ![sd](../../../images/ccx-primary.png) . Then endpoint in our case is `db-9bq15.471ed518-8524-4f37-a3b2-136c68ed3aa6.user-ccx.mydbservice.net`.
 * Get the endpoint of the RDS Writer. In this example, the endpoint is `database-1.cluster-cqc4xehkpymd.eu-north-1.rds.amazonaws.com`
 * Update the Security group on AWS RDS to allow the IP address of the CCX Primary to connect. To get the IP address of the CCX Primary you do:
         ```
-        dig db-9bq15.471ed518-8524-4f37-a3b2-136c68ed3aa6.user-ccx.s9s-dev.net
+        dig db-9bq15.471ed518-8524-4f37-a3b2-136c68ed3aa6.user-ccx.mydbservice.net
 * Ensure you can connect a mysql client to both the CCX Primary and the RDS Writer.        ```
 
 ## Create a replication user on the RDS Writer instance:
@@ -50,7 +50,8 @@ Unfortunately, AWS RDS blocks operations like `FLUSH TABLES WITH READ LOCK`.
 ## Create a consistent dump
 Assuming now that writes are blocked on the RDS Writer Instance, you must now get the binary log file and the position of the RDS Writer instancde.
 
-### Get start position
+### Get the replication start position
+The start position (binary log file name, and position) is used to tell the replica where to start replicating data from. 
 ```
 MySQL 8.0: SHOW MASTER STATUS\G 
 MySQL 8.4 and later: SHOW BINARY LOG STATUS\G
