@@ -16,10 +16,10 @@ The parameter settings are applied on scaling and during upgrads (Life-cycle man
 :::danger
 It is not recommended to update database configuration parameters manually, using S9S CLI or ClusterControl UI. The changes will be overwritten by the the latest saved settings when adding a node (either as part of Scaling, during Lifecycle management, or during automatic repair).
 :::
- 
+
 ## Non-supported parameters and limitations
 
-### MySQL/Mariadb
+### MySQL/MariaDB
 
 - max_connections
 - caches such as innodb_buffer_pool settings, table open caches, tmp table size.

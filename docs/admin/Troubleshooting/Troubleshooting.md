@@ -73,31 +73,45 @@ This command deletes all associated resources, including:
 :::
 
 ## Cluster in Readonly State
+
 CCX will fix this issue automatically in version 1.51+.
+
 For prior versions, navigate to the CC UI:
+
 - **Clusters** -> **Select Datastore ID** -> **Nodes** -> **Actions** -> **Toggle Readonly to disable**
+
 Disable readonly for the nodes that are labeled Readonly.
 
 ## Disk Autoscaling Issues
+
 Disk autoscaling is enabled by default in CCX. The system will automatically increase the storage size by 20% when the used space exceeds 75% of the allocated storage
-##### CCX UI Configuration:
+
+### CCX UI Configuration:
+
 Navigate to Datastore UUID -> Settings -> Auto scaling storage size and ensure the toggle is set to ON.
 
-##### Monitoring Alert:
+### Monitoring Alert:
+
 To check alerts for disk space scaling, run the following command:
+
 ```bash
 kubectl port-forward alertmanager-0 19093:9093
 ```
 Then, open your browser and go to http://localhost:19093.
+
 Search for the alert alertname="HostAutoScaleDiskSpaceReached" by choosing the receiver as `Receiver: webhook-alerts`.
 
 ## Troubleshooting Datastore Backups Failing
+
 To debug failed datastore backups:
-#### Method 1: Using CC UI
+
+### Method 1: Using CC UI
+
 1. Log in to the CC UI at the URL specified in the `ccFQDN` field of your Helm values.
 2. Navigate to:
     - **Clusters** -> **Select Datastore ID** -> **Backups** -> **Actions** -> **Logs**
-#### Method 2: Using CLI Commands
+
+### Method 2: Using CLI Commands
 Use the following commands inside the `cmon-master` container:
 ```bash
 # Access the cmon-master container

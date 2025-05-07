@@ -1,7 +1,10 @@
 # JWT Authentication
+
 This section describes how to implement JWT Authentication. The JWT Authentication allows integrating a Service Portal with CCX.
 ![img](../images/JWT.png)
+
 ### Users and Sessions Managed Using JWTs
+
 The picture below shows the authentication flow:
 
 ![img](../images/JWTFLOW.png)
@@ -21,7 +24,9 @@ ssh-keygen -e -f ccx.key -m PEM > ccx.key.pub
 ```
 
 #### Public key configuration in CCX Helm values:
-you need to set the configuration parameters in `ccx.services.auth` in ccx values.yaml
+
+You need to set the configuration parameters in `ccx.services.auth` in ccx values.yaml
+
 ```
       env:
         JWT_PUBLIC_KEY_ID: 'EXAMPLE_CSP'
@@ -34,11 +39,11 @@ you need to set the configuration parameters in `ccx.services.auth` in ccx value
 
 #### JWT Environment Variables
 
-| Environment Variable     | Description                                               |
-| ------------------------ | --------------------------------------------------------- |
-| **JWT_PUBLIC_KEY_ID**    | The identifier of the provider, e.g., "EXAMPLE_CSP".      |
-| **JWT_PUBLIC_KEY_PEM**   | The public key in PEM format (contents of `ccx.key.pub`). |
-| **JWT_PUBLIC_KEY_PKIX**  | Should be "1" if the key is in PKIX format (optional).    |
+| Environment Variable    | Description                                               |
+| ----------------------- | --------------------------------------------------------- |
+| **JWT_PUBLIC_KEY_ID**   | The identifier of the provider, e.g., "EXAMPLE_CSP".      |
+| **JWT_PUBLIC_KEY_PEM**  | The public key in PEM format (contents of `ccx.key.pub`). |
+| **JWT_PUBLIC_KEY_PKIX** | Should be "1" if the key is in PKIX format (optional).    |
 
 ---
 
@@ -47,9 +52,10 @@ you need to set the configuration parameters in `ccx.services.auth` in ccx value
 There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 
 #### `POST /jwt-login`
+
 - **Description**: A new session is created. If the user doesn’t exist in the CCX database, a new user is created.
 - **Response**: Returns `200 OK` on success.
-  
+
 **Request (JSON):**
 
 ```json
@@ -70,14 +76,17 @@ There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 ```
 
 #### `GET /jwt-login`
+
 - **Description**: Creates a session for the provided user. The user must exist in the CCX database.
 - **Response**: Returns `303 See other` on success. Redirects the user to the URL provided in the `LOGIN_REDIRECT_URL` environment variable in `ccx-auth-service`.
 
 **Query Parameters:**
+
 - `issuer` — the issuer of the JWT, e.g., "CSPNAME".
 - `jwt` — the JWT.
 
 #### `POST /jwt-logout`
+
 - **Description**: Logs out the user. The associated session is deleted.
 - **Response**: Returns `204 No content` on success.
 
@@ -91,6 +100,7 @@ There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 ```
 
 #### `POST /jwt-check`
+
 - **Description**: Verifies the provided JWT. Returns its claims and the issuance and expiration dates.
 - **Response**: Returns `200 OK` on success.
 
@@ -116,8 +126,10 @@ There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 ---
 
 ### Examples of JWT Generation
+
 Run the code by setting the params such as my.ccx.url, Example_CSP, UserID and Private Key
-#### **Go Example:**
+
+#### Go
 
 ```go
 package main
@@ -212,7 +224,7 @@ xxx
 )
 ```
 
-#### **JavaScript (Node.js) Example:**
+#### JavaScript (Node.js)
 
 ```javascript
 const jwt = require("jsonwebtoken");
@@ -222,23 +234,28 @@ const url = require("url");
 const privateKey = fs.readFileSync("./ccx.key");
 
 function createJwt(issuer, subject, exp, key) {
-    const iat = Math.floor(Date.now() / 1000);
+  const iat = Math.floor(Date.now() / 1000);
 
-    return jwt.sign({
-        iss: issuer,
-        sub: subject,
-        jti: Math.random().toString(36).substring(7),
-        iat: iat,
-        exp: iat + (exp * 60),
-    }, key, { algorithm: "RS256" });
+  return jwt.sign(
+    {
+      iss: issuer,
+      sub: subject,
+      jti: Math.random().toString(36).substring(7),
+      iat: iat,
+      exp: iat + exp * 60,
+    },
+    key,
+    { algorithm: "RS256" }
+  );
 }
 
 function example() {
-    const token = createJwt("<mycloud>", "<my-customer-id>", 15 * 60, privateKey);
-    const r = new url.URL('https://<my.ccx.url>/api/auth/jwt-login');
-    r.searchParams.set("jwt", token);
-    r.searchParams.set("issuer", "<mycloud>");
-    console.log(r.href); // you can redirect the user to this URL
+  const token = createJwt("<mycloud>", "<my-customer-id>", 15 * 60, privateKey);
+  const r = new url.URL("https://<my.ccx.url>/api/auth/jwt-login");
+  r.searchParams.set("jwt", token);
+  r.searchParams.set("issuer", "<mycloud>");
+  console.log(r.href); // you can redirect the user to this URL
 }
 
 example();
+```

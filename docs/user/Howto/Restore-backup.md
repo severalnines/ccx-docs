@@ -18,7 +18,6 @@ In the **Backup** tab, users can view all the backups that have been created. Th
 
 ![Backup table](../images/restore_backup.png)
 
-
 Users can manage their backups using the "Actions" menu, where options such as restoring a backup are available.
 
 ## Backup Schedules View
@@ -43,15 +42,17 @@ The schedule table shows the details of each scheduled backup, including:
 ### Managing Backup Schedules
 
 The **Action** menu next to each schedule allows users to:
+
 - **Pause**: Temporarily stop the backup schedule.
 - **Edit**: Adjust the backup schedule settings, such as its frequency or time.
 
 ### Editing a Backup Schedule
 
 When editing a backup schedule, users can specify:
+
 - **Frequency**: Choose between `Hourly` or `Daily` backups.
 - **Time**: Set the exact time when the backup will start (e.g., 05:00 UTC).
-  
+
 For example, in the **Edit Full Backup Schedule** dialog, you can configure a full backup to run every day at a specified time. Adjust the settings as needed and click **Save** to apply the changes.
 
 ### Example Backup Schedule Edit Dialog:
@@ -60,8 +61,11 @@ For example, in the **Edit Full Backup Schedule** dialog, you can configure a fu
 
 This dialog allows you to easily adjust backup intervals, ensuring that backups align with your operational needs.
 
-### Note:
+:::note
+
 Editing or pausing a schedule will not affect the current backups already created. The changes will only apply to future backups.
+
+:::
 
 ## Restore Backup
 
@@ -74,7 +78,7 @@ To restore a backup, navigate to the **Backup** tab, find the desired backup, an
 ### Restore Settings
 
 - **Use Point in Time Recovery**: Option to enable point-in-time recovery for finer control over the restore process. PITR is only supported by Postgres, MySQL/MariaDb, and MS SQLServer.
-  
+
 By default, this option is turned off, allowing a full restoration from the selected backup.
 
 ### Confirmation
