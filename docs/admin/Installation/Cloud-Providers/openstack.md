@@ -37,9 +37,9 @@ Create a security group named ccx-common manually and this name needs to be upda
 `ccx.services.deployer.config.openstack_vendors.MYCLOUD.regions.REGIONNAME.secgrp_name`
 The Security group firewall rule should include a rule to allow CCX ip(CIDR address) to connect to it.
 
-# Configuration
+## Configuration
 
-#### CCX OpenStack Configuration
+### CCX OpenStack Configuration
 
 To configure OpenStack as a cloud provider in CCX, we need to define the provider in the ccx-values-config.yaml file under the ccx.config.clouds section. Here’s an example configuration:
 
@@ -90,7 +90,7 @@ To configure OpenStack as a cloud provider in CCX, we need to define the provide
           name: London-Zone1 # availability zone name as shown to the user.
 ```
 
-## Deployer Configuration (ccx-values-deployer.yaml)
+### Deployer Configuration (ccx-values-deployer.yaml)
 
 To deploy CCX using OpenStack, the OpenStack-specific configurations must be added to the ccx.services.deployer.config section. Here's an example for the openstack_vendors section:
 
@@ -181,7 +181,7 @@ openstack_vendors:
            to_port: 65535
 ```
 
-#### OpenStack Credentials
+## OpenStack Credentials
 
 The credentials required for OpenStack API access should be stored in Kubernetes secrets. The required values are
 
@@ -217,7 +217,7 @@ cloudSecrets:
   - openstack
 ```
 
-#### S3 Backup Storage
+## S3 Backup Storage
 
 For OpenStack S3-compatible backup, create a Kubernetes secret with S3 credentials and configuration:
 
