@@ -295,7 +295,7 @@ const sidebars: SidebarsConfig = {
                     'user/Reference/Products/MySQL/Importing-Data-from-GCP',
                     'user/Reference/Products/MySQL/limitations',
                     'user/Reference/Products/MySQL/TLS-Connection',
-                    'user/Reference/Products/MySQL/User-Management',
+                    'user/Reference/Products/MySQL/User-Management'
                   ],
                 },
                 {
