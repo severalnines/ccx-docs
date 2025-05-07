@@ -4,28 +4,29 @@
 CCX supports Google Cloud Platform (GCP) as a cloud provider.
 
 It requires the following things enabled on the GCP side:
+
 - A GCP project must be created.
 - A service account must be created with the necessary permissions. The list of permissions is as follows:
-```
-compute.disks.create
-compute.disks.delete
-compute.disks.get
-compute.disks.list
-compute.disks.use
-compute.instances.create
-compute.instances.delete
-compute.instances.get
-compute.instances.list
-compute.networks.create
-compute.networks.delete
-compute.networks.get
-compute.networks.list
-compute.networks.use
-compute.zones.get
-compute.zones.list
-compute.operations.get
-compute.operations.list
-```
+    ```
+    compute.disks.create
+    compute.disks.delete
+    compute.disks.get
+    compute.disks.list
+    compute.disks.use
+    compute.instances.create
+    compute.instances.delete
+    compute.instances.get
+    compute.instances.list
+    compute.networks.create
+    compute.networks.delete
+    compute.networks.get
+    compute.networks.list
+    compute.networks.use
+    compute.zones.get
+    compute.zones.list
+    compute.operations.get
+    compute.operations.list
+    ```
 - A VPC network may be created for CCX, where CCX will create necessary rules. If no VPC network is created, CCX will use `default`.
 - Cloud Storage Service account HMAC key must be created in `Cloud Storage > Settings > Interoperability`.
 

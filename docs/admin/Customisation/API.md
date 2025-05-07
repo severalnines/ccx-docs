@@ -1,7 +1,9 @@
 # API
+
 CCX has an API that can be used to access its features.
 
 This includes:
+
 - Provisioning stores: Create, delete, add, remove, repair and scaling.
 - Store information: Get a store and its nodes and its active jobs.
 - Firewall rules: List, add and remove CIDR rules that can access the store.
@@ -45,83 +47,85 @@ Content-Type: application/json
 ```
 
 **Response Headers:**
+
 ```
 Set-Cookie: ccx-session=xxx; Path=/; Domain=xxx; Max-Age=31536000; HttpOnly; Secure
 ```
 
 **Response Body:**
+
 ```json
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "type": "object",
-    "properties": {
-        "id": {
-            "type": "string",
-            "description": "The unique identifier of the user."
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The unique identifier of the user."
+    },
+    "login": {
+      "type": "string",
+      "description": "The login username of the user."
+    },
+    "firstName": {
+      "type": "string",
+      "description": "The first name of the user."
+    },
+    "lastName": {
+      "type": "string",
+      "description": "The last name of the user."
+    },
+    "termsAccepted": {
+      "type": "object",
+      "properties": {
+        "TermsAndConditionsV1": {
+          "type": "boolean",
+          "description": "Indicates whether the user has accepted the terms and conditions."
         },
-        "login": {
-            "type": "string",
-            "description": "The login username of the user."
-        },
-        "firstName": {
-            "type": "string",
-            "description": "The first name of the user."
-        },
-        "lastName": {
-            "type": "string",
-            "description": "The last name of the user."
-        },
-        "termsAccepted": {
-            "type": "object",
-            "properties": {
-                "TermsAndConditionsV1": {
-                    "type": "boolean",
-                    "description": "Indicates whether the user has accepted the terms and conditions."
-                },
-                "PrivacyPolicyV1": {
-                    "type": "boolean",
-                    "description": "Indicates whether the user has accepted the privacy policy."
-                }
-            },
-            "description": "The terms and conditions and privacy policy acceptance status of the user."
-        },
-        "origin": {
-            "type": "string",
-            "description": "The origin of the user."
-        },
-        "createdAt": {
-            "type": "object",
-            "properties": {
-                "seconds": {
-                    "type": "integer",
-                    "description": "The number of seconds since the epoch."
-                },
-                "nanos": {
-                    "type": "integer",
-                    "description": "The number of nanoseconds."
-                }
-            },
-            "description": "The creation timestamp of the user."
-        },
-        "updatedAt": {
-            "type": "object",
-            "properties": {
-                "seconds": {
-                    "type": "integer",
-                    "description": "The number of seconds since the epoch."
-                },
-                "nanos": {
-                    "type": "integer",
-                    "description": "The number of nanoseconds."
-                }
-            },
-            "description": "The last update timestamp of the user."
-        },
-        "additionalFields": {
-            "type": "object",
-            "description": "Additional fields for the user."
+        "PrivacyPolicyV1": {
+          "type": "boolean",
+          "description": "Indicates whether the user has accepted the privacy policy."
         }
+      },
+      "description": "The terms and conditions and privacy policy acceptance status of the user."
+    },
+    "origin": {
+      "type": "string",
+      "description": "The origin of the user."
+    },
+    "createdAt": {
+      "type": "object",
+      "properties": {
+        "seconds": {
+          "type": "integer",
+          "description": "The number of seconds since the epoch."
+        },
+        "nanos": {
+          "type": "integer",
+          "description": "The number of nanoseconds."
+        }
+      },
+      "description": "The creation timestamp of the user."
+    },
+    "updatedAt": {
+      "type": "object",
+      "properties": {
+        "seconds": {
+          "type": "integer",
+          "description": "The number of seconds since the epoch."
+        },
+        "nanos": {
+          "type": "integer",
+          "description": "The number of nanoseconds."
+        }
+      },
+      "description": "The last update timestamp of the user."
+    },
+    "additionalFields": {
+      "type": "object",
+      "description": "Additional fields for the user."
     }
+  }
 }
 ```
 
@@ -129,7 +133,7 @@ Set-Cookie: ccx-session=xxx; Path=/; Domain=xxx; Max-Age=31536000; HttpOnly; Sec
 
 A bearer token can be used to authenticate with the API.
 
-A `client_id` and `client_secret` pair can be generated by users in the **Account > Authorization** section of the UI. 
+A `client_id` and `client_secret` pair can be generated by users in the **Account > Authorization** section of the UI.
 An expiry date must be set on creation. The token can be revoked at any time.
 
 Tokens are useful for automation and can be used in scripts where the user does not want to store their password.
@@ -145,12 +149,13 @@ client_id={{client_id}}&client_secret={{client_secret}}&grant_type=client_creden
 ```
 
 **Response Body:**
+
 ```json
 {
-    "access_token": "xxx",
-    "token_type": "Bearer",
-    "refresh_token": "xxx",
-    "expires_in": 3600
+  "access_token": "xxx",
+  "token_type": "Bearer",
+  "refresh_token": "xxx",
+  "expires_in": 3600
 }
 ```
 
@@ -159,4 +164,4 @@ Once a token is obtained, it can be used to authenticate with the API, for examp
 ```http
 GET /api/auth/check
 Authorization: Bearer {{token}}
-``` 
+```

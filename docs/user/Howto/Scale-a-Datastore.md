@@ -1,14 +1,16 @@
 # Scaling a Datastore
 
 This section explains how to scale a datastore, including:
-* Scaling volumes
-* Scaling nodes (out, in, up and down)
+
+- Scaling volumes
+- Scaling nodes (out, in, up and down)
 
 ## Scaling a Datastore
 
 A datastore can be scaled out to meet growing demands. Scaling out involves adding:
-* One or more replica nodes (for primary/replica configurations). This is useful when you need to scale up and want the primary node to have more resources, such as additional CPU cores and RAM.
-* One or more primary nodes (for multi-primary configurations). In multi-primary setups, scaling up or down must maintain an odd number of nodes to preserve quorum and the consensus protocol required by the database.
+
+- One or more replica nodes (for primary/replica configurations). This is useful when you need to scale up and want the primary node to have more resources, such as additional CPU cores and RAM.
+- One or more primary nodes (for multi-primary configurations). In multi-primary setups, scaling up or down must maintain an odd number of nodes to preserve quorum and the consensus protocol required by the database.
 
 The instance type of the new nodes may differ from the current ones.
 

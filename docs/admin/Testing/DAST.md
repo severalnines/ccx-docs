@@ -34,7 +34,7 @@ Things to make a note of:
 Next, we head over to "Actions," and click `ZAP-VULNERABILITY-SCAN` in github actions.
 After clicking build, it produces report.
 
-###### Download the Artifacts (Reports)
+### Download the Artifacts (Reports)
 
 The OWASP ZAP scan produces a "zap_scan" zip file, containing all security assessment reports. Click it to download and see the report.
 
@@ -100,5 +100,5 @@ jobs:
 ```
 
 :::note
-you need to replace the `<>` placeholder values with your values.
+You need to replace the `<>` placeholder values with your values.
 :::
