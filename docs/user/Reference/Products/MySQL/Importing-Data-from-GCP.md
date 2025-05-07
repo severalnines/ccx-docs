@@ -77,7 +77,7 @@ START REPLICA;
 ```
 followed by:
 ```
-SHOW REPLICA STATUS;
+SHOW REPLICA STATUS\G
 ```
 And verify that:
 ```
@@ -87,11 +87,17 @@ And verify that:
              Replica_SQL_Running: Yes
 ```	     
 ### When the migration is ready
+At some stage you will need to point your applications to the new datastore. Ensure:
+* that there are no appliecation writes to the RDS Writer.
+* the CCX Primary has applied all data (use `SHOW REPLICA STATUS \G` , check the )
+* Connect the applications to the new datastore.
+Then you can clean up the replication link on the CCX Primary:
 ```
 STOP REPLICA;
 RESET REPLICA ALL;
 CHANGE REPLICATION FILTER REPLICATE_IGNORE_DB=();
 ```
+
 
 ### Troubleshooting
 If the replication fails to start then verify:

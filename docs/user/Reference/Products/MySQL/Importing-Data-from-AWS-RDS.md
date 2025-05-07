@@ -126,6 +126,10 @@ And verify that:
              Replica_SQL_Running: Yes
 ```	     
 ### When the migration is ready
+At some stage you will need to point your applications to the new datastore. Ensure:
+* Prevent writes to the RDS Writer.
+* Make sure the CCX Primary has applied all data (use `SHOW REPLICA STATUS`)
+* Connect the applications to the new datastore.
 ```
 STOP REPLICA;
 RESET REPLICA ALL;
