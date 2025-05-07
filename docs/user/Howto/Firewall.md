@@ -34,23 +34,24 @@ After filling out the details, click **Create** to add the trusted source.
 
 ### Managing Open Ports for Each Trusted Source.
 
-**TLS access to exporter metrics are described in this [section](docs/user/Howto/TLS-for-Metrics.md).**
+**TLS access to exporter metrics are described in this [section](TLS-for-Metrics.md).**
 
 Each trusted source can have specific ports opened for services. To manage the ports:
 
 1. **Expand a Trusted Source:**
 
-   - Click the down arrow beside the source IP to view the open ports.
+    - Click the down arrow beside the source IP to view the open ports.
 
 2. **Port Configuration:**
 
-   - **Port Number:** The number of the open port (e.g., `9100`, `5432`).
-   - **Port Name:** The name of the service associated with the port (e.g., `node_exporter`, `postgres_exporter`, `service`).
+    - **Port Number:** The number of the open port (e.g., `9100`, `5432`).
+    - **Port Name:** The name of the service associated with the port (e.g., `node_exporter`, `postgres_exporter`, `service`).
 
    The `service` indicates the listening port of the database server. The ports for the `node_exporter` and `db_exporter` allows you to tap in to observability metrics for the database nodes.
 
 3. **Actions:**
-   - **Delete a Port:** Remove a port by clicking the red trash icon next to the port number.
+
+    - **Delete a Port:** Remove a port by clicking the red trash icon next to the port number.
 
 ### Example Ports:
 
