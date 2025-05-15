@@ -12,7 +12,7 @@ E.g, if you are on version 1.45 and the current version is 1.49, you need to app
 Update the helm chart:
 
 ```bash
-helm update
+helm repo update
 ```
 
 And then perform the upgrade using:
