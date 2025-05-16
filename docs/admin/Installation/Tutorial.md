@@ -169,6 +169,7 @@ kubectl create secret generic aws \
 ```
 
 ## Install CCX
+Now it is finally time to install CCX:
 
 ```
 helm upgrade --install ccx s9s/ccx --debug --wait --set ccxFQDN=dbaas.example.com --set 'ccx.cloudSecrets[0]=aws' --set 'ccx.cidr=146.190.177.145/32'
@@ -179,6 +180,10 @@ Wait for it to finish, and check the pods are `RUNNING`:
 ```
 kubectl get pods -n ccx
 ```
+
+## CCX Web UI
+
+Open `https://dbaas.example.com` in a web browser, and create a new user. Please not that email notfications are not yet configured. You can just press the `Back` button after the signup.
 
 ## Next Steps
 
