@@ -172,7 +172,7 @@ kubectl create secret generic aws \
 Now it is finally time to install CCX:
 
 ```
-helm upgrade --install ccx s9s/ccx --debug --wait --set ccxFQDN=dbaas.example.com --set 'ccx.cloudSecrets[0]=aws' --set 'ccx.cidr=146.190.177.145/32'
+helm upgrade --install ccx s9s/ccx --debug --wait --set ccxFQDN=dbaas.example.com --set 'ccx.cloudSecrets[0]=aws' --set 'ccx.cidr=0.0.0.0/0'
 ```
 
 Wait for it to finish, and check the pods are `RUNNING`: 
