@@ -13,7 +13,8 @@ Our platform is compatible with a diverse array of database types, including:
 - MariaDB
 - MySQL
 - PostgreSQL
-- Redis
+- Cache 22 (deprecated and will be removed in a future release. It is replaced with Valkey)
+- Valkey 
 - Microsoft SQL Server
 
 
@@ -71,7 +72,7 @@ Each datastore has different features and are suitable for different use cases.
 Below is a feature matrix showing what operational feature is supported on each datastore:
 
 
-|           | MySQL | MariaDb | PostgreSQL | Redis | MS SQLServer<br/> (single server) |  MS SQLServer<br/> (Always-on, std license)|
+|           | MySQL | MariaDb | PostgreSQL | Valkey/Cache22 | MS SQLServer<br/> (single server) |  MS SQLServer<br/> (Always-on, std license)|
 |-----------|:-----:|:-------:|:----------:|:-----:|:---------:|:---------:|
 |Scale nodes| Yes | Yes | Yes | Yes | No | No |
 |Scale volume| Yes | Yes | Yes | Yes | Yes | Yes |
