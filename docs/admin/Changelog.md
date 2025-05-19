@@ -11,6 +11,10 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.53.2
+### CMON Bugs
+- additional connection retries during in failover
+
 ## Release Notes - CCX - v1.53.0
 :::info
 Breaking change: Redis is no longer supported on Ubuntu 20.04 — upgrade to Ubuntu 22.04 LTS.
