@@ -183,7 +183,7 @@ kubectl get pods -n ccx
 
 ## CCX Web UI
 
-Open `https://dbaas.example.com` in a web browser, and press the Sign up link to create a new user. Please not that email notfications are not yet configured. You can just press the `Back` button after the signup.
+Open `https://dbaas.example.com` in a web browser, and press the Sign up link to create a new user. Please note that email notfications are not yet configured. You can just press the `Back` button after the signup.
 
 ## Next Steps
 
