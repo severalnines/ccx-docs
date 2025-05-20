@@ -14,8 +14,11 @@ With Parameter Groups, users can:
 - Automatically synchronize parameter changes with associated datastores.
 
 :::note
+
 A datastore can only be associated with one parameter group at a time. Changes to parameters are automatically propagated to all associated datastores.
+
 :::
+
 ---
 
 
