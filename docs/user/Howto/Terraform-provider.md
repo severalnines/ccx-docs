@@ -8,12 +8,11 @@ You can generate these credentials on the Account page Authorization tab.
 And then you will see:
 ![Created creds](../images/createdcreds.png)
 
-## Terraform provider
+## Requirement
 
-### Requirement
 - Terraform 0.13.x or later
 
-### Quick Start
+## Quick Start
 
 1. Create Oauth2 credentials.
 2. Create a `terraform.tf` 
@@ -33,11 +32,12 @@ provider "ccx" {
     client_id = `client_id`
     client_secret = `client_secret`
 }
+```
 
 Now, you can create a datastore using the following terraform code.
 Here is an example of a parameter group:
 
-``` terraform
+```terraform
 resource "ccx_parameter_group" "asteroid" {
     name = "asteroid"
     database_vendor = "mariadb"
@@ -50,8 +50,10 @@ resource "ccx_parameter_group" "asteroid" {
     }
 }
 ```
+
 This group can then be associated with a datastore as follows:
-``` terraform
+
+```terraform
 resource "ccx_datastore" "luna_mysql" {
 	name           = "luna_mysql"
 	size           = 3
@@ -70,7 +72,34 @@ Replace CCX_CLOUD, CCX-REGION-1, MEGALARGE and, MEGAFAST,  with actual values de
 
 For more information and examples, visit the [terraform-provider-ccx](https://github.com/severalnines/terraform-provider-ccx) github page.
 
-### Features
+## More on parameter groups
+Only one parameter group can be used at any give time by a datastore.
+Also, you cannot change an existing parameter group from terraform.
+If you want to change an existing parameter group, then you need to create a new parameter group:
+```terraform
+resource "ccx_parameter_group" "asteroid2" {
+    name = "asteroid2"
+    database_vendor = "mariadb"
+    database_version = "10.11"
+    database_type = "galera"
+
+    parameters = {
+      table_open_cache = 7000
+      sql_mode = "NO_ENGINE_SUBSTITUTION"
+    }
+}
+```
+And then reference it in:
+```terraform
+resource "ccx_datastore" "luna_mysql" {
+	name           = "luna_mysql"
+  ... <same as before>
+	parameter_group = ccx_parameter_group.asteroid2.id
+}
+```
+Now you can apply this to terraform. Always test config changes first on a test system to be sure the config change works as expected.
+
+## Features
 The following settings can be updated:
 - Add and remove nodes
 - Volume type
