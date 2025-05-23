@@ -198,6 +198,13 @@ Verify that the secrets are created:
 kubectl get secrets -n ccx
 ```
 
+:::important
+The secrets contains a number of fields starting with  `MYCLOUD`.
+This identifier `MYCLOUD`, must match the name `- code: mycloud` and `mycloud:` 
+
+Thus if you have a cloud called `grok` then replace the `MYCLOUD` with `grok`  in the `openstack-secrets.yaml` and `openstack-s3-secrets.yaml` files and make sure you use `grok` in the `minimal-values.yaml` file referenced later in this tutorial.
+:::
+
 ## Prepare the Openstack values file and Openstack
 We will use a [minimal Openstack configuration](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/minimal-values-openstack.yaml) as the template.
 At this stage you must have the following information/resources created in your Openstack project:
@@ -210,6 +217,8 @@ At this stage you must have the following information/resources created in your 
 - volume type (a code for the volume type you will use, e.g `fastdisk`).
 - region, e.g you need to know the name of the region, e.g `nova` or `sto1`.
 - A security group called `ccx-common` and must allow all TCP traffic from all k8s nodes where ccx is running. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
+
+---
 ![CCX architecture](../images/ccx-common-sec-group.png)
 
 
@@ -230,6 +239,7 @@ ccx:
   cidr: 0.0.0.0/0
   cloudSecrets:
     - openstack  # This secret must exist in Kubernetes. See 'secrets-template.yaml' for reference.
+    - openstack-s3
   config:
     clouds:
       - code: mycloud  # Unique code for your cloud provider
@@ -265,7 +275,7 @@ ccx:
             country_code: SE
             continent_code: EU
             availability_zones:
-              - code: nove
+              - code: nova
                 name: az1
   services:
     deployer:
@@ -299,7 +309,6 @@ kubectl get pods -n ccx
 ```
 
 ## CCX Web UI
-
 
 Open `https://ccx.example.com/auth/register?from=ccx` in a web browser and register a new user. Please note that email notfications are not yet configured. You can just press the `Back` button after the signup.
 
