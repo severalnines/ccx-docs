@@ -300,7 +300,8 @@ kubectl get pods -n ccx
 
 ## CCX Web UI
 
-Open `https://ccx.example.com` in a web browser, and press the Sign up link to create a new user. Please not that email notfications are not yet configured. You can just press the `Back` button after the signup.
+
+Open `https://ccx.example.com/auth/register?from=ccx` in a web browser and register a new user. Please note that email notfications are not yet configured. You can just press the `Back` button after the signup.
 
 Try and deploy a datastore. Does it fail at around 8% or 16% then there is a problem with the infrastrcture. See the trouble shooting below for clues.
 
