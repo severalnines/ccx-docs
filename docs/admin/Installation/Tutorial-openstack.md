@@ -213,7 +213,7 @@ At this stage you must have the following information/resources created in your 
 - network_id - this is the private network.
 - project_id - the project_id where the resources will be deployed.
 - image_id (this image must be an Ubuntu 22.04 of a recent patch level). Cloudinit will install the necessary tooling on the image.
-- instance type (a code for the instance type you will use, e.g `x4.2c4m.100g`).
+- instance type (a code for the instance type you will use, e.g `x4.2c4m.100g`). We recommend 2vCPU and 4GB as the minimal instance type.
 - volume type (a code for the volume type you will use, e.g `fastdisk`).
 - region, e.g you need to know the name of the region, e.g `nova` or `sto1`.
 - A security group called `ccx-common` and must allow all TCP traffic from all k8s nodes where ccx is running. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
@@ -257,7 +257,7 @@ ccx:
           info: Optimized for performance
           name: Fast storage
           size:
-            default: 60
+            default: 60 # we recommend 100GB as minimum for production systems.
             max: 1000
             min: 30
         network_types:
