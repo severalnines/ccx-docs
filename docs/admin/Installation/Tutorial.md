@@ -1,4 +1,4 @@
-# Tutorial
+# Basic Tutorial
 
 For laptop/desktop installation instructions please visit [Install CCX on a Laptop](CCX-Install-Laptop.md). 
 
@@ -11,7 +11,8 @@ For simplicity, AWS will be configured as the cloud provider.
 ## Requirements for public installation
 
 - AWS credentials (for this tutorial, must be able to create/destroy VMs, security groups and volumes.). Save the credentials in `~/.aws/credentials`.
-- Ingress Controller. In this tutorial we will use the NGINX Ingress Controller.
+- Ingress Controller. In this tutorial we will use the NGINX Ingress Controller. Then ingress controller must have an EXTERNAL-IP
+- Domains (e.g `ccx.example.com`, `cc.example.com`)
 - Cert manager
 
 ### Ingress Controller
@@ -68,9 +69,9 @@ cert-manager-webhook-5f454c484c-bx8gx      1/1     Running   0          11d
 ```
 
 ### Setup DNS
-Ensure you have a DNS A record setup, pointing the EXTERNAL_IP with the domain you wish to install CCX on, e.g dbaas.example.com: 
+Ensure you have a DNS A record setup, pointing the EXTERNAL_IP with the domain you wish to install CCX on, e.g `ccx.example.com`: 
 
-`A 146.190.177.145  dbaas.example.com`
+`A 146.190.177.145  ccx.example.com`
 
 ## Preparations
 ### Add Severalnines Helm Chart repository
@@ -172,7 +173,7 @@ kubectl create secret generic aws \
 Now it is finally time to install CCX:
 
 ```
-helm upgrade --install ccx s9s/ccx --debug --wait --set ccxFQDN=dbaas.example.com --set 'ccx.cloudSecrets[0]=aws' --set 'ccx.cidr=0.0.0.0/0'
+helm upgrade --install ccx s9s/ccx --debug --wait --set ccxFQDN=ccx.example.com --set 'ccx.cloudSecrets[0]=aws' --set 'ccx.cidr=0.0.0.0/0'
 ```
 
 Wait for it to finish, and check the pods are `RUNNING`: 
@@ -183,7 +184,7 @@ kubectl get pods -n ccx
 
 ## CCX Web UI
 
-Open `https://dbaas.example.com` in a web browser, and press the Sign up link to create a new user. Please not that email notfications are not yet configured. You can just press the `Back` button after the signup.
+Open `https://ccx.example.com` in a web browser, and press the Sign up link to create a new user. Please not that email notfications are not yet configured. You can just press the `Back` button after the signup.
 
 ## Next Steps
 

@@ -48,6 +48,10 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: 'doc',
+              id:'admin/Installation/Tutorial-openstack'
+            },
+            {
+              type: 'doc',
               id:'admin/Installation/CCX-Install-Laptop'
             },
             {
