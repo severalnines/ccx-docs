@@ -1,32 +1,32 @@
-# Tutorial for Openstack
+# Tutorial for OpenStack
 
-For laptop/desktop installation instructions please visit [Install CCX on a Laptop](CCX-Install-Laptop.md). 
+For laptop/desktop installation instructions, please visit [Install CCX on a Laptop](CCX-Install-Laptop.md).
 
-In this tutorial we will install CCX so it is reachable from a domain, we will call it `dbaas.example.com`.
+In this tutorial, we will install CCX so it is accessible from a domain, which we will call `dbaas.example.com`.
 
-After this tutorial you will have a working solution, but you will need to extend it with External DNS later on.
+After completing this tutorial, you will have a working solution, but you will need to configure External DNS later.
 
-Openstack will be configured as the cloud provider.
+OpenStack will be configured as the cloud provider.
 
-## Requirements for public installation
-- An Openstack installation and an Openstack project. Please note that Huawei's Openstack implementation is rather different and will use other endpoints.
-- Openstack credentials, obtain e.g an RC file.
-- Ingress Controller. In this tutorial we will use the NGINX Ingress Controller. Then ingress controller must have an EXTERNAL-IP
-- Domains (e.g `ccx.example.com`, `cc.example.com`)
-- Cert manager
+## Requirements for Public Installation
+- An OpenStack installation and an OpenStack project. Please note that Huawei's OpenStack implementation differs significantly and will use different endpoints.
+- OpenStack credentials (e.g., an RC file)
+- Ingress Controller. In this tutorial, we will use the NGINX Ingress Controller. The ingress controller must have an EXTERNAL-IP
+- Domains (e.g., `ccx.example.com`, `cc.example.com`)
+- Cert Manager
 
 ### Ingress Controller
-You must have a working and correctly setup ingress controller. 
+You must have a working and properly configured ingress controller.
 
-Make sure that you have ingress controller in your cluster and you are able to setup externally facing load balancers and that either your domain na    me points to the ingress IP or you have external DNS configured in your cluster.
+Ensure that you have an ingress controller in your cluster and that you can set up externally facing load balancers. Your domain name should either point to the ingress IP or you should have external DNS configured in your cluster.
 
-By default CCX is configured to use `nginx` as the ingress controller  (`ingressClassName: nginx`).
+By default, CCX is configured to use `nginx` as the ingress controller (`ingressClassName: nginx`).
 
 ```
 kubectl get pods --all-namespaces -l app.kubernetes.io/name=ingress-nginx
 ```
 
-should look like: 
+The output should look like:
 
 ```
 NAMESPACE       NAME                                        READY   STATUS    RESTARTS   AGE
@@ -36,13 +36,13 @@ ingress-nginx   ingress-nginx-controller-659f54cbff-lq29d   1/1     Running   0 
 
 All pods should be in a READY state, and STATUS should be Running.
 
-Finally, inspect the external IP address of your NGINX Ingress Controller Load Balancer by running below command:
+Finally, check the external IP address of your NGINX Ingress Controller Load Balancer by running:
 
 ```
 kubectl get svc -n ingress-nginx
 ```
 
-should look like the following:
+The output should look like:
 
 ```
 NAME                                 TYPE           CLUSTER-IP      EXTERNAL-IP                                 PORT(S)                      AGE
@@ -50,16 +50,17 @@ ingress-nginx-controller             LoadBalancer   10.108.22.0     146.190.177.
 ingress-nginx-controller-admission   ClusterIP      10.108.28.137   <none>                                      443/TCP                      5h40m
 ingress-nginx-controller-metrics     ClusterIP      10.108.13.85    <none>                                      9090/TCP                     5h40m
 ```
-You must have an `EXTERNAL-IP`, else the installation will fail.
 
-### Cert manager
-Also, we recommend you have certmanager setup:
+You must have an `EXTERNAL-IP`; otherwise, the installation will fail.
+
+### Cert Manager
+We recommend having cert-manager set up:
 
 ```
 kubectl get pods -n cert-manager
 ```
 
-Verify the pods are running.
+Verify that the pods are running:
 
 ```
 NAME                                       READY   STATUS    RESTARTS   AGE
@@ -69,22 +70,23 @@ cert-manager-webhook-5f454c484c-bx8gx      1/1     Running   0          11d
 ```
 
 ### Setup DNS
-Ensure you have a DNS A record setup, pointing the EXTERNAL_IP with the domain you wish to install CCX on, e.g `ccx.example.com`: 
+Ensure you have a DNS A record set up, pointing the EXTERNAL_IP to the domain you wish to install CCX on, e.g., `ccx.example.com`:
 
 `A 146.190.177.145  ccx.example.com`
 
 ## Preparations
-### Add Severalnines Helm Chart repository
+### Add Severalnines Helm Chart Repository
 
 ```
 helm repo add s9s https://severalnines.github.io/helm-charts/
 helm repo update
 ```
-The complete helm-charts is located on [Github](https://github.com/severalnines/helm-charts/tree/main/charts/ccx).
 
-### Create a namespace
+The complete helm-charts are located on [GitHub](https://github.com/severalnines/helm-charts/tree/main/charts/ccx).
 
-We will deploy in a namespace called `ccx`, so let's create it:
+### Create a Namespace
+
+We will deploy in a namespace called `ccx`:
 
 ```
 kubectl create namespace ccx
@@ -93,23 +95,23 @@ kubectl config set-context --current --namespace=ccx
 
 ## Install CCX Dependencies
 
-First, we need to install the CCX dependencies. The dependencies are:
+First, we need to install the CCX dependencies:
 
-- Postgres -  [read more about the operator](./Postgres-Operator-Installation). In this tutorial we will just use the defaults.
-- MySQL - [read more about the operator](./Mysql-Operator-Installation). In this tutorial we will just use the defaults.
-- NATS 
+- PostgreSQL - [read more about the operator](./Postgres-Operator-Installation). In this tutorial, we will use the defaults.
+- MySQL - [read more about the operator](./Mysql-Operator-Installation). In this tutorial, we will use the defaults.
+- NATS
 - VictoriaMetrics
 - Loki
 - Keycloak
 
-### Installing the dependencies
-We will use the default values when we setup the `ccxdeps`:
+### Installing the Dependencies
+We will use the default values when setting up `ccxdeps`:
 
 ```
 helm install ccxdeps s9s/ccxdeps --debug --wait -n ccx
 ```
 
-Check the pods are the `RUNNING`:
+Check that the pods are `RUNNING`:
 
 ```
 kubectl get pods -n ccx
@@ -130,26 +132,27 @@ victoria-metrics-alert-7f695bf5c8-96ch5      1/1     Running   0          7m22s
 
 :::note
 
-If the mysql-operator pod fails to start with the error (use `kubectl logs mysql-operator-5876cf5b66-6knkp` to check:
-
-        ```
-        persists try setting MYSQL_OPERATOR_K8S_CLUSTER_DOMAIN via environment
-        ```
-
-Then do;        
+If the mysql-operator pod fails to start with the error (use `kubectl logs mysql-operator-5876cf5b66-6knkp` to check):
 
 ```
-kubectl edit deployment -n ccx  mysql-operator
+persists try setting MYSQL_OPERATOR_K8S_CLUSTER_DOMAIN via environment
+```
 
-Locate the `env` and set:
+Then do:
 
+```
+kubectl edit deployment -n ccx mysql-operator
+```
+
+Locate the `env` section and set:
+
+```yaml
 env:
   - name: MYSQL_OPERATOR_K8S_CLUSTER_DOMAIN
     value: "cluster.local"
-
 ```
 
-Finally restart:
+Finally, restart:
 
 ```
 kubectl rollout restart deployment -n ccx mysql-operator
@@ -157,29 +160,28 @@ kubectl rollout restart deployment -n ccx mysql-operator
 
 :::
 
-## Configuring cloud credentials in K8s Secrets
-To be able to deploy datastores to a cloud provider (AWS by default) you need to provide cloud credentials.
-Cloud credentials should be created as kubernetes secrets in format specified in - https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template.yaml
+## Configuring Cloud Credentials in K8s Secrets
+To deploy datastores to a cloud provider (AWS by default), you need to provide cloud credentials.
+Cloud credentials should be created as Kubernetes secrets in the format specified in [secrets-template.yaml](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template.yaml).
 
-Moreover, you can use the script [create-openstack-secrets.sh](https://github.com/severalnines/helm-charts/tree/main/charts/ccx/scripts) which asks you for the openstack credentials. Make sure you have your Openstack RC file handy.
+You can use the script [create-openstack-secrets.sh](https://github.com/severalnines/helm-charts/tree/main/charts/ccx/scripts) which will prompt you for the OpenStack credentials. Make sure you have your OpenStack RC file ready.
 
 Download the scripts:
 
 ```
 curl -o create-openstack-secrets.sh https://raw.githubusercontent.com/severalnines/helm-charts/main/charts/ccx/scripts/create-openstack-secrets.sh
-
 curl -o create-openstack-s3-secrets.sh https://raw.githubusercontent.com/severalnines/helm-charts/main/charts/ccx/scripts/create-openstack-s3-secrets.sh
 chmod u+x create-openstack-secrets.sh
 chmod u+x create-openstack-s3-secrets.sh
 ```
 
-Now run the scripts and fill enter the details:
+Now run the scripts and enter the details:
 
 ```
 ./create-openstack-secrets.sh
 ```
 
-and 
+and
 
 ```
 ./create-openstack-s3-secrets.sh
@@ -199,28 +201,27 @@ kubectl get secrets -n ccx
 ```
 
 :::important
-The secrets contains a number of fields starting with  `MYCLOUD`.
-This identifier `MYCLOUD`, must match the name `- code: mycloud` and `mycloud:` 
+The secrets contain a number of fields starting with `MYCLOUD`.
+This identifier `MYCLOUD` must match the name `- code: mycloud` and `mycloud:` in your configuration.
 
-Thus if you have a cloud called `grok` then replace the `MYCLOUD` with `grok`  in the `openstack-secrets.yaml` and `openstack-s3-secrets.yaml` files and make sure you use `grok` in the `minimal-values.yaml` file referenced later in this tutorial.
+Thus, if you have a cloud called `grok`, then replace `MYCLOUD` with `grok` in the `openstack-secrets.yaml` and `openstack-s3-secrets.yaml` files and make sure you use `grok` in the `minimal-values.yaml` file referenced later in this tutorial.
 :::
 
-## Prepare the Openstack values file and Openstack
-We will use a [minimal Openstack configuration](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/minimal-values-openstack.yaml) as the template.
-At this stage you must have the following information/resources created in your Openstack project:
+## Prepare the OpenStack Values File and OpenStack
+We will use a [minimal OpenStack configuration](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/minimal-values-openstack.yaml) as the template.
+At this stage, you must have the following information/resources created in your OpenStack project:
 
-- floating_network_id - this is the public network (public ip pool).
-- network_id - this is the private network.
-- project_id - the project_id where the resources will be deployed.
-- image_id (this image must be an Ubuntu 22.04 of a recent patch level). Cloudinit will install the necessary tooling on the image.
-- instance type (a code for the instance type you will use, e.g `x4.2c4m.100g`). We recommend 2vCPU and 4GB as the minimal instance type.
-- volume type (a code for the volume type you will use, e.g `fastdisk`).
-- region, e.g you need to know the name of the region, e.g `nova` or `sto1`.
-- A security group called `ccx-common` and must allow all TCP traffic from all k8s nodes where ccx is running. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
+- floating_network_id - this is the public network (public IP pool)
+- network_id - this is the private network
+- project_id - the project_id where the resources will be deployed
+- image_id (this image must be Ubuntu 22.04 of a recent patch level). Cloud-init will install the necessary tools on the image
+- instance type (a code for the instance type you will use, e.g., `x4.2c4m.100g`). We recommend 2vCPU and 4GB as the minimum instance type
+- volume type (a code for the volume type you will use, e.g., `fastdisk`)
+- region, e.g., you need to know the name of the region, e.g., `nova` or `sto1`
+- A security group called `ccx-common` that must allow all TCP traffic from all k8s nodes where CCX is running. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
 
 ---
 ![CCX architecture](../images/ccx-common-sec-group.png)
-
 
 Download the minimal values file:
 
@@ -228,12 +229,13 @@ Download the minimal values file:
 curl -o minimal-openstack.yaml https://raw.githubusercontent.com/severalnines/helm-charts/main/charts/ccx/minimal-values-openstack.yaml
 ```
 
-Edit the `minimal-openstack.yaml` and replace all `MY_*` with the values for `floating_network_id`, `network_id` etc. Double-check that you do not omit or make any typos.
+Edit the `minimal-openstack.yaml` and replace all `MY_*` with the values for `floating_network_id`, `network_id`, etc. Double-check that you do not omit or make any typos.
 Also, ensure that instance types and volume types are specified.
 
-### Sample minimal openstack values file
-Below is an example. Please note that it is possible to add more instance types, volume types, clouds, etc. We recommend that you start small and expand the configuration.
-```
+### Sample Minimal OpenStack Values File
+Below is an example. Please note that you can add more instance types, volume types, clouds, etc. We recommend starting small and expanding the configuration.
+
+```yaml
 ccx:
   # List of Kubernetes secrets containing cloud credentials.
   cidr: 0.0.0.0/0
@@ -283,16 +285,16 @@ ccx:
         openstack_vendors:
           mycloud:
             compute_api_microversion: "2.79"
-            floating_network_id: b19680b3-c00e-40f0-ad77-4448e81ae226  # Replace with actual ID, e.g., "12345-abcde"
-            network_api_version: NetworkNeutron          # Typically "NetworkNeutron"
-            network_id: 21dfbb3d-a948-449b-b727-5fdda2026b45                    # Replace with actual network ID
-            project_id: 5b8e951e41f34b5394bb7cf7992a95de                    # Replace with your OpenStack project ID
+            floating_network_id: b19680b3-c00e-40f0-ad77-4448e81ae226  # Replace with actual ID
+            network_api_version: NetworkNeutron
+            network_id: 21dfbb3d-a948-449b-b727-5fdda2026b45  # Replace with actual network ID
+            project_id: 5b8e951e41f34b5394bb7cf7992a95de  # Replace with your OpenStack project ID
             regions:
               sto1:  # region id, must be consistently set/named.
-                image_id: 936c8ba7-343a-4172-8eab-86dda97f12c5                    # Replace with image ID for the region
-                # secgrp_name refers to the security group name used by ccx to access datastore VMs.
-                # It must be created manually and allow all TCP traffic from all Kubernetes nodes where ccx is running.
-                secgrp_name: ccx-common                  # Recommended to use a dedicated security group
+                image_id: 936c8ba7-343a-4172-8eab-86dda97f12c5  # Replace with image ID for the region
+                # secgrp_name refers to the security group name used by CCX to access datastore VMs.
+                # It must be created manually and allow all TCP traffic from all Kubernetes nodes where CCX is running.
+                secgrp_name: ccx-common  # Recommended to use a dedicated security group
 ```
 
 ## Install CCX
@@ -302,7 +304,7 @@ Now it is finally time to install CCX:
 helm upgrade --install ccx s9s/ccx --debug --wait --set ccxFQDN=ccx.example.com --set 'ccx.cidr=0.0.0.0/0' -f minimal-openstack.yaml
 ```
 
-Wait for it to finish, and check the pods are `RUNNING`: 
+Wait for it to finish, and check that the pods are `RUNNING`:
 
 ```
 kubectl get pods -n ccx
@@ -310,14 +312,14 @@ kubectl get pods -n ccx
 
 ## CCX Web UI
 
-Open `https://ccx.example.com/auth/register?from=ccx` in a web browser and register a new user. Please note that email notfications are not yet configured. You can just press the `Back` button after the signup.
+Open `https://ccx.example.com/auth/register?from=ccx` in a web browser and register a new user. Please note that email notifications are not yet configured. You can just press the `Back` button after the signup.
 
-Try and deploy a datastore. Does it fail at around 8% or 16% then there is a problem with the infrastrcture. See the trouble shooting below for clues.
+Try to deploy a datastore. If it fails at around 8% or 16%, then there is a problem with the infrastructure. See the troubleshooting section below for clues.
 
-## Basic troubleshooting
+## Basic Troubleshooting
 
-In the conception of a datastore, a number of resources are setup: Security groups, volumes, networks, and instances.
-If you run into issues, then one good place to start is to look at logs from the `ccx-runner-service-NNN` pod:
+During the creation of a datastore, several resources are set up: Security groups, volumes, networks, and instances.
+If you run into issues, a good place to start is to look at logs from the `ccx-runner-service-NNN` pod:
 
 ```
 kubectl logs ccx-runner-service-NNNN
@@ -325,19 +327,19 @@ kubectl logs ccx-runner-service-NNNN
 
 ### Timeouts
 
-If you see issues with timeouts then:
-- Ensure you have updated `ccx-common` security group with the correct IP address (the EXTERNAL-IP), but it might also be need to add the IPs of the nodes.
+If you see issues with timeouts:
+- Ensure you have updated the `ccx-common` security group with the correct IP address (the EXTERNAL-IP), but you might also need to add the IPs of the nodes.
 
-### Double check that URLs in the secrets file is correct:
+### Double-check that URLs in the secrets file are correct:
 
 ```
-kubectl get secret openstack    -o json | jq -r '.data | to_entries[] | "\(.key): \(.value | @base64d)"'
+kubectl get secret openstack -o json | jq -r '.data | to_entries[] | "\(.key): \(.value | @base64d)"'
 ```
 
-See our [Troubleshooting](docs/admin/Troubleshooting/Troubleshooting.md) section for more info.
+See our [Troubleshooting](docs/admin/Troubleshooting/Troubleshooting.md) section for more information.
 
 ## Next Steps
 
-- Setup configure ExternalDNS
-- Configure Instance (VMs, storages etc).
-- Add another cloud provider (Openstack, CloudStack).
+- Set up and configure ExternalDNS
+- Configure Instances (VMs, storage, etc.)
+- Add another cloud provider (OpenStack, CloudStack)
