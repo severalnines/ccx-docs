@@ -1,8 +1,8 @@
 # Tutorial for OpenStack
 
-For laptop/desktop installation instructions, please visit [Install CCX on a Laptop](CCX-Install-Laptop.md).
+*For laptop/desktop installation instructions please visit [Install CCX on a Laptop](CCX-Install-Laptop.md).*
 
-In this tutorial, we will install CCX so it is accessible from a domain, which we will call `dbaas.example.com`.
+In this tutorial, we will install CCX so it is accessible from a domain, which we will call `ccx.example.com`.
 
 After completing this tutorial, you will have a working solution, but you will need to configure External DNS later.
 
@@ -16,9 +16,9 @@ OpenStack will be configured as the cloud provider.
 - Cert Manager
 
 ### Ingress Controller
-You must have a working and properly configured ingress controller.
+You must have a working and correctly setup ingress controller. 
 
-Ensure that you have an ingress controller in your cluster and that you can set up externally facing load balancers. Your domain name should either point to the ingress IP or you should have external DNS configured in your cluster.
+Make sure that you have ingress controller in your cluster and you are able to setup externally facing load balancers and that either your domain name points to the ingress IP or you have external DNS configured in your cluster.
 
 By default, CCX is configured to use `nginx` as the ingress controller (`ingressClassName: nginx`).
 
@@ -75,7 +75,10 @@ Ensure you have a DNS A record set up, pointing the EXTERNAL_IP to the domain yo
 `A 146.190.177.145  ccx.example.com`
 
 ## Preparations
+
 ### Add Severalnines Helm Chart Repository
+
+Setup the Helm repo:
 
 ```
 helm repo add s9s https://severalnines.github.io/helm-charts/
