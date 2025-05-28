@@ -347,8 +347,8 @@ Obtain the CLUSTER_UUID of the datastore and us it to get the cluster-id of the 
 
 ```bash
 s9s cluster --list --long | grep CLUSTER_UUID
-#or
-s9s cluster --list --long --cluster-format="%I\n" | grep CLUSTER_UUID
+# or
+s9s cluster --list --long --cluster-format="%I %N\n" | grep CLUSTER_UUID
 ```
 
 #### MySQL/Percona
