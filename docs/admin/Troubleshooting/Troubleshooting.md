@@ -270,3 +270,103 @@ To access metrics securely, you can inspect the automatically generated rules in
     ```
 
 This command will show the ingress url for accessing metrics.
+
+## S9S CLI commands and CC UI commands
+
+:::danger
+Never use the S9S CLI nor the CCUIv2 to add or remove resources (nodes or datastores). ***This may lead to stray data***.
+Do not use the following commands (and corresponding commands in the ClusterConrol UI):
+- s9s cluster --[drop|remove-node|add-node|upgrade-cluster|reinstall-node|demote-node|reconfigure-node]
+- s9s node --[stop|unregister]
+::::
+The 's9s job' commands can be used to debug why a datastore failed to create. Example:
+
+```bash
+# Check cluster status
+s9s cluster --list --long
+# Check node status
+s9s node --list --long
+# Check node status of particular cluster
+s9s node --list --long --cluster-id=CLUSTERID
+# Check status of replication links
+s9s replication --list --long
+## List jobs and view logs
+s9s job --list
+s9s job --job-id=NNN --log
+```
+
+### Creating an Error Report
+
+The error report contains a lot of information about the system and is a very good help for support to understand the configuration, topology and states. From the ClusterControl Admin UI, you can create an error report by going the problematic datastore/cluster -> "Report" and then "Create Error Report". A error report in .tar.gz format will be generated and downloadable from the UI.
+
+### Getting information of a failed job
+
+Get details about the cluster, in case you know the CLUSTER_UUID (this can be obtained from logs, or from UI e.g).
+
+```bash
+s9s cluster --list | grep CLUSTER_UUID
+```
+
+List all the failed jobs of a cluster NNN. You get NNN from the `s9s cluster --list` above.
+
+```bash
+s9s job --list --cluster-id=NNN  |grep FAILED
+```
+
+If you dont know the cluster id, run:
+
+```bash
+s9s job --list  |grep FAILED
+```
+
+Locate the failed job you are interested in, and obtain the jobid (first column in the output).
+
+```bash
+s9s job --job-id=MMM --log
+```
+
+Additionally, an error report is needed in many cases as it contains detailed information about datastores. See [Creating an Error Report](#creating-an-error-report);
+
+## Common Issues
+
+### Monitoring is being setup/Charts/Dashboards are not loading up.
+
+Launch the install agents job again on the controller:
+
+```bash
+s9s cluster --list --long | grep CLUSTER_UUID
+# take the cluster id , NNN
+s9s cluster --deploy-agents --cluster-id=NNN --log
+```
+
+Then check if it solved the issue. If not, contact the CCX Team.
+
+### Recreating 'ccxadmin' user
+
+Obtain the cluster-id of the problematic cluster (`--cluster-id=NNN` below):
+
+### MySQL/Percona
+
+```bash
+s9s account --cluster-id=NNN --create --account='ccxadmin:PASSWORD@%' --privileges='*.*:SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, RELOAD, PROCESS, REFERENCES, INDEX, ALTER, SHOW DATABASES, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, REPLICATION SLAVE, REPLICATION CLIENT, CREATE VIEW, REPLICATION_SLAVE_ADMIN, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, CREATE USER, EVENT, TRIGGER, GRANT'
+
+s9s account --revoke  --account='ccxadmin:PASSWORD@%' --privileges='mysql.*:INSERT, UPDATE, DELETE, CREATE, DROP, REFERENCES, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, EVENT, TRIGGER;sys.*:INSERT, UPDATE, DELETE, CREATE, DROP, REFERENCES, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, EVENT, TRIGGER'
+```
+
+### MariaDB
+
+```bash
+s9s account --cluster-id=NNN --create --account='ccxadmin:PASSWORD@%' --privileges='ccxdb.*:ALL, GRANT;*.*:CREATE USER, REPLICATION SLAVE, REPLICATION SLAVE ADMIN, SLAVE MONITOR'
+```
+
+### PostgreSQL
+
+```bash
+s9s account --cluster-id=NNN --create --account='ccxadmin:PASSWORD@%' --privileges='NOSUPERUSER, CREATEROLE, LOGIN, CREATEDB'
+```
+
+### Rebuildint a failed replica
+In some cases it is wanted to rebuild a replica.
+```bash
+s9s replication --cluster-id=NNN --stage --master="PUBLIC_ADDRESSS_OF_MASTER" --slave="PUBLIC_ADDRESSS_OF_REPLICA_TO_BE_REBUILT
+```
