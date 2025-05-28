@@ -4,8 +4,7 @@ This guide helps you troubleshoot and resolve common issues in CCX. Follow the s
 ## CCX Error Report
 To generate an error report of CCX services and components within a Kubernetes environment, follow these steps:
 ```bash
-
-# Ensure your current Kubernetes context is set to the CCX namespace as example below.
+# Ensure your current Kubernetes context is set to the CCX namespace as shown below
 kubectl config set-context --current --namespace=ccx
 
 # Step 1: Download the error report script
@@ -24,7 +23,7 @@ Clusters may get stuck in a locked state if a job is interrupted unexpectedly. U
 Note that `ccxctl` is available from version 1.50+.
 
 ```bash
-# Step 1: Run `ccxctl` by executing inside the stores pod.
+# Step 1: Run `ccxctl` by executing inside the stores pod
 kubectl exec -it deployment/ccx-stores-service -- sh
 
 # Step 2: Check the datastore state and get the job-id in field `Active Job:`
@@ -69,7 +68,7 @@ This command deletes all associated resources, including:
 - Credentials
 ```
 :::danger
-> This actions are irreversible. Use caution when applying above commands.
+> These actions are irreversible. Use caution when applying the above commands.
 :::
 
 ## Cluster in Readonly State
@@ -213,6 +212,7 @@ Validate backups in PostgreSQL pods:
 kubectl exec -it acid-ccx-0 -- bash
 envdir "/run/etc/wal-e.d/env" wal-g backup-list
 ```
+
 Also, confirm objects stored on S3 storage.
 
 ### Zalando Postgres Operator Restore Validation
@@ -365,7 +365,7 @@ s9s account --cluster-id=NNN --create --account='ccxadmin:PASSWORD@%' --privileg
 s9s account --cluster-id=NNN --create --account='ccxadmin:PASSWORD@%' --privileges='NOSUPERUSER, CREATEROLE, LOGIN, CREATEDB'
 ```
 
-### Rebuildint a failed replica
+### Rebuilding a failed replica
 In some cases it is wanted to rebuild a replica.
 ```bash
 s9s replication --cluster-id=NNN --stage --master="PUBLIC_ADDRESSS_OF_MASTER" --slave="PUBLIC_ADDRESSS_OF_REPLICA_TO_BE_REBUILT
