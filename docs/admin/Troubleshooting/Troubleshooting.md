@@ -343,7 +343,13 @@ Then check if it solved the issue. If not, contact the CCX Team.
 
 ### Recreating 'ccxadmin' user
 
-Obtain the cluster-id of the problematic cluster (`--cluster-id=NNN` below):
+Obtain the CLUSTER_UUID of the datastore and us it to get the cluster-id of the problematic datastore (`--cluster-id=NNN` below):
+
+```bash
+s9s cluster --list --long | grep CLUSTER_UUID
+#or
+s9s cluster --list --long --cluster-format="%I\n" | grep CLUSTER_UUID
+```
 
 #### MySQL/Percona
 
