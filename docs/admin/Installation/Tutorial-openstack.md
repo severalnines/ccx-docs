@@ -196,9 +196,9 @@ data:
 ```
 
 :::important
-The secrets contain a number of fields starting with `MYCLOUD`.
+The secrets contain a number of fields starting with `MYCLOUD`. This must be replaced with how you want to identify your cloud.
 
-Thus, if you have a cloud called `grok`, then replace `MYCLOUD` with `grok` in the `openstack-secrets.yaml` file and make sure you use `grok` in the `minimal-values.yaml` file referenced later in this tutorial.
+If you want to identifty the cloud as `grok`, then replace `MYCLOUD` with `grok` in the `openstack-secrets.yaml` file and make sure you use `grok` in the `minimal-values.yaml` file referenced later in this tutorial.
 :::
 
  Make sure you have your OpenStack RC file handy as it contains the information you need. Also ensure you have S3 credentials. S3 will be used to store backup data coming from the datastores the end user deploys.
