@@ -195,6 +195,12 @@ data:
   MYCLOUD_S3_INSECURE_SSL: ZmFsc2U= # base64 encoded 'true' or 'false'
 ```
 
+:::important
+The secrets contain a number of fields starting with `MYCLOUD`.
+
+Thus, if you have a cloud called `grok`, then replace `MYCLOUD` with `grok` in the `openstack-secrets.yaml` file and make sure you use `grok` in the `minimal-values.yaml` file referenced later in this tutorial.
+:::
+
  Make sure you have your OpenStack RC file handy as it contains the information you need. Also ensure you have S3 credentials. S3 will be used to store backup data coming from the datastores the end user deploys.
 
  Fill out the details, and save the file as `openstack-secrets.yaml`, and then run:
