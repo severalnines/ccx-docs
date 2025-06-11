@@ -164,11 +164,48 @@ kubectl rollout restart deployment -n ccx mysql-operator
 :::
 
 ## Configuring Cloud Credentials in K8s Secrets
-To deploy datastores to a cloud provider (AWS by default), you need to provide cloud credentials.
-Cloud credentials should be created as Kubernetes secrets in the format specified in [secrets-template.yaml](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template.yaml).
+In order to configure CCX for Opebstack you will need to provide cloud credentials.
+Cloud credentials should be created as Kubernetes secrets in the format specified in [secrets-template-openstack.yaml](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template-openstack.yaml). The template looks like this and all data in it must be base64 encoded:
 
-You can use the script [create-openstack-secrets.sh](https://github.com/severalnines/helm-charts/tree/main/charts/ccx/scripts) which will prompt you for the OpenStack credentials. Make sure you have your OpenStack RC file ready.
+```
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mycloud-openstack
+type: Opaque
+data:
+  MYCLOUD_AUTH_URL: YOUR
+  MYCLOUD_PASSWORD: OPENSTACK
+  MYCLOUD_PROJECT_ID: CREDENTIALS
+  MYCLOUD_USER_DOMAIN: HERE
+  MYCLOUD_USERNAME: AND_HERE_BASE64_ENCODED_EVERYWHERE
+  MYCLOUD_USER_DOMAIN_NAME: HERE # duplicates USER_DOMAIN
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mycloud-s3
+type: Opaque
+data:
+  MYCLOUD_S3_ENDPOINT: CHANGE_ME_BASE64_ENCODED
+  MYCLOUD_S3_ACCESSKEY: CHANGE_ME_BASE64_ENCODED
+  MYCLOUD_S3_SECRETKEY: CHANGE_ME_BASE64_ENCODED
+  MYCLOUD_S3_BUCKETNAME: CHANGE_ME_BASE64_ENCODED
+  MYCLOUD_S3_INSECURE_SSL: ZmFsc2U= # base64 encoded 'true' or 'false'
+```
 
+ Make sure you have your OpenStack RC file handy as it contains the information you need. Also ensure you have S3 credentials. S3 will be used to store backup data coming from the datastores the end user deploys.
+
+ Fill out the details, and save the file as `openstack-secrets.yaml`, and then run:
+
+```
+ kubectl apply -n ccx -f openstack-secrets.yaml
+```
+
+### Configure secrets using a script
+
+You can also use the script [create-openstack-secrets.sh](https://github.com/severalnines/helm-charts/tree/main/charts/ccx/scripts) which will prompt you to enter the OpenStack credentials. It will create the credentials base64 encoded.
 Download the scripts:
 
 ```
@@ -184,7 +221,7 @@ Now run the scripts and enter the details:
 ./create-openstack-secrets.sh
 ```
 
-and
+and to generate credentials for S3:
 
 ```
 ./create-openstack-s3-secrets.sh
@@ -196,6 +233,8 @@ Apply the generated secrets files:
 kubectl apply -n ccx -f openstack-secrets.yaml
 kubectl apply -n ccx -f openstack-s3-secrets.yaml
 ```
+
+### Verify the secrets
 
 Verify that the secrets are created:
 
@@ -211,13 +250,14 @@ Thus, if you have a cloud called `grok`, then replace `MYCLOUD` with `grok` in t
 :::
 
 ## Prepare the OpenStack Values File and OpenStack
+
 We will use a [minimal OpenStack configuration](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/minimal-values-openstack.yaml) as the template.
 At this stage, you must have the following information/resources created in your OpenStack project:
 
-- floating_network_id - this is the public network (public IP pool)
-- network_id - this is the private network
-- project_id - the project_id where the resources will be deployed
-- image_id (this image must be Ubuntu 22.04 of a recent patch level). Cloud-init will install the necessary tools on the image
+- `floating_network_id` - this is the public network (public IP pool)
+- `network_id` - this is the private network. You must create this in Openstack.
+- `project_id` - the project_id where the resources will be deployed, This is your openstack project id. All resources are deployed in the same Openstack project.
+- `image_id` (this image must be Ubuntu 22.04 of a recent patch level). Cloud-init will install the necessary tools on the image
 - instance type (a code for the instance type you will use, e.g., `x4.2c4m.100g`). We recommend 2vCPU and 4GB as the minimum instance type
 - volume type (a code for the volume type you will use, e.g., `fastdisk`)
 - region, e.g., you need to know the name of the region, e.g., `nova` or `sto1`
