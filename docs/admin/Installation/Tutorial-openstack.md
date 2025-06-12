@@ -256,22 +256,27 @@ This identifier `MYCLOUD` must match the name `- code: mycloud` and `mycloud:` i
 Thus, if you have a cloud called `grok`, then replace `MYCLOUD` with `grok` in the `openstack-secrets.yaml` and `openstack-s3-secrets.yaml` files and make sure you use `grok` in the `minimal-values.yaml` file referenced later in this tutorial.
 :::
 
+### Create Security Group ccx-common
+
+You must also create a security group. Let's call it `ccx-common`.
+
+`ccx-common` must allow all TCP traffic from all k8s nodes where CCX is running. The Egress must also be allowed. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
+
+![CCX architecture](../images/ccx-common-sec-group.png)
+
 ## Prepare the OpenStack Values File and OpenStack
 
 We will use a [minimal OpenStack configuration](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/minimal-values-openstack.yaml) as the template.
 At this stage, you must have the following information/resources created in your OpenStack project:
 
-- `floating_network_id` - this is the public network (public IP pool)
+- `floating_network_id` - this is the public network (public IP pool).
 - `network_id` - this is the private network. You must create this in Openstack.
 - `project_id` - the project_id where the resources will be deployed, This is your openstack project id. All resources are deployed in the same Openstack project.
-- `image_id` (this image must be Ubuntu 22.04 of a recent patch level). Cloud-init will install the necessary tools on the image
-- instance type (a code for the instance type you will use, e.g., `x4.2c4m.100g`). We recommend 2vCPU and 4GB as the minimum instance type
-- volume type (a code for the volume type you will use, e.g., `fastdisk`)
-- region, e.g., you need to know the name of the region, e.g., `nova` or `sto1`
-- A security group called `ccx-common` that must allow all TCP traffic from all k8s nodes where CCX is running. The Egress must also be allowed. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
-
----
-![CCX architecture](../images/ccx-common-sec-group.png)
+- `image_id` (this image must be Ubuntu 22.04 of a recent patch level). Cloud-init will install the necessary tools on the image.
+- instance type (a code for the instance type you will use, e.g., `x4.2c4m.100g`). We recommend 2vCPU and 4GB as the minimum instance type.
+- volume type (a code for the volume type you will use, e.g., `fastdisk`).
+- region, e.g., you need to know the name of the region, e.g., `nova` or `sto1` .
+- the `ccx-common` security group.
 
 Download the minimal values file:
 
