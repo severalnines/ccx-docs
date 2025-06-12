@@ -395,6 +395,6 @@ See our [Troubleshooting](docs/admin/Troubleshooting/Troubleshooting.md) section
 
 ## Next Steps
 
-- Set up and configure ExternalDNS
+- [Set up and configure ExternalDNS](docs/admin/Installation/Dynamic-DNS.md)
 - Configure Instances (VMs, storage, etc.)
 - Add another cloud provider (OpenStack, CloudStack)
