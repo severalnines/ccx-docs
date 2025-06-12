@@ -396,5 +396,6 @@ See our [Troubleshooting](docs/admin/Troubleshooting/Troubleshooting.md) section
 ## Next Steps
 
 - [Set up and configure ExternalDNS](docs/admin/Installation/Dynamic-DNS.md). This will give your endusers immutable endpoints to the database. Please make sure you have deleted all datastores before you set it up. 
+- [White-labeling UI and customization](docs/admin/Customisation/Frontend.md).
+- [JWT authentication](docs/admin/Customisation/JWT.md).
 - Configure more Instance types (VMs, storage, etc.)
-- [White-labeling UI and customization](docs/admin/Customisation/Frontend.md), [JWT authentication](docs/admin/Customisation/JWT.md).
