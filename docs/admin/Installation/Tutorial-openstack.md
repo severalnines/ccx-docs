@@ -206,7 +206,7 @@ stringData:
   MYCLOUD_S3_ACCESSKEY: CHANGE_ME
   MYCLOUD_S3_SECRETKEY: CHANGE_ME
   MYCLOUD_S3_BUCKETNAME: CHANGE_ME
-  MYCLOUD_S3_INSECURE_SSL: false #'true' or 'false'
+  MYCLOUD_S3_INSECURE_SSL: false #'true' if your S3 connection is unencrypted (http)  or 'false' if it is (https).
 ```
 
 :::important
@@ -409,6 +409,7 @@ See our [Troubleshooting](docs/admin/Troubleshooting/Troubleshooting.md) section
 ## Next Steps
 
 - [Set up and configure ExternalDNS](docs/admin/Installation/Dynamic-DNS.md). This will give your endusers immutable endpoints to the database. Please make sure you have deleted all datastores before you set it up. 
+- [Run End-to-End Tests](docs/admin/Testing/E2E-tests.md).
 - [White-labeling UI and customization](docs/admin/Customisation/Frontend.md).
 - [JWT authentication](docs/admin/Customisation/JWT.md).
 - Configure more Instance types (VMs, storage, etc.)
