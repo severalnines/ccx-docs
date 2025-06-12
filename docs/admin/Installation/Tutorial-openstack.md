@@ -74,6 +74,7 @@ Ensure you have a DNS A record set up, pointing the EXTERNAL_IP to the domain yo
 
 `A 146.190.177.145  ccx.example.com`
 
+
 ## Preparations
 
 ### Add Severalnines Helm Chart Repository
@@ -165,34 +166,34 @@ kubectl rollout restart deployment -n ccx mysql-operator
 
 ## Configuring Cloud Credentials in K8s Secrets
 In order to configure CCX for Opebstack you will need to provide cloud credentials.
-Cloud credentials should be created as Kubernetes secrets in the format specified in [secrets-template-openstack.yaml](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template-openstack.yaml). The template looks like this and all data in it must be base64 encoded:
+Cloud credentials should be created as Kubernetes secrets in the format specified in [secrets-template-openstack.yaml](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template-openstack.yaml). The template looks like this:
 
 ```
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: mycloud-openstack
+  name: openstack
 type: Opaque
-data:
+stringData:
   MYCLOUD_AUTH_URL: YOUR
   MYCLOUD_PASSWORD: OPENSTACK
   MYCLOUD_PROJECT_ID: CREDENTIALS
   MYCLOUD_USER_DOMAIN: HERE
-  MYCLOUD_USERNAME: AND_HERE_BASE64_ENCODED_EVERYWHERE
-  MYCLOUD_USER_DOMAIN_NAME: HERE # duplicates USER_DOMAIN
+  MYCLOUD_USERNAME: AND_HERE
+  MYCLOUD_USER_DOMAIN_NAME: AND_HERE # duplicates USER_DOMAIN
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: mycloud-s3
+  name: openstack-s3
 type: Opaque
-data:
-  MYCLOUD_S3_ENDPOINT: CHANGE_ME_BASE64_ENCODED
-  MYCLOUD_S3_ACCESSKEY: CHANGE_ME_BASE64_ENCODED
-  MYCLOUD_S3_SECRETKEY: CHANGE_ME_BASE64_ENCODED
-  MYCLOUD_S3_BUCKETNAME: CHANGE_ME_BASE64_ENCODED
-  MYCLOUD_S3_INSECURE_SSL: ZmFsc2U= # base64 encoded 'true' or 'false'
+stringData:
+  MYCLOUD_S3_ENDPOINT: CHANGE_ME
+  MYCLOUD_S3_ACCESSKEY: CHANGE_ME
+  MYCLOUD_S3_SECRETKEY: CHANGE_ME
+  MYCLOUD_S3_BUCKETNAME: CHANGE_ME
+  MYCLOUD_S3_INSECURE_SSL: false #'true' or 'false'
 ```
 
 :::important
@@ -267,7 +268,7 @@ At this stage, you must have the following information/resources created in your
 - instance type (a code for the instance type you will use, e.g., `x4.2c4m.100g`). We recommend 2vCPU and 4GB as the minimum instance type
 - volume type (a code for the volume type you will use, e.g., `fastdisk`)
 - region, e.g., you need to know the name of the region, e.g., `nova` or `sto1`
-- A security group called `ccx-common` that must allow all TCP traffic from all k8s nodes where CCX is running. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
+- A security group called `ccx-common` that must allow all TCP traffic from all k8s nodes where CCX is running. The Egress must also be allowed. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
 
 ---
 ![CCX architecture](../images/ccx-common-sec-group.png)
