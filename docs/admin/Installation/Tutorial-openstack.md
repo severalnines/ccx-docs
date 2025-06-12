@@ -8,12 +8,25 @@ After completing this tutorial, you will have a working solution, but you will n
 
 OpenStack will be configured as the cloud provider.
 
-## Requirements for Public Installation
-- An OpenStack installation and an OpenStack project. Please note that Huawei's OpenStack implementation differs significantly and will use different endpoints.
-- OpenStack credentials (e.g., an RC file)
-- Ingress Controller. In this tutorial, we will use the NGINX Ingress Controller. The ingress controller must have an EXTERNAL-IP
-- Domains (e.g., `ccx.example.com`, `cc.example.com`)
-- Cert Manager
+## Prerequisites and Requirements for Public Installation
+
+| Item                              | Description                                                                                                    |
+|------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| A few sub domains                  | (e.g. ccx.example.com, cc.ccx.example,com)                                                                 |
+| Kubernetes                         | • Persistent Volume, Storage Class<br />• Nginx Ingress controller (The ingress controller must have an EXTERNAL-IP).<br />• External IP<br /><br />See [K8S requirements](docs/admin/Installation/Index.md#k8s-control-plane-requirements) for minimum size of cluster and K8S version, etc. |
+| Secrets Manager                    | K8S secrets                                                                                                    |
+| Openstack Credentials              | E.g an openstack RC file containing the auth urls, project id etc. |
+| Infrastructure Cloud               | • One “ccx-tenant” project<br />• VM flavors<br />• Attachable volumes<br />• Public Floating IPs (IPv4)<br />• Ubuntu 22.04 image |
+| S3 storage                         | For datastore backups and Operator DB backup                                                                   |
+| DNS Provider                       | DNS providers supported by [external-dns](docs/admin/Installation/Dynamic-DNS.md). In order to use dynamic dns config. This can be installed later.                               |
+| Ubuntu 22.04LTS cloud image for VMs| Cloud image for VMs hosting database (i.e., db nodes/hosts)                                                    |
+| Root volume for VM                 | There must be at least a 20GB root volume on each VM                                                           |
+| Database volume on VM              | There must be at least 80GB data volume on each VM for database                                                |
+| Project for CCX datastores         | A global project for CCX datastores                                                                            |
+| Project quota                      | Sufficient quota for global project                                                                            |
+| Project network                    | Appropriate network for global project                                                                         |
+| Floating IPs                       | A reasonable amount of floating IPs should be pre-allocated in the network where datastores will be deployed (in the global project) |
+
 
 ### Ingress Controller
 You must have a working and correctly setup ingress controller. 
@@ -199,7 +212,7 @@ stringData:
 :::important
 The secrets contain a number of fields starting with `MYCLOUD`. This must be replaced with how you want to identify your cloud.
 
-If you want to identifty the cloud as `grok`, then replace `MYCLOUD` with `grok` in the `openstack-secrets.yaml` file and make sure you use `grok` in the `minimal-values.yaml` file referenced later in this tutorial.
+If you want to identifty the cloud as `grok`, then replace `MYCLOUD` with `grok` in the `openstack-secrets.yaml` file and make sure you use `grok` in the `minimal-values.yaml` file referenced later in this tutorial. Later, your will also set a real name for your cloud. 
 :::
 
  Make sure you have your OpenStack RC file handy as it contains the information you need. Also ensure you have S3 credentials. S3 will be used to store backup data coming from the datastores the end user deploys.
