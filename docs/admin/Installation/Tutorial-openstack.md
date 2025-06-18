@@ -91,7 +91,7 @@ Then also create a record for:
 
 `A 146.190.177.145  cc.example.com`
 
-`cc.example.com` will be the endpoint of ClusterControl where administrators will have detailed control and information about your datastores. We do no recommend that this endpoint it open directly to the public. A
+`cc.example.com` will be the endpoint of ClusterControl where administrators will have detailed control and information about your datastores. We do no recommend that this endpoint it open directly to the public. 
 
 
 ## Preparations
