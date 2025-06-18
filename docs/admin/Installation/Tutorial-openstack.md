@@ -83,13 +83,15 @@ cert-manager-webhook-5f454c484c-bx8gx      1/1     Running   0          11d
 ```
 
 ### Setup DNS
-Ensure you have a DNS A record set up, pointing the EXTERNAL_IP to the domain you wish to install CCX on, e.g., `ccx.example.com`:
+Ensure you have a DNS A record set up, pointing the EXTERNAL_IP to the domain you wish to install CCX on, e.g., `ccx.example.com` (this is the endpoint the end-users will access):
 
 `A 146.190.177.145  ccx.example.com`
+
 Then also create a record for:
+
 `A 146.190.177.145  cc.example.com`
 
-`cc.example.com` will be the endpoint of ClusterControl where you will have detailed control and information about your datastores. We do no recommend that this endpoint it open directly to the public.
+`cc.example.com` will be the endpoint of ClusterControl where administrators will have detailed control and information about your datastores. We do no recommend that this endpoint it open directly to the public. A
 
 
 ## Preparations
