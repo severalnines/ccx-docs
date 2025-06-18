@@ -20,8 +20,8 @@ In the event of cluster primary fails/changes/add node/etc. CCX will update the 
 
 ## Requirements
 
-- ExternalDNS - https://github.com/kubernetes-sigs/external-dns
-- Domain name managed by one of ExternalDNS supported providers - https://github.com/kubernetes-sigs/external-dns#status-of-providers
+- [ExternalDNS](https://github.com/kubernetes-sigs/external-dns)
+- Domain name managed by one of [ExternalDNS supported providers](https://github.com/kubernetes-sigs/external-dns#status-of-providers)
 
 ### DNS providers supported by ExteralDNS
 
@@ -36,11 +36,11 @@ If your DNS provider is not supported by ExternalDNS (see https://github.com/kub
 
 ### Helm-CCX
 
-- Set a desired domain name to use here - https://github.com/severalnines/helm-ccx/blob/main/values.yaml#L54
+- Set a desired domain name to use here - https://github.com/severalnines/helm-charts/blob/main/charts/ccxdeps/values.yaml#L54
 
 ### ExternalDNS
 
-- Set your cloud provider credentials as described in - https://artifacthub.io/packages/helm/bitnami/external-dns - in https://github.com/severalnines/helm-ccxdeps/blob/main/values.yaml#L49 under `externaldns`.
+- Set your cloud provider credentials as described in - https://artifacthub.io/packages/helm/bitnami/external-dns - in https://github.com/severalnines/helm-charts/blob/main/charts/ccxdeps/values.yaml#L51 under `externaldns`.
   For example:
 
 ```yaml
@@ -66,9 +66,9 @@ data:
 ```
 
 - Enable external-dns in ccxdeps helm chart (disabled by default) - https://github.com/severalnines/helm-ccxdeps/blob/main/values.yaml#L50
-- Configure desired domain name from above in external-dns helm chart - https://github.com/severalnines/helm-ccxdeps/blob/main/values.yaml#L53
+- Configure the desired domain name from above in external-dns helm chart - https://github.com/severalnines/helm-ccxdeps/blob/main/values.yaml#L53
 
-  _NOTE:_ It is recommended to use a dedicated (not shared) domain name for CCX. For example - dbaas.exzample.org, ccx.example.org
+  _NOTE:_ It is recommended to use a dedicated (not shared) domain name for CCX. For example - dbaas.example.org, ccx.example.org
 
 ## Notes
 

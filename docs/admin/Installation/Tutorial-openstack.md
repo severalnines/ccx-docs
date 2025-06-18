@@ -8,12 +8,25 @@ After completing this tutorial, you will have a working solution, but you will n
 
 OpenStack will be configured as the cloud provider.
 
-## Requirements for Public Installation
-- An OpenStack installation and an OpenStack project. Please note that Huawei's OpenStack implementation differs significantly and will use different endpoints.
-- OpenStack credentials (e.g., an RC file)
-- Ingress Controller. In this tutorial, we will use the NGINX Ingress Controller. The ingress controller must have an EXTERNAL-IP
-- Domains (e.g., `ccx.example.com`, `cc.example.com`)
-- Cert Manager
+## Prerequisites and Requirements for Public Installation
+
+| Item                              | Description                                                                                                    |
+|------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| A few sub domains                  | (e.g. ccx.example.com, cc.ccx.example,com)                                                                 |
+| Kubernetes                         | • Persistent Volume, Storage Class<br />• Nginx Ingress controller (The ingress controller must have an EXTERNAL-IP).<br />• External IP<br /><br />See [K8S requirements](docs/admin/Installation/Index.md#k8s-control-plane-requirements) for minimum size of cluster and K8S version, etc. |
+| Secrets Manager                    | K8S secrets                                                                                                    |
+| Openstack Credentials              | E.g an openstack RC file containing the auth urls, project id etc. |
+| Infrastructure Cloud               | • One “ccx-tenant” project<br />• VM flavors<br />• Attachable volumes<br />• Public Floating IPs (IPv4)<br />• Ubuntu 22.04 image |
+| S3 storage                         | For datastore backups and Operator DB backup                                                                   |
+| DNS Provider                       | DNS providers supported by [external-dns](docs/admin/Installation/Dynamic-DNS.md). In order to use dynamic dns config. This can be installed later.                               |
+| Ubuntu 22.04LTS cloud image for VMs| Cloud image for VMs hosting database (i.e., db nodes/hosts)                                                    |
+| Root volume for VM                 | There must be at least a 20GB root volume on each VM                                                           |
+| Database volume on VM              | There must be at least 80GB data volume on each VM for database                                                |
+| Project for CCX datastores         | A global project for CCX datastores                                                                            |
+| Project quota                      | Sufficient quota for global project                                                                            |
+| Project network                    | Appropriate network for global project                                                                         |
+| Floating IPs                       | A reasonable amount of floating IPs should be pre-allocated in the network where datastores will be deployed (in the global project) |
+
 
 ### Ingress Controller
 You must have a working and correctly setup ingress controller. 
@@ -77,6 +90,7 @@ Then also create a record for:
 `A 146.190.177.145  cc.example.com`
 
 `cc.example.com` will be the endpoint of ClusterControl where you will have detailed control and information about your datastores. We do no recommend that this endpoint it open directly to the public.
+
 
 ## Preparations
 
@@ -168,11 +182,54 @@ kubectl rollout restart deployment -n ccx mysql-operator
 :::
 
 ## Configuring Cloud Credentials in K8s Secrets
-To deploy datastores to a cloud provider (AWS by default), you need to provide cloud credentials.
-Cloud credentials should be created as Kubernetes secrets in the format specified in [secrets-template.yaml](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template.yaml).
+In order to configure CCX for Opebstack you will need to provide cloud credentials.
+Cloud credentials should be created as Kubernetes secrets in the format specified in [secrets-template-openstack.yaml](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template-openstack.yaml). The template looks like this:
 
-You can use the script [create-openstack-secrets.sh](https://github.com/severalnines/helm-charts/tree/main/charts/ccx/scripts) which will prompt you for the OpenStack credentials. Make sure you have your OpenStack RC file ready.
+```
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openstack
+type: Opaque
+stringData:
+  MYCLOUD_AUTH_URL: YOUR
+  MYCLOUD_PASSWORD: OPENSTACK
+  MYCLOUD_PROJECT_ID: CREDENTIALS
+  MYCLOUD_USER_DOMAIN: HERE
+  MYCLOUD_USERNAME: AND_HERE
+  MYCLOUD_USER_DOMAIN_NAME: AND_HERE # duplicates USER_DOMAIN
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openstack-s3
+type: Opaque
+stringData:
+  MYCLOUD_S3_ENDPOINT: CHANGE_ME
+  MYCLOUD_S3_ACCESSKEY: CHANGE_ME
+  MYCLOUD_S3_SECRETKEY: CHANGE_ME
+  MYCLOUD_S3_BUCKETNAME: CHANGE_ME
+  MYCLOUD_S3_INSECURE_SSL: false #'true' if your S3 connection is unencrypted (http)  or 'false' if it is (https).
+```
 
+:::important
+The secrets contain a number of fields starting with `MYCLOUD`. This must be replaced with how you want to identify your cloud.
+
+If you want to identifty the cloud as `grok`, then replace `MYCLOUD` with `grok` in the `openstack-secrets.yaml` file and make sure you use `grok` in the `minimal-values.yaml` file referenced later in this tutorial. Later, your will also set a real name for your cloud. 
+:::
+
+ Make sure you have your OpenStack RC file handy as it contains the information you need. Also ensure you have S3 credentials. S3 will be used to store backup data coming from the datastores the end user deploys.
+
+ Fill out the details, and save the file as `openstack-secrets.yaml`, and then run:
+
+```
+ kubectl apply -n ccx -f openstack-secrets.yaml
+```
+
+### Configure secrets using a script
+
+You can also use the script [create-openstack-secrets.sh](https://github.com/severalnines/helm-charts/tree/main/charts/ccx/scripts) which will prompt you to enter the OpenStack credentials. It will create the credentials base64 encoded.
 Download the scripts:
 
 ```
@@ -188,7 +245,7 @@ Now run the scripts and enter the details:
 ./create-openstack-secrets.sh
 ```
 
-and
+and to generate credentials for S3:
 
 ```
 ./create-openstack-s3-secrets.sh
@@ -200,6 +257,8 @@ Apply the generated secrets files:
 kubectl apply -n ccx -f openstack-secrets.yaml
 kubectl apply -n ccx -f openstack-s3-secrets.yaml
 ```
+
+### Verify the secrets
 
 Verify that the secrets are created:
 
@@ -214,21 +273,27 @@ This identifier `MYCLOUD` must match the name `- code: mycloud` and `mycloud:` i
 Thus, if you have a cloud called `grok`, then replace `MYCLOUD` with `grok` in the `openstack-secrets.yaml` and `openstack-s3-secrets.yaml` files and make sure you use `grok` in the `minimal-values.yaml` file referenced later in this tutorial.
 :::
 
+### Create Security Group ccx-common
+
+You must also create a security group. Let's call it `ccx-common`.
+
+`ccx-common` must allow all TCP traffic from all k8s nodes where CCX is running. The Egress must also be allowed. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
+
+![CCX architecture](../images/ccx-common-sec-group.png)
+
 ## Prepare the OpenStack Values File and OpenStack
+
 We will use a [minimal OpenStack configuration](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/minimal-values-openstack.yaml) as the template.
 At this stage, you must have the following information/resources created in your OpenStack project:
 
-- floating_network_id - this is the public network (public IP pool)
-- network_id - this is the private network
-- project_id - the project_id where the resources will be deployed
-- image_id (this image must be Ubuntu 22.04 of a recent patch level). Cloud-init will install the necessary tools on the image
-- instance type (a code for the instance type you will use, e.g., `x4.2c4m.100g`). We recommend 2vCPU and 4GB as the minimum instance type
-- volume type (a code for the volume type you will use, e.g., `fastdisk`)
-- region, e.g., you need to know the name of the region, e.g., `nova` or `sto1`
-- A security group called `ccx-common` that must allow all TCP traffic from all k8s nodes where CCX is running. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
-
----
-![CCX architecture](../images/ccx-common-sec-group.png)
+- `floating_network_id` - this is the public network (public IP pool).
+- `network_id` - this is the private network. You must create this in Openstack.
+- `project_id` - the project_id where the resources will be deployed, This is your openstack project id. All resources are deployed in the same Openstack project.
+- `image_id` (this image must be Ubuntu 22.04 of a recent patch level). Cloud-init will install the necessary tools on the image.
+- instance type (a code for the instance type you will use, e.g., `x4.2c4m.100g`). We recommend 2vCPU and 4GB as the minimum instance type.
+- volume type (a code for the volume type you will use, e.g., `fastdisk`).
+- region, e.g., you need to know the name of the region, e.g., `nova` or `sto1` .
+- the `ccx-common` security group.
 
 Download the minimal values file:
 
@@ -347,6 +412,8 @@ See our [Troubleshooting](docs/admin/Troubleshooting/Troubleshooting.md) section
 
 ## Next Steps
 
-- Set up and configure ExternalDNS
-- Configure Instances (VMs, storage, etc.)
-- Add another cloud provider (OpenStack, CloudStack)
+- [Set up and configure ExternalDNS](docs/admin/Installation/Dynamic-DNS.md). This will give your endusers immutable endpoints to the database. Please make sure you have deleted all datastores before you set it up. 
+- [Run End-to-End Tests](docs/admin/Testing/E2E-tests.md).
+- [White-labeling UI and customization](docs/admin/Customisation/Frontend.md).
+- [JWT authentication](docs/admin/Customisation/JWT.md).
+- Configure more Instance types (VMs, storage, etc.)
