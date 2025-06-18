@@ -15,8 +15,9 @@ If you don't want to set up replication, you can choose to only apply the follow
 
 - Create a database dump file of the GCP Primary
 - Apply the dump file on the CCX replica
-
 :::
+
+Also, practice this a few times before you actually do the migration.
 
 ## Preparations
 

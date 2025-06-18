@@ -73,6 +73,10 @@ cert-manager-webhook-5f454c484c-bx8gx      1/1     Running   0          11d
 Ensure you have a DNS A record set up, pointing the EXTERNAL_IP to the domain you wish to install CCX on, e.g., `ccx.example.com`:
 
 `A 146.190.177.145  ccx.example.com`
+Then also create a record for:
+`A 146.190.177.145  cc.example.com`
+
+`cc.example.com` will be the endpoint of ClusterControl where you will have detailed control and information about your datastores. We do no recommend that this endpoint it open directly to the public.
 
 ## Preparations
 
@@ -304,7 +308,7 @@ ccx:
 Now it is finally time to install CCX:
 
 ```
-helm upgrade --install ccx s9s/ccx --debug --wait --set ccxFQDN=ccx.example.com --set 'ccx.cidr=0.0.0.0/0' -f minimal-openstack.yaml
+helm upgrade --install ccx s9s/ccx --debug --wait --set ccxFQDN=ccx.example.com --set 'ccx.cidr=0.0.0.0/0' --set ccFQDN=cc.example.com --set 'cc.cidr=0.0.0.0/0'  -f minimal-openstack.yaml
 ```
 
 Wait for it to finish, and check that the pods are `RUNNING`:
