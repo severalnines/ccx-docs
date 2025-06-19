@@ -12,7 +12,7 @@ OpenStack will be configured as the cloud provider.
 
 | Item                              | Description                                                                                                    |
 |------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| A few sub domains                  | (e.g. ccx.example.com, cc.ccx.example,com)                                                                 |
+| A few sub domains                  | E.g. `ccx.example.com` and `cc.example.com`. Please note that`cc` and `ccx` are just examples names. You can change them to e.g `adm` and `dbaas`. Just make sure you replace `ccx.example.com` and `cc.example.com` with the new names in the steps below.
 | Kubernetes                         | • Persistent Volume, Storage Class<br />• Nginx Ingress controller (The ingress controller must have an EXTERNAL-IP).<br />• External IP<br /><br />See [K8S requirements](docs/admin/Installation/Index.md#k8s-control-plane-requirements) for minimum size of cluster and K8S version, etc. |
 | Secrets Manager                    | K8S secrets                                                                                                    |
 | Openstack Credentials              | E.g an openstack RC file containing the auth urls, project id etc. |
@@ -93,6 +93,9 @@ Then also create a record for:
 
 `cc.example.com` will be the endpoint of ClusterControl where administrators will have detailed control and information about your datastores. We do no recommend that this endpoint it open directly to the public. 
 
+:::note
+`cc.example.com` and `ccx.example.com` are just examples. You can change them to e.g `adm` and `dbaas`. Just make sure you replace `ccx.example.com` and `cc.example.com` with the new names in the steps below.
+:::
 
 ## Preparations
 
