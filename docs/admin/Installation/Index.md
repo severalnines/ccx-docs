@@ -11,7 +11,9 @@ For a more details please read the [architecture](architecture.md).
 
 ## Quickstart
 
-For laptop/desktop installation instructions please visit [Install CCX on a Laptop](CCX-Install-Laptop.md).
+- For Openstack we recommend that you follow the [Openstack tutorial](Tutorial-openstack.md).
+- For laptop/desktop installation instructions please visit [Install CCX on a Laptop](CCX-Install-Laptop.md).
+
 
 ### Add Severalnines Helm Chart repository
 
