@@ -304,21 +304,29 @@ At this stage, you must have the following information/resources created in your
 - region, e.g., you need to know the name of the region, e.g., `nova` or `sto1` .
 - the `ccx-common` security group.
 
-### networks
 
-In the network section in the values.yaml file that will be created in the next step we have a network called `code: public`. 
-This is the Openstack network name and here is an example how it is created (and also showing 4 instances attached to the public network).
-
-![OpenStack Network Example 1](../images/openstack-network1.png)
-![OpenStack Network Example 2](../images/openstack-network2.png)
-![OpenStack Network Example 3](../images/openstack-network3.png)
-
+In the network section in the values.yaml file that will be created in the next step we have a network called `code: public`, and the ID of this network is also set in the `floating_network_id: b19680b3-c00e-40f0-ad77-4448e81ae226  # Replace with actual ID`. This is the public pool of IP addresses that are assigned to the VMs. 
 
 :::important 
 
-The network MUST be reachable from the CCX controlplane.
+The network MUST be reachable from the CCX controlplane, hence the use if public IPs in this setup.
 
 ::: 
+
+
+This is the Openstack network name and here is an example how it is created (and also showing four instances attached to the public network). 
+
+![OpenStack Public Network Example 1](../images/openstack-network1.png)
+![OpenStack Public Network Example 2](../images/openstack-network2.png)
+![OpenStack Public Network Example 3](../images/openstack-network3.png)
+
+Then for the internal network (`network_id: 21dfbb3d-a948-449b-b727-5fdda2026b45`) below, these diagrams shows the setup of the 'default' network. It will be used for internal communication between the nodes.
+
+
+![OpenStack Private Network Example 1](../images/openstack_default_network1.png)
+![OpenStack Private Network Example 2](../images/openstack_default_network2.png)
+![OpenStack Private Network Example 3](../images/openstack_default_network3.png)
+
 
 Download the minimal values file:
 
@@ -369,13 +377,13 @@ ccx:
         regions:
           - code: sto1  # this is your region code. 
             display_code: my-region1
-            name: Stockholm
+            name: Stockholm # Human-readable name
             city: Stockholm
             country_code: SE
             continent_code: EU
             availability_zones:
               - code: nova
-                name: az1
+                name: az1 # Human-readable name
   services:
     deployer:
       config:
