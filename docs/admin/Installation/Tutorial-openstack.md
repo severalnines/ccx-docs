@@ -16,7 +16,7 @@ OpenStack will be configured as the cloud provider.
 | Kubernetes                         | • Persistent Volume, Storage Class<br />• Nginx Ingress controller (The ingress controller must have an EXTERNAL-IP).<br />• External IP<br /><br />See [K8S requirements](docs/admin/Installation/Index.md#k8s-control-plane-requirements) for minimum size of cluster and K8S version, etc. |
 | Secrets Manager                    | K8S secrets                                                                                                    |
 | Openstack Credentials              | E.g an openstack RC file containing the auth urls, project id etc. |
-| Infrastructure Cloud               | • One “ccx-tenant” project<br />• VM flavors<br />• Attachable volumes<br />• Public Floating IPs (IPv4)<br />• Ubuntu 22.04 image |
+| Infrastructure Cloud               | • One "ccx-tenant" project<br />• VM flavors<br />• Attachable volumes<br />• Public Floating IPs (IPv4)<br />• Ubuntu 22.04 image |
 | S3 storage                         | For datastore backups and Operator DB backup                                                                   |
 | DNS Provider                       | DNS providers supported by [external-dns](docs/admin/Installation/Dynamic-DNS.md). In order to use dynamic dns config. This can be installed later.                               |
 | Ubuntu 22.04LTS cloud image for VMs| Cloud image for VMs hosting database (i.e., db nodes/hosts)                                                    |
@@ -303,6 +303,22 @@ At this stage, you must have the following information/resources created in your
 - volume type (a code for the volume type you will use, e.g., `fastdisk`).
 - region, e.g., you need to know the name of the region, e.g., `nova` or `sto1` .
 - the `ccx-common` security group.
+
+### networks
+
+In the network section in the values.yaml file that will be created in the next step we have a network called `code: public`. 
+This is the Openstack network name and here is an example how it is created (and also showing 4 instances attached to the public network).
+
+![OpenStack Network Example 1](../images/openstack-network1.png)
+![OpenStack Network Example 2](../images/openstack-network2.png)
+![OpenStack Network Example 3](../images/openstack-network3.png)
+
+
+:::important 
+
+The network MUST be reachable from the CCX controlplane.
+
+::: 
 
 Download the minimal values file:
 
