@@ -304,21 +304,26 @@ At this stage, you must have the following information/resources created in your
 - region, e.g., you need to know the name of the region, e.g., `nova` or `sto1` .
 - the `ccx-common` security group.
 
+In the network section in the values.yaml file that will be created in the next step we have a network called `code: public`, and the ID of this network is also set in the `floating_network_id: b19680b3-c00e-40f0-ad77-4448e81ae226`. This is the public pool of IP addresses that are assigned to the VMs. 
 
-In the network section in the values.yaml file that will be created in the next step we have a network called `code: public`, and the ID of this network is also set in the `floating_network_id: b19680b3-c00e-40f0-ad77-4448e81ae226  # Replace with actual ID`. This is the public pool of IP addresses that are assigned to the VMs. 
+Another network, for internal/private communication (marked with `network_id: 21dfbb3d-a948-449b-b727-5fdda2026b45` below) between VMs are also needed to support database replication. These networks are outlined below.
 
 :::important 
 
-The network MUST be reachable from the CCX controlplane, hence the use if public IPs in this setup.
+The VMs that will be create MUST be reachable from the CCX controlplane, hence the use if public IPs in this setup.
 
 ::: 
 
+### Public network
 
-This is the Openstack network name and here is an example how it is created (and also showing four instances attached to the public network). 
+This is the Openstack network name and here is an example how it is created (and also showing four instances attached to the public network). In the `minimal-openstack.yaml` the `floating_network_id:` represents this network:
 
 ![OpenStack Public Network Example 1](../images/openstack-network1.png)
 ![OpenStack Public Network Example 2](../images/openstack-network2.png)
 ![OpenStack Public Network Example 3](../images/openstack-network3.png)
+
+### Private/internal network
+
 
 Then for the internal network (`network_id: 21dfbb3d-a948-449b-b727-5fdda2026b45`) below, these diagrams shows the setup of the 'default' network. It will be used for internal communication between the nodes.
 
