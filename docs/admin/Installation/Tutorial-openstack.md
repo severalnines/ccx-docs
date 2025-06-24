@@ -187,8 +187,12 @@ kubectl rollout restart deployment -n ccx mysql-operator
 :::
 
 ## Configuring Cloud Credentials in K8s Secrets
-In order to configure CCX for Opebstack you will need to provide cloud credentials.
+In order to configure CCX for Openstack you will need to provide cloud credentials.
 Cloud credentials should be created as Kubernetes secrets in the format specified in [secrets-template-openstack.yaml](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template-openstack.yaml). The template looks like this:
+
+### Using the template (recommended first time)
+
+In the template, the secrets are specified in clear text (stringData):
 
 ```
 ---
@@ -232,7 +236,7 @@ If you want to identifty the cloud as `grok`, then replace `MYCLOUD` with `grok`
  kubectl apply -n ccx -f openstack-secrets.yaml
 ```
 
-### Configure secrets using a script
+### Configure secrets using a script - base64 encoded (recommended for production)
 
 You can also use the script [create-openstack-secrets.sh](https://github.com/severalnines/helm-charts/tree/main/charts/ccx/scripts) which will prompt you to enter the OpenStack credentials. It will create the credentials base64 encoded.
 Download the scripts:
@@ -375,7 +379,9 @@ ccx:
 ```
 
 ## Install CCX
-Now it is finally time to install CCX:
+Now it is finally time to install CCX.
+
+Make sure you change `cc.example.com` and `ccx.example.com` to the domain names you use:
 
 ```
 helm upgrade --install ccx s9s/ccx --debug --wait --set ccxFQDN=ccx.example.com --set 'ccx.cidr=0.0.0.0/0' --set ccFQDN=cc.example.com --set 'cc.cidr=0.0.0.0/0'  -f minimal-openstack.yaml
