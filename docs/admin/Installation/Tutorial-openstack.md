@@ -318,8 +318,18 @@ The VMs that will be create MUST be reachable from the CCX controlplane, hence t
 
 This is the Openstack network name and here is an example how it is created (and also showing four instances attached to the public network). In the `minimal-openstack.yaml` the `floating_network_id:` represents this network:
 
-![OpenStack Public Network Example 1](../images/openstack-network1.png)
+
+#### Overview
+
 ![OpenStack Public Network Example 2](../images/openstack-network2.png)
+
+#### Subnets
+
+![OpenStack Public Network Example 1](../images/openstack-network1.png)
+
+
+#### Topology view
+
 ![OpenStack Public Network Example 3](../images/openstack-network3.png)
 
 ### Private/internal network
@@ -327,9 +337,16 @@ This is the Openstack network name and here is an example how it is created (and
 
 Then for the internal network (`network_id: 21dfbb3d-a948-449b-b727-5fdda2026b45`) below, these diagrams shows the setup of the 'default' network. It will be used for internal communication between the nodes.
 
+####Overview
 
 ![OpenStack Private Network Example 1](../images/openstack_default_network1.png)
+
+####Subnets
+
 ![OpenStack Private Network Example 2](../images/openstack_default_network2.png)
+
+####Ports
+
 ![OpenStack Private Network Example 3](../images/openstack_default_network3.png)
 
 
