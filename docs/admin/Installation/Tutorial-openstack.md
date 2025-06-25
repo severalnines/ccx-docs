@@ -295,7 +295,7 @@ You must also create a security group. Let's call it `ccx-common`.
 We will use a [minimal OpenStack configuration](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/minimal-values-openstack.yaml) as the template.
 At this stage, you must have the following information/resources created in your OpenStack project:
 
-- `floating_network_id` - this is the public network (public IP pool).
+- `floating_network_id` - this is the public network. All instances must be assigned a public ip (read more below).
 - `network_id` - this is the private network. You must create this in Openstack.
 - `project_id` - the project_id where the resources will be deployed, This is your openstack project id. All resources are deployed in the same Openstack project.
 - `image_id` (this image must be Ubuntu 22.04 of a recent patch level). Cloud-init will install the necessary tools on the image.
@@ -316,14 +316,19 @@ The VMs that will be create MUST be reachable from the CCX controlplane, hence t
 
 ### Public network
 
-This is the Openstack network name and here is an example how it is created (and also showing four instances attached to the public network). In the `minimal-openstack.yaml` the `floating_network_id:` represents this network:
+This is the Openstack network name and here is an example how it is created (and also showing four instances attached to the public network). In the `minimal-openstack.yaml` the `floating_network_id` represents this network. 
+Moreover, if you use a pool of public ip addresses, then you need to set `public_pool` to the same value as the `floating_network_id`.
 
+Specifying a public pool allows OpenStack to automatically create public IPs. If the public pool is not specified then CCX will explicitly create and attach public IPs to the instance. Thus, these configuring this depends on how you setup and design your Openstack network. We recommend that CCX explicitly create and attach public ip, thus not using the public pool.
+
+Below are examples of a public network setup for OpenStack.
 
 #### Overview
 
 ![OpenStack Public Network Example 2](../images/openstack-network2.png)
 
 #### Subnets
+Here, in this picture, the `public` network is configured with IP pools, thus `public_pool` is set to the same value as `floating_network_id`:
 
 ![OpenStack Public Network Example 1](../images/openstack-network1.png)
 
@@ -335,18 +340,16 @@ This is the Openstack network name and here is an example how it is created (and
 ### Private/internal network
 
 
-Then for the internal network (`network_id: 21dfbb3d-a948-449b-b727-5fdda2026b45`) below, these diagrams shows the setup of the 'default' network. It will be used for internal communication between the nodes.
+Then for the internal network (`network_id: 21dfbb3d-a948-449b-b727-5fdda2026b45`) below, these diagrams shows the setup of the 'default' network. It will be used for internal communication between the VMs (database replication).
 
-####Overview
+#### Overview
 
 ![OpenStack Private Network Example 1](../images/openstack_default_network1.png)
 
-####Subnets
-
+#### Subnets
 ![OpenStack Private Network Example 2](../images/openstack_default_network2.png)
 
-####Ports
-
+#### Ports
 ![OpenStack Private Network Example 3](../images/openstack_default_network3.png)
 
 
@@ -413,6 +416,7 @@ ccx:
           mycloud:
             compute_api_microversion: "2.79"
             floating_network_id: b19680b3-c00e-40f0-ad77-4448e81ae226  # Replace with actual ID
+            #public_pool: b19680b3-c00e-40f0-ad77-4448e81ae226 # Enable this if a public pool is used.
             network_api_version: NetworkNeutron
             network_id: 21dfbb3d-a948-449b-b727-5fdda2026b45  # Replace with actual network ID
             project_id: 5b8e951e41f34b5394bb7cf7992a95de  # Replace with your OpenStack project ID
