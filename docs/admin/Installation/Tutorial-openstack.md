@@ -82,6 +82,26 @@ cert-manager-cainjector-69cfd4dbc9-lmxf2   1/1     Running   0          11d
 cert-manager-webhook-5f454c484c-bx8gx      1/1     Running   0          11d
 ```
 
+Make sure that ClusterIssuer resource exist. Below is an example for basic LetsEncrypt Issuer.
+
+```
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    email: some@email.com #any email is fine
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: some-key #if not define, it will be created
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+```
+To verify, run the command `kubectl describe clusterissuer letsencrypt-prod`. If the commmand returns `The ACME account was registered with the ACME server` in status, it's functioning properly. 
+
 ### Setup DNS
 Ensure you have a DNS A record set up, pointing the EXTERNAL_IP to the domain you wish to install CCX on, e.g., `ccx.example.com` (this is the endpoint the end-users will access):
 
@@ -366,12 +386,19 @@ Also, ensure that instance types and volume types are specified.
 Below is an example. Please note that you can add more instance types, volume types, clouds, etc. We recommend starting small and expanding the configuration.
 
 ```yaml
+ccxFQDN: ccx.example.com
+ccFQDN: cc.example.com
+cc:
+  cidr: 0.0.0.0/0
 ccx:
   # List of Kubernetes secrets containing cloud credentials.
   cidr: 0.0.0.0/0
   cloudSecrets:
     - openstack  # This secret must exist in Kubernetes. See 'secrets-template.yaml' for reference.
     - openstack-s3
+  ingress:
+    ssl:
+      clusterIssuer: letsencrypt-prod
   config:
     clouds:
       - code: mycloud  # Unique code for your cloud provider
@@ -431,10 +458,11 @@ ccx:
 ## Install CCX
 Now it is finally time to install CCX.
 
-Make sure you change `cc.example.com` and `ccx.example.com` to the domain names you use:
+Make sure you change `cc.example.com` and `ccx.example.com` to the domain names you use. 
+Also change the `clusterIssuer` to the one you created previously.
 
 ```
-helm upgrade --install ccx s9s/ccx --debug --wait --set ccxFQDN=ccx.example.com --set 'ccx.cidr=0.0.0.0/0' --set ccFQDN=cc.example.com --set 'cc.cidr=0.0.0.0/0'  -f minimal-openstack.yaml
+helm upgrade --install ccx s9s/ccx --debug --wait -f minimal-openstack.yaml
 ```
 
 Wait for it to finish, and check that the pods are `RUNNING`:
@@ -462,6 +490,18 @@ kubectl logs ccx-runner-service-NNNN
 
 If you see issues with timeouts:
 - Ensure you have updated the `ccx-common` security group with the correct IP address (the EXTERNAL-IP), but you might also need to add the IPs of the nodes.
+
+### No Valid Certificates
+
+First run the following command:
+
+`kubectl describe certificate -n ccx ccx-ingress`
+
+If the certificate that ingress needed to use is not there or it's status is not ready, use:
+
+`kubectl get challenges -n ccx`
+
+In the status field of challenge, error that is causing certificate not to be able to be created or work properly will be shown.
 
 ### Double-check that URLs in the secrets file are correct:
 
