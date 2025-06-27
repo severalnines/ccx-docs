@@ -95,14 +95,28 @@ spec:
     email: some@email.com #any email is fine
     server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
-      name: some-key #if not define, it will be created
+      name: some-key #if not defined, it will be created
     solvers:
     - http01:
         ingress:
           class: nginx
 ```
-To verify, run the command `kubectl describe clusterissuer letsencrypt-prod`. If the commmand returns `The ACME account was registered with the ACME server` in status, it's functioning properly. 
+To verify, run the command: 
 
+```
+kubectl describe clusterissuer letsencrypt-prod
+```
+
+If successful, the the commmand returns:
+```
+Status:
+  Acme:
+..
+  Conditions:
+  ..
+    Message:               The ACME account was registered with the ACME server
+```
+  
 
 ### Setup DNS
 Ensure you have a DNS A record set up, pointing the EXTERNAL_IP to the domain you wish to install CCX on, e.g., `ccx.example.com` (this is the endpoint the end-users will access):
