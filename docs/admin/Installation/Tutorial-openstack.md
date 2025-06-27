@@ -17,6 +17,7 @@ OpenStack will be configured as the cloud provider.
 | Secrets Manager                    | K8S secrets                                                                                                    |
 | Openstack Credentials              | E.g an openstack RC file containing the auth urls, project id etc. |
 | Infrastructure Cloud               | • One "ccx-tenant" project<br />• VM flavors<br />• Attachable volumes<br />• Public Floating IPs (IPv4)<br />• Ubuntu 22.04 image |
+| Space for PVCs                     | About 100Gi will be used for PVCs in this tutorial. More space is needed for a production grade environment. |
 | S3 storage                         | For datastore backups and Operator DB backup                                                                   |
 | DNS Provider                       | DNS providers supported by [external-dns](docs/admin/Installation/Dynamic-DNS.md). In order to use dynamic dns config. This can be installed later.                               |
 | Ubuntu 22.04LTS cloud image for VMs| Cloud image for VMs hosting database (i.e., db nodes/hosts)                                                    |
@@ -29,7 +30,7 @@ OpenStack will be configured as the cloud provider.
 
 ### Storage (PVCs)
 
-During the installation the following PVCs are created. Thus you must ensure you have enough storage available. In total, plan on using about 100Gi.
+During the installation the following PVCs are created. Thus you must ensure you have enough storage available. In total, plan on using about 100Gi for the setup described in this tutorial. More space is needed for a production grade setup.
 
 ```
 kubectl get pvc
