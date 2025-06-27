@@ -101,6 +101,11 @@ spec:
         ingress:
           class: nginx
 ```
+To apply this file, change the two parameters that have a comment and save it as clusterissuer.yaml. Than use command:
+```
+kubectl apply -f clusterissuer.yaml
+```
+There is no need to pass the namespace as ClusterIssuer resource is cluser wide resource.
 To verify, run the command: 
 
 ```
@@ -518,6 +523,15 @@ If the certificate that ingress needed to use is not there or it's status is not
 `kubectl get challenges -n ccx`
 
 In the status field of challenge, error that is causing certificate not to be able to be created or work properly will be shown.
+If no challange exists, run the following commands:
+```
+kubectl get order.acme.cert-manager.io
+NAME                        STATE     AGE
+cc.localhost-xxxxxxx        errored   6h23m
+
+kubectl describe order.acme.cert-manager.io cc.localhost-xxxxxxx | grep Reason
+```
+This will return the reason why certificate was no able to be created.
 
 ### Double-check that URLs in the secrets file are correct:
 
