@@ -27,6 +27,22 @@ OpenStack will be configured as the cloud provider.
 | Project network                    | Appropriate network for global project                                                                         |
 | Floating IPs                       | A reasonable amount of floating IPs should be pre-allocated in the network where datastores will be deployed (in the global project) |
 
+### Storage (PVCs)
+
+During the installation the following PVCs are created. Thus you must ensure you have enough storage available. In total, plan on using about 100Gi.
+
+```
+kubectl get pvc
+NAME                                         STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS       VOLUMEATTRIBUTESCLASS   AGE
+ccxdeps-ccx-nats-js-pvc-ccxdeps-ccx-nats-0   Bound    pvc-ca4425a3-41c1-4e31-844e-c089d643967d   10Gi       RWO            do-block-storage   <unset>                 36d
+cmon-master-volume                           Bound    pvc-82bf7d9f-817d-4f0c-a14b-a95f259a6d40   20Gi       RWO            do-block-storage   <unset>                 36d
+cmon-var-lib-cmon                            Bound    pvc-ea1f97fb-3ec0-4bc6-9431-5803b1f60744   1Gi        RWO            do-block-storage   <unset>                 36d
+datadir-ccxdeps-0                            Bound    pvc-ee2924f6-b4d4-4fa4-bac3-fc6bc8426740   20Gi       RWO            do-block-storage   <unset>                 36d
+pgdata-acid-ccx-0                            Bound    pvc-b2923d0f-c775-4916-8254-d959ac34bbae   10Gi       RWO            do-block-storage   <unset>                 36d
+storage-alertmanager-0                       Bound    pvc-5ff9cd69-9426-4f35-b1a4-885f6d7dab06   1Gi        RWO            do-block-storage   <unset>                 36d
+storage-ccxdeps-loki-0                       Bound    pvc-81c89a19-6c8a-40e4-bf35-931f0bfd196c   10Gi       RWO            do-block-storage   <unset>                 36d
+victoria-metrics                             Bound    pvc-23c13e1c-3345-48c8-8796-ed1a3e1a0b04   16Gi       RWO            do-block-storage   <unset>                 36d
+```
 
 ### Ingress Controller
 You must have a working and correctly setup ingress controller. 
@@ -329,7 +345,7 @@ You must also create a security group. Let's call it `ccx-common`.
 
 `ccx-common` must allow all TCP traffic from all k8s nodes where CCX is running. The Egress must also be allowed. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
 
-![CCX architecture](../images/ccx-common-sec-group.png)
+![ccx-common](../images/ccx-common-sec-group.png)
 
 ## Prepare the OpenStack Values File and OpenStack
 
