@@ -67,7 +67,7 @@ ingress-nginx-controller-metrics     ClusterIP      10.108.13.85    <none>      
 You must have an `EXTERNAL-IP`; otherwise, the installation will fail.
 
 ### Cert Manager
-We recommend having cert-manager set up:
+Make sure you have `cert-manager` set up:
 
 ```
 kubectl get pods -n cert-manager
@@ -81,6 +81,8 @@ cert-manager-66dbc9658d-4hh55              1/1     Running   0          11d
 cert-manager-cainjector-69cfd4dbc9-lmxf2   1/1     Running   0          11d
 cert-manager-webhook-5f454c484c-bx8gx      1/1     Running   0          11d
 ```
+
+#### 
 
 ### Setup DNS
 Ensure you have a DNS A record set up, pointing the EXTERNAL_IP to the domain you wish to install CCX on, e.g., `ccx.example.com` (this is the endpoint the end-users will access):
