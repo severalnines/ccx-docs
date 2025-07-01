@@ -364,14 +364,17 @@ You must also create a security group. Let's call it `ccx-common`.
 We will use a [minimal OpenStack configuration](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/minimal-values-openstack.yaml) as the template.
 At this stage, you must have the following information/resources created in your OpenStack project:
 
-- `floating_network_id` - this is the public network. All instances must be assigned a public ip (read more below).
-- `network_id` - this is the private network. You must create this in Openstack.
-- `project_id` - the project_id where the resources will be deployed, This is your openstack project id. All resources are deployed in the same Openstack project.
-- `image_id` - this image must be Ubuntu 22.04 of a recent patch level). Cloud-init will install the necessary tools on the image. This can be updated later to provide for new versions and patch levels.
-- `instance_type` - this is a code for the instance type you will use, e.g., `x4.2c4m.100g`). We recommend 2vCPU and 4GB as the minimum instance type. The code must match an existing openstack instance_type / flavor.
-- `volume_type` - a code for the volume type you will use, e.g., `fastdisk`. The code must match the openstack volume type name.
-- `region` - you need to know the name of the region, e.g., `nova` or `sto1` .
-- the `ccx-common` security group.
+| Item            | Description                                                                                                                                                   |
+|----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `floating_network_id`| This is the public network. All instances must be assigned a public IP (read more below).                                                                    |
+| `network_id`         | This is the private network. You must create this in OpenStack.                                                                                               |
+| `project_id`         | The project ID where the resources will be deployed. This is your OpenStack project ID. All resources are deployed in the same OpenStack project.            |
+| `image_id`           | This image must be Ubuntu 22.04 of a recent patch level. Cloud-init will install the necessary tools on the image. Can be updated for new versions/patches.  |
+| `instance_type`      | Code for the instance type you will use, e.g., `x4.2c4m.100g`. Recommended: 2vCPU and 4GB minimum. Must match an existing OpenStack flavor.                   |
+| `volume_type`        | Code for the volume type you will use, e.g., `fastdisk`. Must match the OpenStack volume type name.                                                           |
+| `region`             | Name of the region, e.g., `nova` or `sto1`.                                                                                                                   |
+| `ccx-common`         | Security group.                                                                                                                                               |
+
 
 In the network section in the values.yaml file that will be created in the next step we have a network called `code: public`, and the ID of this network is also set in the `floating_network_id: b19680b3-c00e-40f0-ad77-4448e81ae226`. This is the public pool of IP addresses that are assigned to the VMs. 
 
@@ -540,32 +543,34 @@ kubectl logs ccx-runner-service-NNNN
 If you see issues with timeouts:
 - Ensure you have updated the `ccx-common` security group with the correct IP address (the EXTERNAL-IP), but you might also need to add the IPs of the nodes.
 
+
 ### No Valid Certificates
 
-First run the following command:
+First, run the following command:
 
-`kubectl describe certificate -n ccx ccx-ingress`
-
-If the certificate that ingress needed to use is not there or it's status is not ready, use:
-
-`kubectl get challenges -n ccx`
-
-In the status field of challenge, error that is causing certificate not to be able to be created or work properly will be shown.
-If no challange exists, run the following commands:
+```bash
+kubectl describe certificate -n ccx ccx-ingress
 ```
+
+If the certificate required by the ingress is missing or its status is not "Ready", run:
+
+```bash
+kubectl get challenges -n ccx
+```
+
+In the `status` field of the challenge, you will see the error that is preventing the certificate from being created or functioning correctly.  
+If no challenge exists, run the following commands:
+
+```bash
 kubectl get order.acme.cert-manager.io
 NAME                        STATE     AGE
 cc.localhost-xxxxxxx        errored   6h23m
 
 kubectl describe order.acme.cert-manager.io cc.localhost-xxxxxxx | grep Reason
 ```
-This will return the reason why certificate was no able to be created.
 
-### Double-check that URLs in the secrets file are correct:
+This will display the reason why the certificate could not be created.
 
-```
-kubectl get secret openstack -o json | jq -r '.data | to_entries[] | "\(.key): \(.value | @base64d)"'
-```
 
 See our [Troubleshooting](docs/admin/Troubleshooting/Troubleshooting.md) section for more information.
 
