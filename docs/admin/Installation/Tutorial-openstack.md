@@ -100,7 +100,18 @@ cert-manager-webhook-5f454c484c-bx8gx      1/1     Running   0          11d
 ```
 
 
-Make sure that ClusterIssuer resource exist. Below is an example for basic LetsEncrypt Issuer.
+Make sure the ClusterIssuer resource exist:
+
+```
+kubectl get clusterissuer
+
+NAME                  READY   AGE
+letsencrypt-prod      True    2y233d
+```
+
+If not, then it must be created.
+
+Below is an example for basic LetsEncrypt Issuer.
 
 ```
 apiVersion: cert-manager.io/v1
@@ -109,16 +120,16 @@ metadata:
   name: letsencrypt-prod
 spec:
   acme:
-    email: some@email.com #any email is fine
+    email: some@email.com #any email is fine. CHANGE THIS
     server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
-      name: some-key #if not defined, it will be created
+      name: some-key #if not defined, it will be created. CHANGE THIS
     solvers:
     - http01:
         ingress:
           class: nginx
 ```
-To apply this file, change the two parameters that have a comment and save it as clusterissuer.yaml. Than use command:
+To apply this file, change the two parameters that have a comment and save it as `clusterissuer.yaml`. Then use the command:
 ```
 kubectl apply -f clusterissuer.yaml
 ```
@@ -356,10 +367,10 @@ At this stage, you must have the following information/resources created in your
 - `floating_network_id` - this is the public network. All instances must be assigned a public ip (read more below).
 - `network_id` - this is the private network. You must create this in Openstack.
 - `project_id` - the project_id where the resources will be deployed, This is your openstack project id. All resources are deployed in the same Openstack project.
-- `image_id` (this image must be Ubuntu 22.04 of a recent patch level). Cloud-init will install the necessary tools on the image.
-- instance type (a code for the instance type you will use, e.g., `x4.2c4m.100g`). We recommend 2vCPU and 4GB as the minimum instance type.
-- volume type (a code for the volume type you will use, e.g., `fastdisk`).
-- region, e.g., you need to know the name of the region, e.g., `nova` or `sto1` .
+- `image_id` - this image must be Ubuntu 22.04 of a recent patch level). Cloud-init will install the necessary tools on the image. This can be updated later to provide for new versions and patch levels.
+- `instance_type` - this is a code for the instance type you will use, e.g., `x4.2c4m.100g`). We recommend 2vCPU and 4GB as the minimum instance type. The code must match an existing openstack instance_type / flavor.
+- `volume_type` - a code for the volume type you will use, e.g., `fastdisk`. The code must match the openstack volume type name.
+- `region` - you need to know the name of the region, e.g., `nova` or `sto1` .
 - the `ccx-common` security group.
 
 In the network section in the values.yaml file that will be created in the next step we have a network called `code: public`, and the ID of this network is also set in the `floating_network_id: b19680b3-c00e-40f0-ad77-4448e81ae226`. This is the public pool of IP addresses that are assigned to the VMs. 
@@ -449,7 +460,7 @@ ccx:
             ram: 4
             type: x4.2c4m.100g
         volume_types:
-        - code: fastdisk
+        - code: fastdisk #the code must match the openstack volume type name.
           has_iops: false
           info: Optimized for performance
           name: Fast storage
