@@ -395,7 +395,16 @@ The public network name is identified by the name of the public network as used 
 Here is an example how it is created (and also showing four instances attached to the public network). In the `minimal-openstack.yaml` the `floating_network_id` represents this network. 
 Moreover, if you use a pool of public ip addresses, then you need to set `public_pool` to the same value as the `floating_network_id`.
 
-Specifying a public pool allows OpenStack to automatically create public IPs. If the public pool is not specified then CCX will explicitly create and attach public IPs to the instance. Thus, configuring this depends on how you setup and design your Openstack network. We recommend that CCX explicitly create and attach public ip, thus not using the public pool.
+
+Specifying a public pool allows OpenStack to automatically create public IPs. 
+
+If the public pool is not specified then CCX will explicitly create and attach public IPs to the instance. Thus, configuring this depends on how you setup and design your Openstack network. We recommend that CCX explicitly create and attach public ip, thus not using the public pool.
+
+:::note
+
+The most common is not to use the `public_pool` (i.e. leave it empty) and just specify the `floating_network_id`.
+
+:::
 
 Below are examples of a public network setup for OpenStack.
 
