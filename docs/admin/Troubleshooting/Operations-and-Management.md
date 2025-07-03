@@ -4,13 +4,17 @@ CCX comes with many tools for managing and operating your installation.
 
 ## CCX Admin UI
 
-Your `CCX_URL` has the `/auth/admin` endpoint that allows you (and your support team) to administer all datastores deployed.
+Your `CCX_URL` has the `/auth/admin` endpoint (https://ccxFQDN/auth/admin) that allows you (and your support team) to administer all datastores deployed
 
-The account details for this are found in the kubernetes secret `admin-users`. (The format is `<email>:<password>` and additional users can be specified using the `;` as a separator)
+The account details for this are found in the kubernetes secret `admin-users`. (The format is `<email>:<password>` and additional admin users can be specified using the `;` as a separator).
 
 You need to logout from CCX web-app first or clear the cookies for your `CCX_URL` in a browser.
 
 ### CCX Admin API
+
+The Admin UI offers basic administration of datastores (View and Delete), and also users (view).
+
+Database configuration parameters, instance types, volunes, etc are configured in `values.yaml`.
 
 #### Basic Auth
 
