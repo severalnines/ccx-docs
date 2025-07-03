@@ -447,6 +447,12 @@ curl -o minimal-openstack.yaml https://raw.githubusercontent.com/severalnines/he
 Edit the `minimal-openstack.yaml` and replace all `MY_*` with the values for `floating_network_id`, `network_id`, etc. Double-check that you do not omit or make any typos.
 Also, ensure that instance types and volume types are specified.
 
+:::note
+
+A number of identifiers are case sensitive: `ccx.config.clouds[].regions[].code`, `ccx.config.clouds[].regions[].availabiliity_zones[].code`, `ccx.services.deployer.config.openstack_vendors[].regions[].identifier` and also 
+
+:::
+
 ### Sample Minimal OpenStack Values File
 Below is an example. Please note that you can add more instance types, volume types, clouds, etc. We recommend starting small and expanding the configuration.
 
@@ -492,14 +498,14 @@ ccx:
               All instances will be deployed with public IPs.
               Access to the public IPs is controlled by a firewall.
         regions:
-          - code: sto1  # this is your region code. 
+          - code: sto1  # this is your region code. Case-sensitive.
             display_code: my-region1
             name: Stockholm # Human-readable name
             city: Stockholm
             country_code: SE
             continent_code: EU
             availability_zones:
-              - code: nova
+              - code: nova # Case-sensitive 
                 name: az1 # Human-readable name
   services:
     deployer:
@@ -513,7 +519,7 @@ ccx:
             network_id: 21dfbb3d-a948-449b-b727-5fdda2026b45  # Replace with actual network ID
             project_id: 5b8e951e41f34b5394bb7cf7992a95de  # Replace with your OpenStack project ID
             regions:
-              sto1:  # region id, must be consistently set/named.
+              sto1:  # region id, must be consistently set/named. Case-sensitive.
                 image_id: 936c8ba7-343a-4172-8eab-86dda97f12c5  # Replace with image ID for the region
                 # secgrp_name refers to the security group name used by CCX to access datastore VMs.
                 # It must be created manually and allow all TCP traffic from all Kubernetes nodes where CCX is running.
