@@ -472,6 +472,8 @@ ccx:
   cloudSecrets:
     - openstack  # This secret must exist in Kubernetes. See 'secrets-template.yaml' for reference.
     - openstack-s3
+  env:
+     DISABLE_ROLLBACK: "true" #if a datastore fails to deploy, then it will not be deleted. Helps with debugging. Set to "false" for prod.
   ingress:
     ssl:
       clusterIssuer: letsencrypt-prod
@@ -586,6 +588,7 @@ kubectl run -it --rm ssh-db-node --image=europe-docker.pkg.dev/severalnines-publ
 ### Timeouts
 
 If you see issues with timeouts:
+
 - Ensure you have updated the `ccx-common` security group with the correct IP address (the EXTERNAL-IP), but you might also need to add the IPs of the nodes.
 
 
