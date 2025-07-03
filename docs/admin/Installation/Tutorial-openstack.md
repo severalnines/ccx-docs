@@ -354,7 +354,14 @@ Thus, if you have a cloud called `grok`, then replace `MYCLOUD` with `grok` in t
 
 You must also create a security group. Let's call it `ccx-common`.
 
-`ccx-common` must allow all TCP traffic from all k8s nodes where CCX is running. The Egress must also be allowed. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
+`ccx-common` must allow all TCP traffic from all k8s nodes where CCX is running. 
+
+
+The Egress must also be allowed. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
+
+:::important
+If you have three worker nodes, and they have different IP addresses then you must add three entries to the security group, allowing 1-65535 for each IP address as egress.
+:::
 
 ![ccx-common](../images/ccx-common-sec-group.png)
 
@@ -373,7 +380,6 @@ At this stage, you must have the following information/resources created in your
 | `volume_type`        | Code for the volume type you will use, e.g., `fastdisk`. Must match the OpenStack volume type name.                                                           |
 | `region`             | Name of the region, e.g., `nova` or `sto1`.                                                                                                                   |
 | `ccx-common`         | Security group.                                                                                                                                               |
-
 
 In the network section in the values.yaml file that will be created in the next step we have a network called `code: public`, and the ID of this network is also set in the `floating_network_id: b19680b3-c00e-40f0-ad77-4448e81ae226`. This is the public pool of IP addresses that are assigned to the VMs. 
 
