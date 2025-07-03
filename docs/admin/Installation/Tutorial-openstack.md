@@ -577,7 +577,8 @@ Check the following
 - See if you can SSH into the deployed VM and look for errors in cloudint (`/var/log/cloud-init.log` and `/var/log/cloud-init-output.log`). See below how to SSH to the VM using `ssh-db-node`:
 
 ** ssh-db-node **
-Obtain the UUID of the datastore from the CCX UI.
+Obtain the UUID of the datastore from the CCX UI. 
+
 ```
 kubectl run -it --rm ssh-db-node --image=europe-docker.pkg.dev/severalnines-public/ccx/ssh-db-node:latest --restart=Never -- <store_uuid>
 ```
