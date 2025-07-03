@@ -588,6 +588,24 @@ This will display the reason why the certificate could not be created.
 
 If the error is something like `Error presenting challenge: admission webhook "validate.nginx.ingress.kubernetes.io" denied the request: ingress contains invalid paths: path /.well-known/acme-challenge/6Uf-bGI5H8fwC-hY3ItfraPvG__PvowY--WL5-hiyWw cannot be used with pathType Exact`, go to the nginx-ingress-controler namespace, and make sure that the `use-proxy-protocol` is set to false in the ConfigurationMap. You can use `kubectl get configmap -n ingress-nginx` to get the ConfigurationMap. The reason this is something that needs to be done is that unless LoadBalancer that is being used is custom installed (e.x HAProxy), OpenStack doesn't support proxy protocol.
 
+If that doesn't help or using the `use-proxy-protocol` is necessary, do the following:
+```bash
+kubectl get validatingwebhookconfiguration
+NAME                                 WEBHOOKS   AGE
+cert-manager-webhook                 1          44h
+ingress-nginx-xxxxx-admission        1          36d
+```
+Edit the ingress-nginx-xxxxx-admission, such that you add in the namespaceSelecor you add
+```
+namespaceSelector:
+  matchExpressions:
+  - key: nginx-webhook
+    operator: NotIn
+    values:
+    - disabled
+```
+Save it and restart all of the nginx ingress pods. After that is done, add label to the ccx namespace `kubernetes.io/metadata.name=ccx`.
+Give it 5 minutes for the internal stuff to sync, than remove the `ccx-ingress` manually. This will cause it to be recreated, and now it should be in ready state within few minutes. 
 
 See our [Troubleshooting](docs/admin/Troubleshooting/Troubleshooting.md) section for more information.
 
