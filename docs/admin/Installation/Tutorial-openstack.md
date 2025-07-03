@@ -595,7 +595,7 @@ NAME                                 WEBHOOKS   AGE
 cert-manager-webhook                 1          44h
 ingress-nginx-xxxxx-admission        1          36d
 ```
-Edit the ingress-nginx-xxxxx-admission, such that you add in the namespaceSelecor you add
+Edit the ingress-nginx-xxxxx-admission, such that you add in the namespaceSelecor the following:
 ```
 namespaceSelector:
   matchExpressions:
