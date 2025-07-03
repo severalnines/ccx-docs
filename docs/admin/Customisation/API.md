@@ -18,7 +18,11 @@ This includes:
 - VPCs: Manage VPCs and peerings.
 - Authentication: Authentication and user account management
 
-The full API documentation is documented in a Swagger file that can be accessed at `https://<hostname>/api/swagger/index.html`.
+The full API documentation is documented in a Swagger file that can be accessed at `https://<ccxFQDN>/api/docs/`.
+
+The API is provided *as is*.
+
+
 
 ## Authentication
 
