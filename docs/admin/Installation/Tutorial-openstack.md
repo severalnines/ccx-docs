@@ -562,6 +562,26 @@ If you run into issues, a good place to start is to look at logs from the `ccx-r
 kubectl logs ccx-runner-service-NNNN
 ```
 
+### Deployment fails 
+
+Usually deployment fails because of:
+
+- firewall issues (ccx-common does not contain all the IP of all k8s worker nodes).
+- quota issues.
+- cloudinit fails.
+- other networking issues preventing the CCX to reach the VM/instance. 
+
+Check the following
+
+- Inspect the logs of the ccx-runner service: `kubectl logs ccx-runner-service-NNNN`
+- See if you can SSH into the deployed VM and look for errors in cloudint (`/var/log/cloud-init.log` and `/var/log/cloud-init-output.log`). See below how to SSH to the VM using `ssh-db-node`:
+
+** ssh-db-node **
+Obtain the UUID of the datastore from the CCX UI.
+```
+kubectl run -it --rm ssh-db-node --image=europe-docker.pkg.dev/severalnines-public/ccx/ssh-db-node:latest --restart=Never -- <store_uuid>
+```
+
 ### Timeouts
 
 If you see issues with timeouts:
