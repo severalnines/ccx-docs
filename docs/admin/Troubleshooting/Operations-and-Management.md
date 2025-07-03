@@ -1,6 +1,6 @@
 # Operations and Management
 
-CCX comes with many tools for managing and operating your installation.
+CCX comes with tools for managing and operating your installation.
 
 ## CCX Admin UI
 
@@ -33,7 +33,7 @@ BASIC_AUTH=$(kubectl get secret admin-basic-auth -o json | jq -r '(.data.ADMIN_A
 
 ## ClusterControl UI
 
-This is the admin panel for Cluster Control and exposes the functionality of CMON through a web interface (you can also use the `s9s` CLI to interact).
+This is the admin panel for ClusterControl and exposes the functionality of CMON through a web interface (you can also use the `s9s` CLI tool to interact).
 
 The account details for this are found in the kubernetes secret `cmon-credentials`.
 
@@ -43,7 +43,7 @@ Never use the ClusterControl UI to delete resources (nodes or datastores). This 
 
 ## S9S CLI
 
-This is a CLI tool that provides access to CMON functionality and the tool can be run from the `cmon-master` service within kubernetes.
+[S9s CLI](docs/admin/Troubleshooting/Troubleshooting.md#s9s-cli-commands-and-cc-ui-commands) is a tool that provides access to CMON functionality and the tool can be run from the `cmon-master` service within Kubernetes.
 
 :::danger
 Never use the S9S CLI to delete resources (nodes or datastores). This may lead to stray data.
