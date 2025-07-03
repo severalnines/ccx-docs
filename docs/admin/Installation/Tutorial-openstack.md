@@ -473,7 +473,7 @@ ccx:
     - openstack  # This secret must exist in Kubernetes. See 'secrets-template.yaml' for reference.
     - openstack-s3
   env:
-     DISABLE_ROLLBACK: "true" #if a datastore fails to deploy, then it will not be deleted. Helps with debugging. Set to "false" for prod.
+     DISABLE_ROLLBACK: "false" #if a datastore fails to deploy, then it will not be deleted. Helps with debugging. Set to "false" for prod.
   ingress:
     ssl:
       clusterIssuer: letsencrypt-prod
