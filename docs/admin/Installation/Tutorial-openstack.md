@@ -449,7 +449,7 @@ Also, ensure that instance types and volume types are specified.
 
 :::note
 
-A number of identifiers are case sensitive: `ccx.config.clouds[].regions[].code`, `ccx.config.clouds[].regions[].availabiliity_zones[].code`, `ccx.services.deployer.config.openstack_vendors[].regions[].identifier` and also 
+A number of identifiers are case sensitive: `ccx.config.clouds[].regions[].code`, `ccx.config.clouds[].regions[].availabiliity_zones[].code`, `ccx.services.deployer.config.openstack_vendors[].regions[].identifier` and also the codes for the `instance_types`, `flavors`, `volumes` are `network_types` case-sensitive. Be consistent!
 
 :::
 
