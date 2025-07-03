@@ -447,14 +447,14 @@ curl -o minimal-openstack.yaml https://raw.githubusercontent.com/severalnines/he
 Edit the `minimal-openstack.yaml` and replace all `MY_*` with the values for `floating_network_id`, `network_id`, etc. Double-check that you do not omit or make any typos.
 Also, ensure that instance types and volume types are specified.
 
+### Sample Minimal OpenStack Values File
+Below is an example. Please note that you can add more instance types, volume types, clouds, etc. We recommend starting small and expanding the configuration.
+
 :::note
 
 A number of identifiers are case sensitive: `ccx.config.clouds[].regions[].code`, `ccx.config.clouds[].regions[].availabiliity_zones[].code`, `ccx.services.deployer.config.openstack_vendors[].regions[].identifier` and also the codes for the `instance_types`, `flavors`, `volumes` are `network_types` case-sensitive. Be consistent!
 
 :::
-
-### Sample Minimal OpenStack Values File
-Below is an example. Please note that you can add more instance types, volume types, clouds, etc. We recommend starting small and expanding the configuration.
 
 ```yaml
 ccxFQDN: ccx.example.com
