@@ -578,7 +578,7 @@ Check the following
 - Inspect the logs of the ccx-runner service: `kubectl logs ccx-runner-service-NNNN`
 - See if you can SSH into the deployed VM and look for errors in cloudint (`/var/log/cloud-init.log` and `/var/log/cloud-init-output.log`). See below how to SSH to the VM using `ssh-db-node`:
 
-** ssh-db-node **
+**ssh-db-node**
 Obtain the UUID of the datastore from the CCX UI. 
 
 ```
