@@ -149,7 +149,14 @@ Status:
   ..
     Message:               The ACME account was registered with the ACME server
 ```
-  
+If you plan to use your own custom certificate, you will have to manually upload it to the ccx namespace. To validate if the the certificate is properly created, use the following command:
+```
+kubectl get cert -n ccx
+
+NAME                        READY   SECRET                      AGE
+ccx-ingress-cert            True    ccx-ingress-cert            19h
+```
+If the value returned in the READY column is True, the certificate is valid.
 
 ### Setup DNS
 Ensure you have a DNS A record set up, pointing the EXTERNAL_IP to the domain you wish to install CCX on, e.g., `ccx.example.com` (this is the endpoint the end-users will access):
@@ -594,13 +601,21 @@ If you see issues with timeouts:
 
 ### No Valid Certificates
 
-First, run the following command:
+First check the currently existing certificates with 
+
+```bash
+kubectl get cert -n ccx
+
+NAME                        READY   SECRET                      AGE
+ccx-ingress-cert            False   ccx-ingress-cert            19h
+```
+If the certificate has `False` in the READY column, procced with the following:
 
 ```bash
 kubectl describe certificate -n ccx ccx-ingress
 ```
 
-If the certificate required by the ingress is missing or its status is not "Ready", run:
+If the certificate required by the ingress is missing, run:
 
 ```bash
 kubectl get challenges -n ccx
@@ -619,6 +634,26 @@ kubectl describe order.acme.cert-manager.io cc.localhost-xxxxxxx | grep Reason
 
 This will display the reason why the certificate could not be created.
 
+If the error is something like `Error presenting challenge: admission webhook "validate.nginx.ingress.kubernetes.io" denied the request: ingress contains invalid paths: path /.well-known/acme-challenge/6Uf-bGI5H8fwC-hY3ItfraPvG__PvowY--WL5-hiyWw cannot be used with pathType Exact`, go to the nginx-ingress-controler namespace, and make sure that the `use-proxy-protocol` is set to false in the ConfigurationMap. You can use `kubectl get configmap -n ingress-nginx` to get the ConfigurationMap. The reason this is something that needs to be done is that unless LoadBalancer that is being used is custom installed (e.x HAProxy), OpenStack doesn't support proxy protocol.
+
+If that doesn't help or using the `use-proxy-protocol` is necessary, do the following:
+```bash
+kubectl get validatingwebhookconfiguration
+NAME                                 WEBHOOKS   AGE
+cert-manager-webhook                 1          44h
+ingress-nginx-xxxxx-admission        1          36d
+```
+Edit the ingress-nginx-xxxxx-admission, such that you add in the namespaceSelecor the following:
+```
+namespaceSelector:
+  matchExpressions:
+  - key: nginx-webhook
+    operator: NotIn
+    values:
+    - disabled
+```
+Save it and restart all of the nginx ingress pods. After that is done, add label to the ccx namespace `kubernetes.io/metadata.name=ccx`.
+Give it 5 minutes for the internal stuff to sync, than remove the `ccx-ingress` manually. This will cause it to be recreated, and now it should be in ready state within few minutes. 
 
 See our [Troubleshooting](docs/admin/Troubleshooting/Troubleshooting.md) section for more information.
 
