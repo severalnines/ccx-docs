@@ -81,7 +81,7 @@ ingress-nginx-controller-admission   ClusterIP      10.108.28.137   <none>      
 ingress-nginx-controller-metrics     ClusterIP      10.108.13.85    <none>                                      9090/TCP                     5h40m
 ```
 
-You must have an `EXTERNAL-IP`; otherwise, the installation will fail.
+You must have an `EXTERNAL-IP`. If not, then the installation will fail.
 
 ### Cert Manager
 Make sure you have `cert-manager` set up:
@@ -100,7 +100,7 @@ cert-manager-webhook-5f454c484c-bx8gx      1/1     Running   0          11d
 ```
 
 
-Make sure the ClusterIssuer resource exist:
+Make sure the `ClusterIssuer` resource exist:
 
 ```
 kubectl get clusterissuer
@@ -140,7 +140,7 @@ To verify, run the command:
 kubectl describe clusterissuer letsencrypt-prod
 ```
 
-If successful, the the commmand returns:
+If successful, the commmand returns:
 ```
 Status:
   Acme:
@@ -197,7 +197,7 @@ kubectl config set-context --current --namespace=ccx
 
 ## Install CCX Dependencies
 
-First, we need to install the CCX dependencies:
+First, we need to install the CCX dependencies (`ccxdeps`):
 
 - PostgreSQL - [read more about the operator](./Postgres-Operator-Installation). In this tutorial, we will use the defaults.
 - MySQL - [read more about the operator](./Mysql-Operator-Installation). In this tutorial, we will use the defaults.
