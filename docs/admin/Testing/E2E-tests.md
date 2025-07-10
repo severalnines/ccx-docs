@@ -44,7 +44,7 @@ npm run report:open -- --port 8080"
 
 ### Commands Overview
 
-- `npm run test:ui:#YOUR_CLOUD_NAME#`: Runs all UI tests for `#YOUR_CLOUD_NAME#` (e.g. `aws`).
+- `npm run test:ui`: Runs all UI tests add `:singleCloud` if you have just single cloud configuration
 - `npm run test -- --grep '(?=.*\[#YOUR_CLOUD_NAME#\].*)(?=.*)' --grep-invert '@long-running|galera' --workers 4`: Runs all API tests excluding Galera's node configuration. The `--workers 4` flag sets the number of datastore tests to run in parallel (you can adjust this value based on your environment capacity).
 - `npm run report:generate`: Generates a test report.
 - `npm run report:open -- --port 8080`: Opens the report on port 8080. You can change the port to a different value if needed.
