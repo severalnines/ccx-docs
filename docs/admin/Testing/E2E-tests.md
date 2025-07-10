@@ -8,7 +8,10 @@ This documentation explains how to execute E2E tests using Docker.
 - Access to the necessary environment variables and credentials
 
 ### How to Execute E2E Tests
-
+Pull the test image:
+```bash
+docker pull europe-docker.pkg.dev/severalnines-public/ccx/playwright-e2e-tests:#CCX_VERSION#
+```
 You can run the E2E tests with the following Docker command:
 
 ```bash
