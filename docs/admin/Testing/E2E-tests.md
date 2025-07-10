@@ -20,7 +20,7 @@ docker run -p 8080:8080 -it --rm \
 -e IP_ADDRESS="<IP_ADDRESS_FOR_FIREWALL_RULE>/32" \
 -e CC_USER="cmon-user" \
 -e CC_PASSWORD="xxx" \
-eu.gcr.io/brave-night-121210/playwright-e2e-tests:#CCX_VERSION# /bin/bash \
+europe-docker.pkg.dev/severalnines-public/ccx/playwright-e2e-tests:#CCX_VERSION# /bin/bash \
 -c "npm run test:ui:#YOUR_CLOUD_NAME# || true && 
 npm run test -- --grep '(?=.*\[#YOUR_CLOUD_NAME#\].*)(?=.*)' --grep-invert '@long-running|galera' --workers 4 || true &&
 npm run report:generate &&
