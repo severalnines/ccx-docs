@@ -24,7 +24,7 @@ docker run -p 8080:8080 -it --rm \
 -e CC_USER="cmon-user" \
 -e CC_PASSWORD="xxx" \
 europe-docker.pkg.dev/severalnines-public/ccx/playwright-e2e-tests:#CCX_VERSION# /bin/bash \
--c "npm run test:ui:#YOUR_CLOUD_NAME# || true && 
+-c "npm run test:ui || true && 
 npm run test -- --grep '(?=.*\[#YOUR_CLOUD_NAME#\].*)(?=.*)' --grep-invert '@long-running|galera' --workers 4 || true &&
 npm run report:generate &&
 npm run report:open -- --port 8080"
