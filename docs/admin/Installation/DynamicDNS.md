@@ -70,8 +70,51 @@ data:
 
   _NOTE:_ It is recommended to use a dedicated (not shared) domain name for CCX. For example - dbaas.exzample.org, ccx.example.org
 
+### Designate Example
+
+In case you are using Designate for the DNS provider, since it's not the provider "officialy" supported by the ExternalDNS, we need to use `webhook` for it to work. In the ExternalDNS configuration, add the following:
+
+```
+domainFilters:
+- your@domain.com
+extraVolumes:
+- name: oscloudsyaml 
+  secret:
+    secretName: oscloudsyaml
+provider:
+  name: webhook
+  webhook:
+    extraVolumeMounts:
+    - mountPath: /etc/openstack/
+      name: oscloudsyaml
+    image:
+      repository: ghcr.io/inovex/external-dns-openstack-webhook
+      tag: 1.1.0
+    resources: {}
+registry: noop #if there is some other service managing records, appart from ExternalDNS, set this to txt
+policy: sync #add this if you want ExternalDns to be able to delete
+```
+Before applying the configuration, create a secret for authentication. Make a file with a name `clouds.yaml` and iput the following in it:
+
+```
+clouds:
+  openstack:
+    auth:
+      auth_url: https://auth.cloud.example.com
+      application_credential_id: "TOP"
+      application_credential_secret: "SECRET"
+    region_name: "earth"
+    interface: "public"
+    auth_type: "v3applicationcredential"
+```
+An existing file can be converted into a Secret via kubectl:
+
+`kubectl create secret generic oscloudsyaml --namespace external-dns --from-file=clouds.yaml`
+
+After applying it, deploy the ExternalDnS chart.
+
 ## Notes
 
-- Please note that this is not required to use ExternalDNS from ccxdeps helm chart. Feel free to use existing ExternalDNS for your cluster. Just make sure to handle `service` resource with `ExternalName` type.
+- Please note that this is not required to use ExternalDNS from ccxdeps helm chart. Feel free to use existing ExternalDNS for your cluster. Just make sure to handle `Service` and `Ingress` resource with `ExternalName` type.
 - It is recommended to set negative cache TTL - SOA.MINIMUM to a low value (0-10) to prevent issues with negative cache. This can be done by modifying SOA record for the domain used for `userDomain`.
 - It is recommended to set ExternalDNS `interval` to a low value (10s) to enable fast dns record creation and prevent issues with dns timeouts or record not found errors.
