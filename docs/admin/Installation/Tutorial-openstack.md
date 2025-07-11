@@ -473,6 +473,8 @@ ccxFQDN: ccx.example.com
 ccFQDN: cc.example.com
 cc:
   cidr: 0.0.0.0/0
+cmon:
+  licence: #insert the licence key you've received here
 ccx:
   # List of Kubernetes secrets containing cloud credentials.
   cidr: 0.0.0.0/0
