@@ -7,7 +7,8 @@ Read more in the [JWT Authentication guide](JWT.md).
 
 ## Environment Variables
 
-A number of variables is used to control the frontend:
+A number of variables is used to control the frontend. The enviroment variables are set under `ccx.services.uiapp` in the `values.yaml` for ccx.
+
 
 ```yaml
 - name: FE_BASE_DOMAIN
@@ -54,4 +55,26 @@ A number of variables is used to control the frontend:
   value: "true" # set it to true if you don't want to use the built-in `ccx-ui-auth` app. FE_AUTH_APP_URL *must* be set for this in order to work.
 - name: FE_EXTERNAL_CSS_URL
   value: "https://example.com/my.css" # CSS file URL that will be loaded and applied to the CCX UI, might be useful for theming/visual customisatons. Could also break the layout if not used with caution.
+```
+
+### Example
+
+The enviroment variables are set under `ccx.services.uiapp`. Below is an example:
+
+```
+ccx:
+   ...
+   services:
+       ...
+       uiapp:
+            env:
+                FE_AUTH_APP_URL: '/auth/?from=ccx'
+                FE_BILLING_DISABLED: 'true'
+                FE_HIDE_CLOUD_PROVIDER: 'true'
+                FE_HIDE_FEEDBACK: 'true'
+                FE_HIDE_PROJECT_NAME: 'true'
+                FE_ONBOARDING_DISABLED: 'true'
+                FE_REACT_APP_FAVICON_URL: https://ccx.example.com/favicon.ico
+                FE_REACT_APP_LOGO_URL: https://ccx.example.com/logo.png               
+                FE_VPC_DISABLED: 'true'
 ```
