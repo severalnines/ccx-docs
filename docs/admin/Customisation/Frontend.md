@@ -59,7 +59,7 @@ A number of variables is used to control the frontend. The enviroment variables 
 
 ### Example
 
-The enviroment variables are set under `ccx.services.uiapp`. Below is an example:
+The enviroment variables are set under `ccx.services.uiapp.env`. Below is an example:
 
 ```
 ccx:
@@ -67,6 +67,8 @@ ccx:
    services:
        ...
        uiapp:
+            affinity: {}
+            replicas: 3
             env:
                 FE_AUTH_APP_URL: '/auth/?from=ccx'
                 FE_BILLING_DISABLED: 'true'
