@@ -69,14 +69,8 @@ ccx:
        uiapp:
             affinity: {}
             replicas: 3
-            env:
-                FE_AUTH_APP_URL: '/auth/?from=ccx'
-                FE_BILLING_DISABLED: 'true'
-                FE_HIDE_CLOUD_PROVIDER: 'true'
-                FE_HIDE_FEEDBACK: 'true'
-                FE_HIDE_PROJECT_NAME: 'true'
-                FE_ONBOARDING_DISABLED: 'true'
-                FE_REACT_APP_FAVICON_URL: https://ccx.example.com/favicon.ico
-                FE_REACT_APP_LOGO_URL: https://ccx.example.com/logo.png               
+            env:        
+                FE_REACT_APP_FAVICON_URL: "https://ccx.example.com/favicon.ico"
+                FE_REACT_APP_LOGO_URL: "https://ccx.example.com/logo.png"        
                 FE_VPC_DISABLED: 'true'
 ```
