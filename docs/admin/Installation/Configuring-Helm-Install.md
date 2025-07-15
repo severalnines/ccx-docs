@@ -1,11 +1,19 @@
 # Configuring Helm
-Configuring Openstack, available services, availability zones or other Helm values is done in `$ENV-ccx-override-values.yaml`
+
+Configuring OpenStack, available services, availability zones or other Helm values is done in
+`$ENV-ccx-override-values.yaml`
 
 ## Common Configs
 
 - `ccFQDN` - The domain name for the CCX installation
 - `ccx`
   - `affiliation` - name of CCX owner
+  - `env` - various environment variables to tweak CCX
+    - `DISABLE_USER_MANAGEMENT` - set to `"true"` to disable standard user registration API endpoints, useful when
+      using [JWT authentication flow](../Customisation/JWT.md).
+    - `LOG_LEVEL` - possible values: `debug`, `info`, `warn`, `error`, `dpanic`, `panic`, `fatal`; default: `info`.
+    - `DISABLE_ROLLBACK` - setting it to `"true"` will prevent automatic deletion of cloud resources (VMs, volumes and
+      such) on failure. Useful for debugging. Remember to remove it when debugging is done.
   - `config`
     - `clouds` - cloud config per provider
       - `code` - cloud provider identifier
