@@ -11,6 +11,34 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.54.1
+### Improvements
+- Updated cloud security group handling to comply with new provider requirements: ports must now be specified only when a protocol (TCP or UDP) is defined.
+
+## Release Notes - CCX - v1.54.0
+CMON version 2.3.1-13620
+### New Features
+- Added support for PostgreSQL 17.
+- Instance selection improvements.
+- Added support for MariaDB 11.8.
+- New API endpoint for CCX Admin with detailed datastore info (#465).
+- `valkey-search` and `valkey-json` support.
+
+### Bugs
+- Fixed missing add/extend storage option for MSSQL.
+- Fixed MariaDB failover issue on AWS.
+- Resolved Helm chart issue with unsupported `prefix`; now uses `ImplementationSpecific`.
+- Prevented multiple VPCs from being created in the UI during datastore deployment.
+- Fixed issue with PostgreSQL 17 unable to set DB parameters.
+- Corrected disk utilization charts (sum vs. max).
+
+### Improvements
+- Disabled registration of new users via API (#458).
+- Auto-selection of Availability Zones (AZs) in the deployment wizard.
+- PostgreSQL: Added checkpoint charts.
+- Allow "dangerous" commands in Valkey and Redis.
+- Valkey: Display info about Search/JSON modules on deployment page.
+
 ## Release Notes - CCX - v1.53.2
 ### CMON Bugs
 - additional connection retries during in failover
