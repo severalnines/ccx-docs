@@ -293,7 +293,6 @@ stringData:
   MYCLOUD_S3_ENDPOINT: CHANGE_ME
   MYCLOUD_S3_ACCESSKEY: CHANGE_ME
   MYCLOUD_S3_SECRETKEY: CHANGE_ME
-  MYCLOUD_S3_BUCKETNAME: CHANGE_ME
   MYCLOUD_S3_INSECURE_SSL: false #'true' if your S3 connection is unencrypted (http)  or 'false' if it is (https).
 ```
 
