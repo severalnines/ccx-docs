@@ -1,6 +1,6 @@
 # Configuring Helm
 
-Configuring Openstack, available services, availability zones or other Helm values is done in
+Configuring OpenStack, available services, availability zones or other Helm values is done in
 `$ENV-ccx-override-values.yaml`
 
 ## Common Configs
