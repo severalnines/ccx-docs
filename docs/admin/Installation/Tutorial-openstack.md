@@ -318,8 +318,8 @@ You can also use the script [create-openstack-secrets.sh](https://github.com/sev
 Download the scripts:
 
 ```
-curl -o create-openstack-secrets.sh https://raw.githubusercontent.com/severalnines/helm-charts/main/charts/ccx/scripts/create-openstack-secrets.sh
-curl -o create-openstack-s3-secrets.sh https://raw.githubusercontent.com/severalnines/helm-charts/main/charts/ccx/scripts/create-openstack-s3-secrets.sh
+curl -o create-openstack-secrets.sh https://raw.githubusercontent.com/severalnines/helm-charts/main/charts/ccx/scripts/openstack/create-openstack-secrets.sh
+curl -o create-openstack-s3-secrets.sh https://raw.githubusercontent.com/severalnines/helm-charts/main/charts/ccx/scripts/openstack/create-openstack-s3-secrets.sh
 chmod u+x create-openstack-secrets.sh
 chmod u+x create-openstack-s3-secrets.sh
 ```
