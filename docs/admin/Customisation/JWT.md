@@ -3,7 +3,7 @@
 This section describes how to implement JWT Authentication. The JWT Authentication allows integrating a Service Portal with CCX.
 ![img](../images/JWT.png)
 
-### Users and Sessions Managed Using JWTs
+## Users and Sessions Managed Using JWTs
 
 The picture below shows the authentication flow:
 
@@ -47,11 +47,11 @@ You need to set the configuration parameters in `ccx.services.auth` in ccx value
 
 ---
 
-### JWT Endpoints
+## JWT Endpoints
 
 There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 
-#### `POST /jwt-login`
+### `POST /jwt-login`
 
 - **Description**: A new session is created. If the user doesn’t exist in the CCX database, a new user is created.
 - **Response**: Returns `200 OK` on success.
@@ -75,7 +75,7 @@ There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 }
 ```
 
-#### `GET /jwt-login`
+### `GET /jwt-login`
 
 - **Description**: Creates a session for the provided user. The user must exist in the CCX database.
 - **Response**: Returns `303 See other` on success. Redirects the user to the URL provided in the `LOGIN_REDIRECT_URL` environment variable in `ccx-auth-service`.
@@ -85,7 +85,7 @@ There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 - `issuer` — the issuer of the JWT, e.g., "CSPNAME".
 - `jwt` — the JWT.
 
-#### `POST /jwt-logout`
+### `POST /jwt-logout`
 
 - **Description**: Logs out the user. The associated session is deleted.
 - **Response**: Returns `204 No content` on success.
