@@ -16,7 +16,7 @@ A **JWT** contains an associative array with claims about the user and session, 
 
 **CCX** verifies JWTs using the corresponding public key (RSA), which is stored in the values file.
 
-The private key is used by **CSP** to encrypt the JWT token (see [examples](#examples-of-jwt-generation)). A key pair can be generated with:
+The private key is used by the **intergrator**/**CSP** to encrypt the JWT token (see [examples](#examples-of-jwt-generation)). A key pair can be generated with:
 
 ```bash
 ssh-keygen -t rsa -b 4096 -m PEM -f ccx.key
@@ -125,11 +125,13 @@ There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 
 ---
 
-### Examples of JWT Generation
+## Examples of JWT Generation
 
 Run the code by setting the params such as my.ccx.url, Example_CSP, UserID and Private Key
 
-#### Go
+### Go
+
+*This is an example and the code is provided as-is, no further support will be left on this code but feedback is welcome.* 
 
 ```go
 package main
@@ -224,38 +226,157 @@ xxx
 )
 ```
 
-#### JavaScript (Node.js)
+### JavaScript (Node.js)
+
+*This is an example and the code is provided as-is, no further support will be left on this code but feedback is welcome.* 
 
 ```javascript
-const jwt = require("jsonwebtoken");
-const fs = require("fs");
-const url = require("url");
+const fs = require('fs');
+const jwt = require('jsonwebtoken');
+const axios = require('axios');
+const { v4: uuidv4 } = require('uuid');
 
-const privateKey = fs.readFileSync("./ccx.key");
+// --- Config ---
+const authUrlPrefix = "https://<my.ccx.url>/api/auth";
+const privateKey = fs.readFileSync('./ccx.key', 'utf-8'); // path to your PEM file
 
-function createJwt(issuer, subject, exp, key) {
-  const iat = Math.floor(Date.now() / 1000);
-
-  return jwt.sign(
-    {
-      iss: issuer,
-      sub: subject,
-      jti: Math.random().toString(36).substring(7),
-      iat: iat,
-      exp: iat + exp * 60,
-    },
-    key,
-    { algorithm: "RS256" }
-  );
+// --- JWT Creation ---
+function createJWT(issuer, subject, expMinutes, key) {
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    iss: issuer,
+    sub: subject,
+    jti: uuidv4(),
+    iat: now,
+    exp: now + expMinutes * 60,
+  };
+  return jwt.sign(payload, key, { algorithm: 'RS256' });
 }
 
-function example() {
-  const token = createJwt("<mycloud>", "<my-customer-id>", 15 * 60, privateKey);
-  const r = new url.URL("https://<my.ccx.url>/api/auth/jwt-login");
-  r.searchParams.set("jwt", token);
-  r.searchParams.set("issuer", "<mycloud>");
-  console.log(r.href); // you can redirect the user to this URL
+// --- Main Logic ---
+async function main() {
+  try {
+    // Create the JWT
+    const token = createJWT("EXAMPLE_CSP", "userID", 15, privateKey);
+
+    // Prepare the request body
+    const requestBody = {
+      issuer: "EXAMPLE_CSP",
+      jwt: token,
+      first_name: "First_Name",
+      last_name: "Last_Name"
+    };
+
+    // Send the POST request
+    const response = await axios.post(
+      `${authUrlPrefix}/jwt-login`,
+      requestBody,
+      { timeout: 5000 } // 5 second timeout
+    );
+    console.log("response status:", response.status);
+
+    // Construct the login URL
+    const constructedURL = `${authUrlPrefix}/jwt-login?jwt=${encodeURIComponent(token)}&issuer=EXAMPLE_CSP`;
+    console.log("Constructed URL:", constructedURL);
+
+  } catch (err) {
+    console.error("Error:", err.message || err);
+  }
 }
 
-example();
+main();
+```
+
+**Key Details**
+
+- Replace ./ccx.key with your actual key path, or inline the PEM if you want.
+- Install required packages:
+  ```npm install jsonwebtoken axios uuid```
+- The JWT is signed exactly as in Go example (RS256, same claims).
+- The POST uses axios for simplicity (you can use native fetch in Node 18+, but axios is most similar to Go’s http.Client).
+
+### Typescript
+
+*This is an example and the code is provided as-is, no further support will be left on this code but feedback is welcome.* 
+
+You will need these dependencies:
+
+```
+npm install jsonwebtoken axios uuid
+npm install --save-dev @types/jsonwebtoken @types/node @types/uuid
+```
+
+Here is the code:
+```typescript
+import * as fs from 'fs';
+import * as jwt from 'jsonwebtoken';
+import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
+
+// ---- Types ----
+interface JwtLoginRequest {
+  issuer: string;
+  jwt: string;
+  first_name: string;
+  last_name: string;
+}
+
+// ---- Config ----
+const authUrlPrefix = "https://<my.ccx.url>/api/auth";
+
+// Load private key (PEM)
+const privateKey: string = fs.readFileSync('./ccx.key', 'utf-8');
+
+// ---- Functions ----
+function createJWT(
+  issuer: string,
+  subject: string,
+  expMinutes: number,
+  key: string
+): string {
+  const now = Math.floor(Date.now() / 1000); // seconds since epoch
+  const payload = {
+    iss: issuer,
+    sub: subject,
+    jti: uuidv4(),
+    iat: now,
+    exp: now + expMinutes * 60,
+  };
+  return jwt.sign(payload, key, { algorithm: 'RS256' });
+}
+
+async function main() {
+  try {
+    // Create JWT
+    const token = createJWT("EXAMPLE_CSP", "userID", 15, privateKey);
+
+    // Prepare request payload
+    const reqBody: JwtLoginRequest = {
+      issuer: "EXAMPLE_CSP",
+      jwt: token,
+      first_name: "First_Name",
+      last_name: "Last_Name",
+    };
+
+    // Send POST request
+    const resp = await axios.post(
+      `${authUrlPrefix}/jwt-login`,
+      reqBody,
+      { timeout: 5000 }
+    );
+    console.log("response status:", resp.status);
+
+    // Construct and print URL (as in Go)
+    const constructedURL = `${authUrlPrefix}/jwt-login?jwt=${encodeURIComponent(token)}&issuer=EXAMPLE_CSP`;
+    console.log("Constructed URL:", constructedURL);
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      console.error("HTTP error:", err.message, err.response?.status);
+    } else {
+      console.error("Error:", err);
+    }
+  }
+}
+
+main();
 ```
