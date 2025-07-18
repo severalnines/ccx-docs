@@ -6,14 +6,16 @@ This documentation explains how to execute E2E tests using Docker.
 
 - Docker installed on your machine
 - Access to the necessary environment variables and credentials
+- Optional `datastore.json` file to run your own dedicated spec
 
 ### How to Execute E2E Tests
 Pull the test image:
 ```bash
 docker pull europe-docker.pkg.dev/severalnines-public/ccx/playwright-e2e-tests:#CCX_VERSION#
 ```
-You can run the E2E tests with the following Docker command:
 
+
+#### Running from existing (hardcoded spec)
 ```bash
 docker run -p 8080:8080 -it --rm \
 -e BASE_URL="https://yourULR.net" \
@@ -28,6 +30,61 @@ europe-docker.pkg.dev/severalnines-public/ccx/playwright-e2e-tests:#CCX_VERSION#
 npm run report:generate &&
 npm run report:open -- --port 8080"
 ```
+
+#### Running from json spec
+
+prepare `datastore.json` file in this format:
+```json
+[
+    {
+        "dbType": "mariadb",
+        "clusterName": "First datastore to test",
+        "nodeConfiguration": "replication",
+        "numberOfNodes": 1,
+        "cloudProvider": "mycloud",
+        "region": {
+            "code": "WAW4-1"
+        },
+        "instance": "eo2a.large",
+        "storageType": "ssd",
+        "diskSize": 80,
+        "networkType": "public"
+    },
+    {
+        "dbType": "postgres",
+        "clusterName": "Second datastore to test",
+        "nodeConfiguration": "replication",
+        "numberOfNodes": 2,
+        "cloudProvider": "#myCloud#",
+        "region": {
+            "code": "#myRegion#"
+        },
+        "instance": "#myInstance#",
+        "storageType": "#myStorage#",
+        "diskSize": 80,
+        "networkType": "public"
+    }
+]
+```
+Replace `#myCloud#`, `#myRegion#`, `#myInstance#` and `#myStorage#` with proper values you can find in your yaml configs or get from `api/content/api/v1/deploy-wizard` response 
+
+then run:
+```bash
+docker run -p 8080:8080 -it --rm \
+-e BASE_URL="https://yourULR.net" \
+-e CC_URL="https://cc.yourULR.net" \
+-e LOGIN="e2e@severalnines.com" \
+-e PASSWORD="xxx" \
+-e IP_ADDRESS="<IP_ADDRESS_FOR_FIREWALL_RULE>/32" \
+-e CC_USER="cmon-user" \
+-e CC_PASSWORD="xxx" \
+-v $(pwd)/datastores.json:/app/datastores.json \
+europe-docker.pkg.dev/severalnines-public/ccx/playwright-e2e-tests:#CCX_VERSION# /bin/bash \
+-c "npm run test -- --grep @FROM-JSON --workers 2 || true &&
+npm run report:generate &&
+npm run report:open -- --port 8080"
+```
+It will run all the test 
 
 ### Environment Variables
 
