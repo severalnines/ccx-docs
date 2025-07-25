@@ -11,6 +11,14 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.54.4
+### Improvements
+- Added wget to cloud-init packages
+
+## Release Notes - CCX - v1.54.3
+### Bugs
+- CMON - MSSQL installation fix 
+
 ## Release Notes - CCX - v1.54.1
 ### Improvements
 - Updated cloud security group handling to comply with new provider requirements: ports must now be specified only when a protocol (TCP or UDP) is defined.
