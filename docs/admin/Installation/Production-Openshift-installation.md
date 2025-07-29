@@ -149,6 +149,21 @@ cert-manager-cainjector-69cfd4dbc9-lmxf2   1/1     Running   0          11d
 cert-manager-webhook-5f454c484c-bx8gx      1/1     Running   0          11d
 ```
 
+If you don't have cert manager installed on your system, use the following commands to install it:
+```
+helm repo add jetstack https://charts.jetstack.io --force-update
+
+helm install cert-manager --namespace cert-manager --version xxx jetstack/cert-manager --set crds.enabled=true #switch xxx for the version you wish to install, making sure it's not lower than 1.18.0
+
+```
+:::Note
+When setting up production version of cert-manager, there are a few configurtations parameter that needs to be adressed:
+`replicaCount` - by default it's set to 1. To make sure it's production ready, make sure it has 2 or 3 replicas to provide high availability.
+`podDisruptionBudget.enabled` - by default this is set to `false`. Make sure to change it to `true` if you changed `replicaCount` to be different than 1. 
+`crds.enabled` - set to `true`. This will make sure to install all of the CRD's needed for optimal work. 
+`crds.keep` - make sure it's set to `true`. This will prevent Helm from uninstalling the CRD when the Helm release is uninstalled.
+:::
+
 
 Make sure the `ClusterIssuer` resource exist:
 
@@ -294,9 +309,6 @@ oracle-mysql-operator:
   enabled: true
 installOperators: true
 
-ingressController:
-  enabled: true
-
 ```
 Please take a look at all [values](https://github.com/severalnines/helm-charts/blob/main/charts/ccxdeps/values.yaml), as you might be interested in some of the additional flags.
 
@@ -436,6 +448,30 @@ kubectl apply -n ccx -f openstack-secrets.yaml
 kubectl apply -n ccx -f openstack-s3-secrets.yaml
 ```
 
+### Create Email secret
+
+In oder to setup the emailing for the ccx, create the secret in accordance to the following template:
+```
+apiVersion: v1
+data:
+  SMTP_FROM:  #email adress from which emails will be sent
+  SMTP_FROM_NAME: CCX
+  SMTP_HOST: #sender host
+  SMTP_PASSWORD: #email password
+  SMTP_PORT: #port
+  SMTP_USERNAME: #username
+kind: Secret
+metadata:
+  name: smtp
+  namespace: ccx
+type: Opaque
+
+```
+
+Use `kubectl apply -f smtp.yaml` to apply the secret.
+
+More documentation can be found [here.](../Day2/Notifications.md)
+
 ### Verify the secrets
 
 Verify that the secrets are created:
@@ -456,7 +492,6 @@ Thus, if you have a cloud called `grok`, then replace `MYCLOUD` with `grok` in t
 You must also create a security group. Let's call it `ccx-common`.
 
 `ccx-common` must allow all TCP traffic from all k8s nodes where CCX is running. 
-
 
 The Egress must also be allowed. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
 
@@ -563,83 +598,209 @@ A number of identifiers are case sensitive: `ccx.config.clouds[].regions[].code`
 :::
 
 ```yaml
-ccxFQDN: ccx.example.com
-ccFQDN: cc.example.com
 cc:
-  cidr: 0.0.0.0/0
-cmon:
-  licence: #insert the licence key you've received here
+  cidr: 0.0.0.0/0 #setup according to your network
+ccFQDN: cc.ccx.somedomain.com # dns name for ccx
+ccxFQDN: ccx.somedomain.com # dns name for cc
 ccx:
-  # List of Kubernetes secrets containing cloud credentials.
-  cidr: 0.0.0.0/0
-  cloudSecrets:
-    - openstack  # This secret must exist in Kubernetes. See 'secrets-template.yaml' for reference.
-    - openstack-s3
-  env:
-     DISABLE_ROLLBACK: "false" #if a datastore fails to deploy, then it will not be deleted. Helps with debugging. Set to "false" for prod.
-  ingress:
-    ssl:
-      clusterIssuer: letsencrypt-prod
+  cidr: 0.0.0.0/0 #setup according to your network
+  cloudSecrets: ccx # List of Kubernetes secrets containing cloud credentials.
+  - openstack # This secret must exist in Kubernetes. See 'secrets-template.yaml' for reference.
+  - openstack-s3
+  - smtp #secret made from email step
   config:
     clouds:
-      - code: mycloud  # Unique code for your cloud provider
-        name: MyCloud  # Human-readable name
-        instance_types:
-          - code: x4.2c4m.100g
-            cpu: 2
-            disk_size: 100
-            name: x4.2c4m.100g
-            ram: 4
-            type: x4.2c4m.100g
-        volume_types:
-        - code: fastdisk #the code must match the openstack volume type name.
-          has_iops: false
-          info: Optimized for performance
-          name: Fast storage
-          size:
-            default: 60 # we recommend 100GB as minimum for production systems.
-            max: 1000
-            min: 30
-        network_types:
-          - code: public
-            name: Public
-            in_vpc: false
-            info: >
-              All instances will be deployed with public IPs.
-              Access to the public IPs is controlled by a firewall.
-        regions:
-          - code: sto1  # this is your region code. Case-sensitive.
-            display_code: my-region1
-            name: Stockholm # Human-readable name
-            city: Stockholm
-            country_code: SE
-            continent_code: EU
-            availability_zones:
-              - code: nova # Case-sensitive 
-                name: az1 # Human-readable name
+    - code: mycloud # Unique code for your cloud provider
+      name: MyCloudName # Human-readable name
+      instance_types: #Type of instances that will be used 
+      - code: large-1 #code must match the one used on cloud
+        cpu: 2           #must match the instance template 
+        disk_size: 64
+        name: Small
+        ram: 8  #must match the instance template 
+        type: large-1
+      - code: large-2
+        cpu: 4
+        disk_size: 64
+        name: Medium
+        ram: 16
+        type: large-2
+      network_types:
+      - code: public
+        in_vpc: false
+        info: |
+          All instances will be deployed with public IPs. Access to the public IPs is controlled by a firewall.
+        name: Public
+      regions:
+      - availability_zones:
+        - code: nova # Case-sensitive 
+          name: az1 # Human-readable name
+        city: Stockholm
+        code: my-region1 # this is your region code. Case-sensitive.
+        continent_code: EU
+        country_code: SE
+        display_code: my-region1
+        name: my-region1
+      volume_types:
+      - code: ssd
+        has_iops: false
+        info: Optimized for performance
+        name: SSD network attached
+        size:
+          default: 60
+          max: 1000
+          min: 30
+    databases: #database variations
+    - code: mariadb
+      enabled: true
+      info: Deploy MariaDB with either multi-master (MariaDB Cluster) or master/replicas.
+      name: MariaDB
+      num_nodes:
+      - 1
+      - 2
+      - 3
+      ports:
+      - 3306
+      types:
+      - code: galera
+        name: Multi-Master
+        size_hints:
+          "1": 1 master node
+          "3": 3 multi-master nodes
+      - code: replication
+        name: Master / Replicas
+        size_hints:
+          "1": 1 master node
+          "2": 1 master, 1 replica
+          "3": 1 master, 2 replicas
+      versions:
+      - "10.11"
+      - "11.4"
+    - code: percona
+      enabled: true
+      info: Deploy MySQL with either multi-master (PXC) or master/replicas.
+      name: MySQL
+      num_nodes:
+      - 1
+      - 2
+      - 3
+      ports:
+      - 3306
+      types:
+      - code: galera
+        name: Multi-Master
+        size_hints:
+          "1": 1 master node
+          "3": 3 multi-master nodes
+      - code: replication
+        name: Master / Replicas
+        size_hints:
+          "1": 1 master node
+          "2": 1 master, 1 replica
+          "3": 1 master, 2 replicas
+      versions:
+      - "8"
+      - "8.4"
+    - code: postgres
+      enabled: true
+      info: Deploy PostgreSQL using asynchronous replication for high-availability.
+      name: PostgreSQL
+      num_nodes:
+      - 1
+      - 2
+      - 3
+      ports:
+      - 5432
+      types:
+      - code: postgres_streaming
+        name: Streaming Replication
+        size_hints:
+          "1": 1 master node
+          "2": 1 master, 1 replica
+          "3": 1 master, 2 replicas
+      versions:
+      - "14"
+      - "15"
+      - "16"
+    - code: valkey_sentinel
+      enabled: true
+      info: Deploy Valkey Sentinel.
+      name: Valkey
+      num_nodes:
+      - 1
+      - 3
+      ports:
+      - 6379
+      types:
+      - code: valkey_sentinel
+        name: Sentinel
+        size_hints:
+          "1": 1 master node
+          "3": 1 master, 2 replicas
+      versions:
+      - "8"
+    - code: microsoft
+      enabled: true
+      info: Deploy Microsoft SQL Server.
+      name: Microsoft SQL Server
+      num_nodes:
+      - 1
+      - 2
+      ports:
+      - 1433
+      types:
+      - code: mssql_single
+        name: Single server
+        size_hints:
+          "1": 1 node
+      - code: mssql_ao_async
+        name: Always On (async commit mode)
+        size_hints:
+          "2": 1 primary, 1 secondary
+      versions:
+      - "2022"
+  env:
+    DISABLE_ROLLBACK: "false" #if a datastore fails to deploy, then it will not be deleted. Helps with debugging. Set to "false" for prod.
+  ingress:
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: somedomain.com # domain used for databases. It has to match with ExternalDNS used one.
+    ssl:
+      clusterIssuer: letsencrypt-prod # Make sure it's the one you created in cert-manager step
   services:
     deployer:
       config:
         openstack_vendors:
           mycloud:
             compute_api_microversion: "2.79"
-            floating_network_id: b19680b3-c00e-40f0-ad77-4448e81ae226  # Replace with actual ID
-            #public_pool: b19680b3-c00e-40f0-ad77-4448e81ae226 # Enable this if a public pool is used.
+            floating_network_id: some_id  # Replace with actual ID
             network_api_version: NetworkNeutron
-            network_id: 21dfbb3d-a948-449b-b727-5fdda2026b45  # Replace with actual network ID
-            project_id: 5b8e951e41f34b5394bb7cf7992a95de  # Replace with your OpenStack project ID
-            regions:
-              sto1:  # region id, must be consistently set/named. Case-sensitive.
+            network_id: some_network_id # Replace with actual network ID
+            project_id: project_id # Replace with your OpenStack project ID
+            regions: 
+              sto1: # region id, must be consistently set/named. Case-sensitive.
                 image_id: 936c8ba7-343a-4172-8eab-86dda97f12c5  # Replace with image ID for the region
                 # secgrp_name refers to the security group name used by CCX to access datastore VMs.
                 # It must be created manually and allow all TCP traffic from all Kubernetes nodes where CCX is running.
                 secgrp_name: ccx-common  # Recommended to use a dedicated security group
+    uiapp:
+      env:
+        FE_REACT_APP_FAVICON_URL: your_icon_link #link to your company icon
+        FE_REACT_APP_LOGO_URL: your_link #link to your company logo
+        FE_EXTERNAL_CSS_URL: your.css.url #ult to the ccss you will be using 
+        FE_NODE_ENV: "production"
+        FE_VPC_DISABLED: true #turn off this unless using AWS
+      replicas: 3
+    runner:
+      replicas: 5 # Minimum is 3 that should be used in prduction. Prefferable is to have 5 or more
+  userDomain: somedomain.com # domain used for databases. It has to match with ExternalDNS used one.
+cmon:
+  licence: xxx # insert licence here
 ```
 
 ## Install CCX
 Now it is finally time to install CCX.
 
-Make sure you change `cc.example.com` and `ccx.example.com` to the domain names you use. 
+Make sure you change `cc.ccx.somedomain.com` and `ccx.somedomain.com` to the domain names you use. 
 Also change the `clusterIssuer` to the one you created previously.
 
 ```
