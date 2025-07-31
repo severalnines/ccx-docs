@@ -667,3 +667,4 @@ See our [Troubleshooting](docs/admin/Troubleshooting/Troubleshooting.md) section
 - [White-labeling UI and customization](docs/admin/Customisation/Frontend.md).
 - [JWT authentication](docs/admin/Customisation/JWT.md).
 - Configure more Instance types (VMs, storage, etc.)
+- [Billing API](docs/admin/Other/Billing.md).
