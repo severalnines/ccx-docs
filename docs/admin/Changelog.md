@@ -13,6 +13,10 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 ::::
 ## Release Notes - CCX - v1.54.4
 ### Improvements
+- The MSSQL driver version update from 17 to 18
+
+## Release Notes - CCX - v1.54.4
+### Improvements
 - Added wget to cloud-init packages
 
 ## Release Notes - CCX - v1.54.3
