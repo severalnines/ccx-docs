@@ -11,7 +11,7 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
-## Release Notes - CCX - v1.54.4
+## Release Notes - CCX - v1.54.5
 ### Improvements
 - The MSSQL driver version update from 17 to 18
 
