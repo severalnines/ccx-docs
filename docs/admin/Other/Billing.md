@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-## Overview
-This documentation outlines the functionality and usage of the billing report API that generates a JSON or CSV formatted report detailing all cluster usage within a specified date range. This report includes data from active and deleted clusters and is accessible only to admin users from the admin panel.
-
-Also see [Tagging](docs/admin/Other/Tagging.md).
-
-## Environment Variables
-
-=======
 # Billing
 This documentation outlines the functionality and usage of the billing report API that generates a JSON or CSV formatted report detailing all cluster usage within a specified date range. This report includes data from active and deleted clusters and is accessible only to admin users from the admin panel. 
 
@@ -27,32 +18,19 @@ Select Billing Report from the action menu, and a dialog opens allowing you to s
 
 `RETENTION_PERIOD`: Defines how long the usage data for deleted clusters is kept (default is 6 months).
 
->>>>>>> 2593b054bcd10bbef80863bebcf41538b65b2ef6
 ## API Endpoint
 
 The endpoint is `https://ccx.example.com/api/admin/datastores/billing/{type}`
 
-<<<<<<< HEAD
-=======
 The reponse is either JSON or CSV.
 
 ### Authentication
 Basic auth is supported. The credentials are stored in the `admin-basic-auth` secet.
 
->>>>>>> 2593b054bcd10bbef80863bebcf41538b65b2ef6
 ### Method: GET
 
 Parameters:
 
-<<<<<<< HEAD
-- `start`: Start date of the period (YYYY-MM-DD)
-- `end`: End date of the period (YYYY-MM-DD)
-
-**Example Request:**
-
-```
-curl -X GET "https://ccx.example.com/api/admin/datastores/billing/{type}?start=2024-04-05&end=2024-04-05" -H "Authorization: Bearer {access_token}"
-=======
 - `type`: `json` or `csv`
 - `start`: Start date of the period (YYYY-MM-DD)
 - `end`: End date of the period (YYYY-MM-DD)
@@ -61,9 +39,9 @@ curl -X GET "https://ccx.example.com/api/admin/datastores/billing/{type}?start=2
 #### Example Request
 
 **JSON**
+
 ```
 curl -uadmin:PASSWORD -X GET "https://ccx.example.com/api/admin/datastores/billing/json?start=2024-04-05&end=2024-04-05" -H "Authorization: Bearer {access_token}"
->>>>>>> 2593b054bcd10bbef80863bebcf41538b65b2ef6
 ```
 
 Response Format:
@@ -98,8 +76,6 @@ Response Format:
 }
 ```
 
-<<<<<<< HEAD
-=======
 **CSV**
 
 ```
@@ -107,7 +83,6 @@ curl -uadmin:PASSWORD -X GET "https://ccx.example.com/api/admin/datastores/billi
 ```
 
 
->>>>>>> 2593b054bcd10bbef80863bebcf41538b65b2ef6
 ##  Actions Impacting Billing
 This section describes various user or system actions that influence the billing calculations in the cluster management system. Understanding these actions is crucial for admins to predict changes in billing due to operational modifications.
 
@@ -142,8 +117,5 @@ Details: A change in volume type initiates a new volume_types entry for the resp
 
 Each of these actions triggers specific changes within the datastore that are directly reflected in the billing calculations. The API effectively aggregates and computes the financial impact of these operational activities, ensuring that each action's financial implications are transparent and well-documented in the billing report.
 
-<<<<<<< HEAD
-=======
 ## Defining prices
 Prices defined in the values.yaml file are not reflected in the billing report. 
->>>>>>> 2593b054bcd10bbef80863bebcf41538b65b2ef6
