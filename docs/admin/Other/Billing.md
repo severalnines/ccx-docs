@@ -25,7 +25,7 @@ The endpoint is `https://ccx.example.com/api/admin/datastores/billing/{type}`
 The reponse is either JSON or CSV.
 
 ### Authentication
-Basic auth is supported. The credentials are stored in the `admin-basic-auth` secet.
+Basic auth is supported. The credentials are stored in the `admin-basic-auth` secret.
 
 ### Method: GET
 
