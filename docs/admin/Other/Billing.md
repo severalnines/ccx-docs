@@ -39,6 +39,7 @@ Parameters:
 #### Example Request
 
 **JSON**
+
 ```
 curl -uadmin:PASSWORD -X GET "https://ccx.example.com/api/admin/datastores/billing/json?start=2024-04-05&end=2024-04-05" 
 ```
