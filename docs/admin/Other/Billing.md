@@ -40,7 +40,7 @@ Parameters:
 
 **JSON**
 ```
-curl -uadmin:PASSWORD -X GET "https://ccx.example.com/api/admin/datastores/billing/json?start=2024-04-05&end=2024-04-05" -H "Authorization: Bearer {access_token}"
+curl -uadmin:PASSWORD -X GET "https://ccx.example.com/api/admin/datastores/billing/json?start=2024-04-05&end=2024-04-05" 
 ```
 
 Response Format:
@@ -78,7 +78,7 @@ Response Format:
 **CSV**
 
 ```
-curl -uadmin:PASSWORD -X GET "https://ccx.example.com/api/admin/datastores/billing/csv?start=2024-04-05&end=2024-04-05" -H "Authorization: Bearer {access_token}"
+curl -uadmin:PASSWORD -X GET "https://ccx.example.com/api/admin/datastores/billing/csv?start=2024-04-05&end=2024-04-05" 
 ```
 
 
