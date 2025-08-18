@@ -24,6 +24,9 @@ The endpoint is `https://ccx.example.com/api/admin/datastores/billing/{type}`
 
 The reponse is either JSON or CSV.
 
+### Authentication
+Basic auth is supported. The credentials are stored in the `admin-basic-auth` secet.
+
 ### Method: GET
 
 Parameters:
@@ -37,7 +40,7 @@ Parameters:
 
 **JSON**
 ```
-curl -X GET "https://ccx.example.com/api/admin/datastores/billing/json?start=2024-04-05&end=2024-04-05" -H "Authorization: Bearer {access_token}"
+curl -uadmin:PASSWORD -X GET "https://ccx.example.com/api/admin/datastores/billing/json?start=2024-04-05&end=2024-04-05" -H "Authorization: Bearer {access_token}"
 ```
 
 Response Format:
@@ -75,7 +78,7 @@ Response Format:
 **CSV**
 
 ```
-curl -X GET "https://ccx.example.com/api/admin/datastores/billing/csv?start=2024-04-05&end=2024-04-05" -H "Authorization: Bearer {access_token}"
+curl -uadmin:PASSWORD -X GET "https://ccx.example.com/api/admin/datastores/billing/csv?start=2024-04-05&end=2024-04-05" -H "Authorization: Bearer {access_token}"
 ```
 
 
