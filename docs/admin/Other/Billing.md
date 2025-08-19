@@ -25,7 +25,11 @@ The endpoint is `https://ccx.example.com/api/admin/datastores/billing/usage/{typ
 The reponse is either JSON or CSV.
 
 ### Authentication
-Basic auth is supported. The credentials are stored in the `admin-basic-auth` secret.
+Basic auth is supported. The credentials are stored in the `admin-basic-auth` secret:
+
+```
+kubectl get secret -n ccx admin-basic-auth -o jsonpath={.data.password} | base64 --decode
+```
 
 ### Method: GET
 
