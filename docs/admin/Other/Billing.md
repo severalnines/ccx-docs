@@ -20,7 +20,7 @@ Select Billing Report from the action menu, and a dialog opens allowing you to s
 
 ## API Endpoint
 
-The endpoint is `https://ccx.example.com/api/admin/datastores/billing/{type}`
+The endpoint is `https://ccx.example.com/api/admin/datastores/billing/usage/{type}`
 
 The reponse is either JSON or CSV.
 
@@ -40,7 +40,7 @@ Parameters:
 
 **JSON**
 ```
-curl -uadmin:PASSWORD -X GET "https://ccx.example.com/api/admin/datastores/billing/json?start=2024-04-05&end=2024-04-05" 
+curl -uadmin:PASSWORD -X GET "https://ccx.example.com/api/admin/datastores/billing/usage/json?start=2024-04-05&end=2024-04-05" 
 ```
 
 Response Format:
@@ -78,7 +78,7 @@ Response Format:
 **CSV**
 
 ```
-curl -uadmin:PASSWORD -X GET "https://ccx.example.com/api/admin/datastores/billing/csv?start=2024-04-05&end=2024-04-05" 
+curl -uadmin:PASSWORD -X GET "https://ccx.example.com/api/admin/datastores/billing/usage/csv?start=2024-04-05&end=2024-04-05" 
 ```
 
 
