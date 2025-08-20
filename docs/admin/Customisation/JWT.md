@@ -1,6 +1,7 @@
 # JWT Authentication
 
-This section describes how to implement JWT Authentication. The JWT Authentication allows integrating a Service Portal with CCX.
+This section describes how to implement JWT Authentication. 
+The JWT Authentication allows integrating a Service Portal with CCX.
 ![img](../images/JWT.png)
 
 ## Users and Sessions Managed Using JWTs
@@ -127,7 +128,12 @@ There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 
 ## Examples of JWT Generation
 
-Run the code by setting the params such as my.ccx.url, Example_CSP, UserID and Private Key
+Run the code by setting the params such as `my.ccx.url`, `EXAMPLE_CSP`, `USERID` and `Private Key`
+
+_ `my.ccx.url`: E.g ccx.example.com
+- `EXAMPLE_CSP` : The name of the cloud provider, example `mydbaas`
+- `USERID`:  Users with the the same `USERID` will see the same datastores. In Openstack e.g, there is a Project ID, if you want all users in a project to see the datastores, then you should set this to the Openstack Project Id.
+- `Private Key`: The actual private key used to encrypt the token.
 
 ### Go
 
@@ -189,7 +195,7 @@ func main() {
         log.Fatal(err)
     }
 
-    token, err := createJWT("EXAMPLE_CSP", "userID", 15*time.Minute, privKey)
+    token, err := createJWT("EXAMPLE_CSP", "USERID", 15*time.Minute, privKey)
     if err != nil {
         log.Fatal(err)
     }
@@ -257,7 +263,7 @@ function createJWT(issuer, subject, expMinutes, key) {
 async function main() {
   try {
     // Create the JWT
-    const token = createJWT("EXAMPLE_CSP", "userID", 15, privateKey);
+    const token = createJWT("EXAMPLE_CSP", "USERID", 15, privateKey);
 
     // Prepare the request body
     const requestBody = {
@@ -348,7 +354,7 @@ function createJWT(
 async function main() {
   try {
     // Create JWT
-    const token = createJWT("EXAMPLE_CSP", "userID", 15, privateKey);
+    const token = createJWT("EXAMPLE_CSP", "USERID", 15, privateKey);
 
     // Prepare request payload
     const reqBody: JwtLoginRequest = {
