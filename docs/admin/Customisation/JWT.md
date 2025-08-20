@@ -128,9 +128,9 @@ There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 
 ## Examples of JWT Generation
 
-Run the code by setting the params such as `my.ccx.url`, `EXAMPLE_CSP`, `USERID` and `Private Key`
+Run the code by setting the params such as `CCX_URL`, `EXAMPLE_CSP`, `USERID` and `Private Key`
 
-_ `my.ccx.url`: E.g ccx.example.com
+- `CCX_URL`: E.g ccx.example.com
 - `EXAMPLE_CSP` : The name of the cloud provider, example `mydbaas`
 - `USERID`:  Users with the the same `USERID` will see the same datastores. In Openstack e.g, there is a Project ID, if you want all users in a project to see the datastores, then you should set this to the Openstack Project Id.
 - `Private Key`: The actual private key used to encrypt the token.
@@ -156,7 +156,7 @@ import (
     "github.com/google/uuid"
 )
 
-const authUrlPrefix = "https://<my.ccx.url>/api/auth"
+const authUrlPrefix = "https://<CCX_URL>/api/auth"
 
 var (
     ErrBadPEMData = errors.New("malformed PEM data")
@@ -243,7 +243,7 @@ const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
 
 // --- Config ---
-const authUrlPrefix = "https://<my.ccx.url>/api/auth";
+const authUrlPrefix = "https://<CCX_URL>/api/auth";
 const privateKey = fs.readFileSync('./ccx.key', 'utf-8'); // path to your PEM file
 
 // --- JWT Creation ---
@@ -328,7 +328,7 @@ interface JwtLoginRequest {
 }
 
 // ---- Config ----
-const authUrlPrefix = "https://<my.ccx.url>/api/auth";
+const authUrlPrefix = "https://<CCX_URL>/api/auth";
 
 // Load private key (PEM)
 const privateKey: string = fs.readFileSync('./ccx.key', 'utf-8');
