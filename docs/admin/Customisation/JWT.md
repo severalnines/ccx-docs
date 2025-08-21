@@ -244,6 +244,11 @@ xxx
 
 *This is an example and the code is provided as-is, no further support will be left on this code but feedback is welcome.* 
 
+1. Create a folder called jwt, and change to this folder
+2. Save the code as jwt.js
+3. npm install jsonwebtoken axios uuid
+4. node jwt.js
+
 ```javascript
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
