@@ -30,7 +30,7 @@ You need to set the configuration parameters in `ccx.services.auth` in ccx value
 
 ```
       env:
-        JWT_PUBLIC_KEY_ID: 'EXAMPLE_CSP'
+        JWT_PUBLIC_KEY_ID: 'MYCLOUD'
         JWT_PUBLIC_KEY_PEM: |-
             -----BEGIN PUBLIC KEY-----
             MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxowkw7Zf2pXoehn2CkwQ
@@ -42,7 +42,7 @@ You need to set the configuration parameters in `ccx.services.auth` in ccx value
 
 | Environment Variable    | Description                                               |
 | ----------------------- | --------------------------------------------------------- |
-| **JWT_PUBLIC_KEY_ID**   | The identifier of the provider, e.g., "EXAMPLE_CSP".      |
+| **JWT_PUBLIC_KEY_ID**   | The identifier of the provider, e.g., "MYCLOUD".      |
 | **JWT_PUBLIC_KEY_PEM**  | The public key in PEM format (contents of `ccx.key.pub`). |
 | **JWT_PUBLIC_KEY_PKIX** | Should be "1" if the key is in PKIX format (optional).    |
 
@@ -61,7 +61,7 @@ There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 
 ```json
 {
-  "issuer": "CSPNAME",
+  "issuer": "MYCLOUD",
   "jwt": "JWT_TOKEN",
   "first_name": "First Name (Optional)",
   "last_name": "Last Name (Optional)"
@@ -83,7 +83,7 @@ There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 
 **Query Parameters:**
 
-- `issuer` — the issuer of the JWT, e.g., "CSPNAME".
+- `issuer` — the issuer of the JWT, e.g., "MYCLOUD".
 - `jwt` — the JWT.
 
 ### `POST /jwt-logout`
@@ -95,7 +95,7 @@ There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 
 ```json
 {
-  "issuer": "CSPNAME",
+  "issuer": "MYCLOUD",
   "jwt": "JWT_TOKEN"
 }
 ```
@@ -109,7 +109,7 @@ There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 
 ```json
 {
-  "issuer": "CSPNAME",
+  "issuer": "MYCLOUD",
   "jwt": "JWT_TOKEN"
 }
 ```
@@ -128,10 +128,10 @@ There are four endpoints for handling JWTs, all prefixed with `/api/auth`:
 
 ## Examples of JWT Generation
 
-Run the code by setting the params such as `CCX_URL`, `EXAMPLE_CSP`, `USERID` and `Private Key`
+Run the code by setting the params such as `CCX_URL`, `MYCLOUD`, `USERID` and `Private Key`
 
 - `CCX_URL`: E.g ccx.example.com
-- `EXAMPLE_CSP` : The name of the cloud provider, example `mydbaas`
+- `MYCLOUD` : The name of the cloud provider, example `mydbaas`
 - `USERID`:  Users with the the same `USERID` will see the same datastores. In Openstack e.g, there is a Project ID, if you want all users in a project to see the datastores, then you should set this to the Openstack Project Id.
 - `Private Key`: The actual private key used to encrypt the token.
 
@@ -195,14 +195,14 @@ func main() {
         log.Fatal(err)
     }
 
-    token, err := createJWT("EXAMPLE_CSP", "USERID", 15*time.Minute, privKey)
+    token, err := createJWT("MYCLOUD", "USERID", 15*time.Minute, privKey)
     if err != nil {
         log.Fatal(err)
     }
 
     client := &http.Client{Timeout: 5 * time.Second}
     in := &jwtLoginRequest{
-        Issuer:    "EXAMPLE_CSP",
+        Issuer:    "MYCLOUD",
         Token:     token,
         FirstName: "First_Name",
         LastName:  "Last_Name",
@@ -221,7 +221,7 @@ func main() {
     }
     defer resp.Body.Close()
     log.Print("response status: ", resp.Status)
-	constructedURL := fmt.Sprintf("%s/jwt-login?jwt=%s&issuer=%s", authUrlPrefix, token, "EXAMPLE_CSP")
+	constructedURL := fmt.Sprintf("%s/jwt-login?jwt=%s&issuer=%s", authUrlPrefix, token, "MYCLOUD")
 	log.Printf("Constructed URL: %s", constructedURL) // Log the constructed URL
 }
 
@@ -263,11 +263,11 @@ function createJWT(issuer, subject, expMinutes, key) {
 async function main() {
   try {
     // Create the JWT
-    const token = createJWT("EXAMPLE_CSP", "USERID", 15, privateKey);
+    const token = createJWT("MYCLOUD", "USERID", 15, privateKey);
 
     // Prepare the request body
     const requestBody = {
-      issuer: "EXAMPLE_CSP",
+      issuer: "MYCLOUD",
       jwt: token,
       first_name: "First_Name",
       last_name: "Last_Name"
@@ -282,7 +282,7 @@ async function main() {
     console.log("response status:", response.status);
 
     // Construct the login URL
-    const constructedURL = `${authUrlPrefix}/jwt-login?jwt=${encodeURIComponent(token)}&issuer=EXAMPLE_CSP`;
+    const constructedURL = `${authUrlPrefix}/jwt-login?jwt=${encodeURIComponent(token)}&issuer=MYCLOUD`;
     console.log("Constructed URL:", constructedURL);
 
   } catch (err) {
@@ -354,11 +354,11 @@ function createJWT(
 async function main() {
   try {
     // Create JWT
-    const token = createJWT("EXAMPLE_CSP", "USERID", 15, privateKey);
+    const token = createJWT("MYCLOUD", "USERID", 15, privateKey);
 
     // Prepare request payload
     const reqBody: JwtLoginRequest = {
-      issuer: "EXAMPLE_CSP",
+      issuer: "MYCLOUD",
       jwt: token,
       first_name: "First_Name",
       last_name: "Last_Name",
@@ -373,7 +373,7 @@ async function main() {
     console.log("response status:", resp.status);
 
     // Construct and print URL (as in Go)
-    const constructedURL = `${authUrlPrefix}/jwt-login?jwt=${encodeURIComponent(token)}&issuer=EXAMPLE_CSP`;
+    const constructedURL = `${authUrlPrefix}/jwt-login?jwt=${encodeURIComponent(token)}&issuer=MYCLOUD`;
     console.log("Constructed URL:", constructedURL);
   } catch (err) {
     if (axios.isAxiosError(err)) {
