@@ -140,10 +140,10 @@ Run the code by setting the params such as `CCX_URL`, `MYCLOUD`, `USERID` and `P
 *This is an example and the code is provided as-is, no further support will be left on this code but feedback is welcome.* 
 
 1. Create a folder called jwt, and change to this folder
-2. jwt.go
+2. Save the code in jwt.go
 3. go mod init jwt
 4. go mod tidy 
-5. Change `CCX_URL`, `Private Key`
+5. Change `CCX_URL`, `Private Key` etc
 6. go run main.go
 
 ```go
@@ -247,7 +247,8 @@ xxx
 1. Create a folder called jwt, and change to this folder
 2. Save the code as jwt.js
 3. npm install jsonwebtoken axios uuid
-4. node jwt.js
+4. Change `CCX_URL`, `Private Key` etc
+5. node jwt.js
 
 ```javascript
 const fs = require('fs');
