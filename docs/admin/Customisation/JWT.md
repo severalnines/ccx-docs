@@ -139,6 +139,13 @@ Run the code by setting the params such as `CCX_URL`, `MYCLOUD`, `USERID` and `P
 
 *This is an example and the code is provided as-is, no further support will be left on this code but feedback is welcome.* 
 
+1. Create a folder called jwt, and change to this folder
+2. jwt.go
+3. go mod init jwt
+4. go mod tidy 
+5. Change `CCX_URL`, `Private Key`
+6. go run main.go
+
 ```go
 package main
 
