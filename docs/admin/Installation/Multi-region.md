@@ -1,6 +1,6 @@
 # Multi-region Configuration
 
-This guide explains how to configure CCX for multi-region deployments across different cloud providers and regions.
+This guide explains how to configure CCX for multi-region deployments.
 
 ## Overview
 
