@@ -24,7 +24,7 @@ CMON version 2.3.1-13878
 
 ### Bugs
 - Single server MSSQL datastore creation fails unless 1 node is manually chosen.
-- Unnecessary primary.<cluster_id>.<domain>  is created
+- Unnecessary `primary.<cluster_id>.<domain>`  is created
 - Cannot create datastore from backup with different storage type
 
 ### Improvements
