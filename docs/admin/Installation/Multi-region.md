@@ -78,7 +78,7 @@ After configuration, the frontend will display a single cloud group "MYCLOUD" co
 - `mycloud-region1`
 - `mycloud-region2`
 
-Users can select the desired region from within the cloud group interface.
+Users can select the desired region from within Deployment wizard.
 
 ## Best Practices
 
