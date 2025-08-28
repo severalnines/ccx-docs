@@ -27,15 +27,11 @@ ccx:
       openstack_vendors:
         mycloud-region1:
           auth_url: https://region1.example.com:5000/v3
-          username: admin
-          password: your_password
-          project_name: your_project
+          ...          
           # Additional region-specific configuration
         mycloud-region2:
           auth_url: https://region2.example.com:5000/v3
-          username: admin
-          password: your_password
-          project_name: your_project
+          ...
           # Additional region-specific configuration
 ```
 
