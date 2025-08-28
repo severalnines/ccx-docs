@@ -93,8 +93,8 @@ Users can select the desired region from within the cloud group interface.
 ## Troubleshooting
 
 Common issues in multi-region setups:
-- **Authentication Failures**: Verify that each region has correct authentication credentials
-- **Network Connectivity**: Ensure proper network configuration between regions
-- **Resource Limits**: Check that each region has sufficient resources allocated
-- **Configuration Synchronization**: Verify that all regions have consistent configuration settings
+- **Authentication Failures**: Verify that each region has correct authentication credentials.
+- **Network Connectivity**: Ensure proper network configuration.
+- **Resource Limits**: Check that each region has sufficient resources allocated.
+- **Configuration Synchronization**: Verify that all regions have consistent configuration settings.
 
