@@ -10,7 +10,27 @@ Downgrades are not supported.
 
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
+
+## Release Notes - CCX - v1.55.0 
+:::danger
+This release must be deployed, you cannot skip it when upgrading to later release
 ::::
+Release date: 20-08-2025
+CMON version 2.3.1-13878
+### New Features
+- change user onboarding flow
+- Tags change support in Terraform provider
+- Update the Ingress controler for the ccxdeps chart with security headers
+
+### Bugs
+- Single server MSSQL datastore creation fails unless 1 node is manually chosen.
+- Unnecessary primary.<cluster_id>.<domain>  is created
+- Cannot create datastore from backup with different storage type
+
+### Improvements
+- Cloud_credentials migration
+- Move change password section
+
 ## Release Notes - CCX - v1.54.5
 ### Improvements
 - The MSSQL driver version update from 17 to 18
