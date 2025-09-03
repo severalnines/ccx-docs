@@ -31,6 +31,16 @@ CMON version 2.3.1-13878
 - Cloud_credentials migration
 - Move change password section
 
+## Release Notes - CCX - v1.54.8
+### Bugs
+- Datastore upgrade fixes
+### Known issue
+- Restore backup that was done before the upgrade might fail, it will be fix in next patch. As workaround create datastore from backup can be use in such cases.
+
+## Release Notes - CCX - v1.54.7
+### Bugs
+- CMON fix for wrong datastore config file after parameters being changed
+
 ## Release Notes - CCX - v1.54.5
 ### Improvements
 - The MSSQL driver version update from 17 to 18
