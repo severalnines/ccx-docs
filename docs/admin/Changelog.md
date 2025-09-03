@@ -10,6 +10,7 @@ Downgrades are not supported.
 
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
+::::
 
 ## Release Notes - CCX - v1.55.0 
 :::danger
