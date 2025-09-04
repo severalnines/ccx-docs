@@ -32,6 +32,10 @@ CMON version 2.3.1-13878
 - Cloud_credentials migration
 - Move change password section
 
+## Release Notes - CCX - v1.54.9
+### Bugs
+- Restore backup that was done before the upgrade.
+
 ## Release Notes - CCX - v1.54.8
 ### Bugs
 - Datastore upgrade fixes
