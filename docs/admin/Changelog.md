@@ -32,6 +32,12 @@ CMON version 2.3.1-13878
 - Cloud_credentials migration
 - Move change password section
 
+## Release Notes - CCX - v1.54.10
+### Bugs
+- Backend using 8.0.5 valkey resolving promote replica bugs
+- Timeout bugs in valkey fixed in cmon
+- UI fix to not allow PITR for valkey
+
 ## Release Notes - CCX - v1.54.9
 ### Bugs
 - Restore backup that was done before the upgrade.
