@@ -73,9 +73,9 @@ CMON version 2.3.1-13620
 ### New Features
 - Added support for PostgreSQL 17.
 - Instance selection improvements.
-- Added support for MariaDB 11.8.
+- Added support for MariaDB 11.8 (includes MariaDb Vector)
 - New API endpoint for CCX Admin with detailed datastore info (#465).
-- `valkey-search` and `valkey-json` support.
+- Support for `valkey-search` and `valkey-json` modules.
 
 ### Bugs
 - Fixed missing add/extend storage option for MSSQL.
