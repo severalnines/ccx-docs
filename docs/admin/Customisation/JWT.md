@@ -24,6 +24,7 @@ ssh-keygen -t rsa -b 4096 -m PEM -f ccx.key
 ssh-keygen -e -f ccx.key -m PEM > ccx.key.pub
 ```
 
+
 #### Public key configuration in CCX Helm values:
 
 You need to set the configuration parameters in `ccx.services.auth` in ccx values.yaml
@@ -125,6 +126,10 @@ There are four endpoints for handling JWTs:
 ```
 
 ---
+
+## Code sample
+
+You can find a sample implementation here: [ccx-jwt-sample on GitHub](https://github.com/severalnines/ccx-jwt-sample).
 
 ## Examples of JWT Generation
 
