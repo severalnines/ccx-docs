@@ -12,6 +12,38 @@ Downgrades are not supported.
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
 
+## Release Notes - CCX - v1.55.4
+:::danger
+This release must be deployed, you cannot skip it when upgrading to later release
+::::
+CMON version 2.3.1-14751
+### Bugs
+- UI fix for create datastore from backup when changing node configuration
+
+## Release Notes - CCX - v1.55.3
+:::danger
+This release must be deployed, you cannot skip it when upgrading to later release
+::::
+CMON version 2.3.1-14751
+### Bugs
+- Internal TLS fixes 
+
+## Release Notes - CCX - v1.55.2
+:::danger
+This release must be deployed, you cannot skip it when upgrading to later release
+::::
+CMON version 2.3.1-14751
+### Bugs
+- Openstack s3 region fix
+
+## Release Notes - CCX - v1.55.1
+:::danger
+This release must be deployed, you cannot skip it when upgrading to later release
+::::
+CMON version 2.3.1-14751
+### CMON Bugs
+- cmon config invalid save issues fix
+
 ## Release Notes - CCX - v1.55.0 
 :::danger
 This release must be deployed, you cannot skip it when upgrading to later release
