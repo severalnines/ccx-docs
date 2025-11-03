@@ -28,7 +28,7 @@ OpenStack will be configured as the cloud provider.
 
 ### Storage (PVCs)
 
-During the installation the following PVCs are created. Thus you must ensure you have enough storage available. In total, plan on using about 306Gi for the setup described in this tutorial. Depending on the production setup (how many replicas is desired, as well as how much data is needed for metrics/logs, as well as retention polocy, last two volumes might need to be increased).
+During the installation the following PVCs are created. Thus you must ensure you have enough storage available. In total, plan on using about 306Gi for the setup described in this tutorial. Depending on the production setup (how many replicas is desired, as well as how much data is needed for metrics/logs, as well as retention policy, last two volumes might need to be increased).
 
 ```
 kubectl get pvc
