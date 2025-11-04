@@ -15,7 +15,7 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 ## Release Notes - CCX - v1.55.6
 CMON version 2.3.1-14751
 ### Bugs
-- Regresson for individual node FQDNs when ExternalDNS is disabled
+- Regression for individual node FQDNs when ExternalDNS is disabled
 
 ## Release Notes - CCX - v1.55.5
 CMON version 2.3.1-14751
