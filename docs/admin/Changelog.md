@@ -12,6 +12,11 @@ Downgrades are not supported.
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
 
+## Release Notes - CCX - v1.55.6
+CMON version 2.3.1-14751
+### Bugs
+- Regresson for individual node FQDNs when ExternalDNS is disabled
+
 ## Release Notes - CCX - v1.55.5
 CMON version 2.3.1-14751
 ### upgrades
