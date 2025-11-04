@@ -16,7 +16,7 @@ To view existing Redis users:
 - **Privileges:** Specific privileges granted or filtered out.
 - **Actions:** Options to manage (modify/delete) the user.
 
-> **Note:** By default, the `-@admin` and `-@dangerous` privileges are filtered out for security purposes.
+> **Note:** By default, the `-@admin` privilege is filtered out for security purposes.
 
 ## Creating a New Redis Admin User
 
@@ -29,7 +29,7 @@ To create a new Redis admin user:
 
    - **Username:** Enter the desired username.
    - **Password:** Enter a secure password for the user.
-   - **Categories:** Enter the privilege categories. By default, using `+@all` will grant all privileges except those explicitly filtered (like `-@admin` and `-@dangerous`).
+   - **Categories:** Enter the privilege categories. By default, using `+@all` will grant all privileges except those explicitly filtered (e.g `-@admin`).
 
 3. Optionally, you can define more granular restrictions:
 
@@ -48,7 +48,6 @@ To create a new Redis admin user:
 CCX ensures the security of your Redis instance by automatically filtering potentially harmful privileges:
 
 - **`-@admin`:** Restricts administrative commands.
-- **`-@dangerous`:** Restricts commands that could compromise the cluster's stability.
 
 These privileges cannot be granted through CCX's standard user interface for security reasons.
 
