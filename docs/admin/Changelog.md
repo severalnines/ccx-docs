@@ -12,6 +12,11 @@ Downgrades are not supported.
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
 
+## Release Notes - CCX - v1.55.7
+CMON version 2.3.1-14751
+### Bugs
+- Valkey ACL validation error on user creation. (Unable to allow all keys and channels with `~* &*`)
+
 ## Release Notes - CCX - v1.55.6
 CMON version 2.3.1-14751
 ### Bugs
