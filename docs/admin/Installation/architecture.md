@@ -40,7 +40,7 @@ Cloudinit setups up SSL certificates and also installs the database software on 
 
 ###  Controller (CMON) 
 
-Runs in a pod called `cmon-master`. 
+Runs in a pod called `cmon`. 
 
 The controller is responsible for:
 

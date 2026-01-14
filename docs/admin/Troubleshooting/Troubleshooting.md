@@ -111,10 +111,10 @@ To debug failed datastore backups:
     - **Clusters** -> **Select Datastore ID** -> **Backups** -> **Actions** -> **Logs**
 
 ### Method 2: Using CLI Commands
-Use the following commands inside the `cmon-master` container:
+Use the following commands inside the `cmon` container:
 ```bash
-# Access the cmon-master container
-kubectl exec -it cmon-master-0 -- bash
+# Access the cmon container
+kubectl exec -it cmon-0 -- bash
 
 # List all jobs
 s9s job --list
@@ -156,7 +156,7 @@ Click on Targets and ensure the cmon-sd active targets are in the Up state.
 If no scrape targets are not found, the issue may be due to exporters not running on the datastore servers.
 ```bash
 # If exporters are not running inside datastores, then deploy agents commands
-kubectl exec -it cmon-master-0 -- bash
+kubectl exec -it cmon-0 -- bash
 s9s cluster --cluster-id=<cluster-id> --deploy-agents --log
 ```
 
