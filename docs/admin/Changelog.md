@@ -11,6 +11,21 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.55.10
+CMON version 2.3.1-17376
+### fixes
+- scale volume in private datastores
+
+## Release Notes - CCX - v1.55.10
+CMON version 2.3.1-17376
+### fixes
+- MSSQL hardcoded datadir issue
+
+## Release Notes - CCX - v1.55.9
+CMON version 2.3.1-17373
+### fixes
+- CA Cert fix in cmon
+
 ## Release Notes - CCX - v1.55.8
 CMON version 2.3.1-14751
 ### fixes
