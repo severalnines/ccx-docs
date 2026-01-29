@@ -11,6 +11,11 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.55.12
+CMON version 2.3.1-17705
+### fixes
+- additional logging
+
 ## Release Notes - CCX - v1.55.10
 CMON version 2.3.1-17376
 ### fixes
