@@ -16,7 +16,7 @@ CMON version 2.3.1-17705
 ### fixes
 - additional logging
 
-## Release Notes - CCX - v1.55.10
+## Release Notes - CCX - v1.55.11
 CMON version 2.3.1-17376
 ### fixes
 - scale volume in private datastores
