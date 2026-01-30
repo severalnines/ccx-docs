@@ -13,8 +13,10 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 ::::
 ## Release Notes - CCX - v1.55.12
 CMON version 2.3.1-17705
+
 ### fixes
-- additional logging
+- Increased timeouts (300 seconds) for connect_timeout, net_read_timeout, and net_write_timeout
+- Added more detailed debug information in job messages
 
 ## Release Notes - CCX - v1.55.11
 CMON version 2.3.1-17376
