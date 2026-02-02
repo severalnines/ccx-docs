@@ -1,10 +1,8 @@
-# Tutorial for OpenStack
-
-*For laptop/desktop installation instructions please visit [Install CCX on a Laptop](CCX-Install-Laptop.md).*
+# Tutorial for Production-ready OpenStack installation
 
 In this tutorial, we will install CCX so it is accessible from a domain, which we will call `ccx.example.com`.
 
-After completing this tutorial, you will have a working solution, but you will need to configure External DNS later.
+After completing this tutorial, you will have a production-ready working solution.
 
 OpenStack will be configured as the cloud provider.
 
@@ -17,11 +15,11 @@ OpenStack will be configured as the cloud provider.
 | Secrets Manager                    | K8S secrets                                                                                                    |
 | Openstack Credentials              | E.g an openstack RC file containing the auth urls, project id etc. |
 | Infrastructure Cloud               | • One "ccx-tenant" project<br />• VM flavors<br />• Attachable volumes<br />• Public Floating IPs (IPv4)<br />• Ubuntu 22.04 image |
-| Space for PVCs                     | About 100Gi will be used for PVCs in this tutorial. More space is needed for a production grade environment. |
+| Space for PVCs                     | Make sure you ahve at least 500Gi ready for production environment. Initial setup will use less, but it's better to have it in case it's needed. Depending on how detailed monitoring soultion is needed, it might require more memory. |
 | S3 storage                         | For datastore backups and Operator DB backup                                                                   |
-| DNS Provider                       | DNS providers supported by [external-dns](docs/admin/Installation/Dynamic-DNS.md). In order to use dynamic dns config. This can be installed later.                               |
+| DNS Provider                       | DNS providers supported by [external-dns](docs/admin/Installation/Dynamic-DNS.md). In order to use dynamic dns config.                               |
 | Ubuntu 22.04LTS cloud image for VMs| Cloud image for VMs hosting database (i.e., db nodes/hosts)                                                    |
-| Root volume for VM                 | There must be at least a 20GB root volume on each VM                                                           |
+| Root volume for VM                 | There must be at least a 40GB root volume on each VM                                                           |
 | Database volume on VM              | There must be at least 80GB data volume on each VM for database                                                |
 | Project for CCX datastores         | A global project for CCX datastores                                                                            |
 | Project quota                      | Sufficient quota for global project                                                                            |
@@ -30,19 +28,19 @@ OpenStack will be configured as the cloud provider.
 
 ### Storage (PVCs)
 
-During the installation the following PVCs are created. Thus you must ensure you have enough storage available. In total, plan on using about 100Gi for the setup described in this tutorial. More space is needed for a production grade setup.
+During the installation the following PVCs are created. Thus you must ensure you have enough storage available. In total, plan on using about 306Gi for the setup described in this tutorial. Depending on the production setup (how many replicas is desired, as well as how much data is needed for metrics/logs, as well as retention policy, last two volumes might need to be increased).
 
 ```
 kubectl get pvc
-NAME                                         STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS       VOLUMEATTRIBUTESCLASS   AGE
-ccxdeps-ccx-nats-js-pvc-ccxdeps-ccx-nats-0   Bound    pvc-ca4425a3-41c1-4e31-844e-c089d643967d   10Gi       RWO            do-block-storage   <unset>                 36d
-cmon-master-volume                           Bound    pvc-82bf7d9f-817d-4f0c-a14b-a95f259a6d40   20Gi       RWO            do-block-storage   <unset>                 36d
-cmon-var-lib-cmon                            Bound    pvc-ea1f97fb-3ec0-4bc6-9431-5803b1f60744   1Gi        RWO            do-block-storage   <unset>                 36d
-datadir-ccxdeps-0                            Bound    pvc-ee2924f6-b4d4-4fa4-bac3-fc6bc8426740   20Gi       RWO            do-block-storage   <unset>                 36d
-pgdata-acid-ccx-0                            Bound    pvc-b2923d0f-c775-4916-8254-d959ac34bbae   10Gi       RWO            do-block-storage   <unset>                 36d
-storage-alertmanager-0                       Bound    pvc-5ff9cd69-9426-4f35-b1a4-885f6d7dab06   1Gi        RWO            do-block-storage   <unset>                 36d
-storage-ccxdeps-loki-0                       Bound    pvc-81c89a19-6c8a-40e4-bf35-931f0bfd196c   10Gi       RWO            do-block-storage   <unset>                 36d
-victoria-metrics                             Bound    pvc-23c13e1c-3345-48c8-8796-ed1a3e1a0b04   16Gi       RWO            do-block-storage   <unset>                 36d
+NAME                                         STATUS   VOLUME                                     CAPACITY   ACCESS MODES       
+ccxdeps-ccx-nats-js-pvc-ccxdeps-ccx-nats-0   Bound    pvc-ca4425a3-41c1-4e31-844e-c089d643967d    10Gi           RWO           
+cmon-master-volume                           Bound    pvc-82bf7d9f-817d-4f0c-a14b-a95f259a6d40    40Gi           RWO            
+cmon-var-lib-cmon                            Bound    pvc-ea1f97fb-3ec0-4bc6-9431-5803b1f60744    1Gi            RWO            
+datadir-ccxdeps-0                            Bound    pvc-ee2924f6-b4d4-4fa4-bac3-fc6bc8426740    40Gi           RWO            
+pgdata-acid-ccx-0                            Bound    pvc-b2923d0f-c775-4916-8254-d959ac34bbae    10Gi           RWO            
+storage-alertmanager-0                       Bound    pvc-5ff9cd69-9426-4f35-b1a4-885f6d7dab06    5Gi            RWO            
+storage-ccxdeps-loki-0                       Bound    pvc-81c89a19-6c8a-40e4-bf35-931f0bfd196c    100Gi          RWO            
+victoria-metrics                             Bound    pvc-23c13e1c-3345-48c8-8796-ed1a3e1a0b04    100Gi          RWO            
 ```
 
 ### Ingress Controller
@@ -83,6 +81,58 @@ ingress-nginx-controller-metrics     ClusterIP      10.108.13.85    <none>      
 
 You must have an `EXTERNAL-IP`. If not, then the installation will fail.
 
+When deploying the Ingress Controller, make sure that the following field are entered during the deployment:
+```
+  controller:
+    addHeaders:
+      Referrer-Policy: no-referrer
+      X-Content-Type-Options: nosniff
+      X-Frame-Options: DENY
+      X-XSS-Protection: 1; mode=block
+    config:
+      allow-backend-server-header: "true"
+      use-forwarded-headers: "true"
+      hide-headers: "Server,X-Powered-By"
+```
+
+To verify it, run the following commands:
+```
+kubectl describe configmap -n nginx-ingress-controller ingress-nginx-controller
+
+Name:         ingress-nginx-controller
+Namespace:    nginx-ingress-controller
+Labels:       app.kubernetes.io/component=controller
+              app.kubernetes.io/instance=ingress-nginx
+              app.kubernetes.io/managed-by=Helm
+              app.kubernetes.io/name=ingress-nginx
+              app.kubernetes.io/part-of=ingress-nginx
+Annotations:  meta.helm.sh/release-name: ingress-nginx
+              meta.helm.sh/release-namespace: nginx-ingress-controller
+Data
+====
+allow-backend-server-header:
+----
+true
+
+hide-headers:                       
+----
+Server,X-Powered-By
+
+use-forwarded-headers:
+----
+true
+
+add-headers:                                                                                                                                                      ----                                                                                                                                                              nginx-ingress-controller/ingress-nginx-custom-add-headers  
+
+#Verify that headers are there
+kubectl get configmap -n nginx-ingress-controller ingress-nginx-custom-add-headers
+NAME                                       DATA   AGE
+ingress-nginx-custom-add-headers           4      4d21h
+```
+
+Replace the `nginx-ingress-controller` with the namespace where Ingress controler is actually deployed.
+
+
 ### Cert Manager
 Make sure you have `cert-manager` set up:
 
@@ -98,6 +148,21 @@ cert-manager-66dbc9658d-4hh55              1/1     Running   0          11d
 cert-manager-cainjector-69cfd4dbc9-lmxf2   1/1     Running   0          11d
 cert-manager-webhook-5f454c484c-bx8gx      1/1     Running   0          11d
 ```
+
+If you don't have cert manager installed on your system, use the following commands to install it:
+```
+helm repo add jetstack https://charts.jetstack.io --force-update
+
+helm install cert-manager --namespace cert-manager --version xxx jetstack/cert-manager --set crds.enabled=true #switch xxx for the version you wish to install, making sure it's not lower than 1.18.0
+
+```
+:::Note
+When setting up production version of cert-manager, there are a few configuration parameter that needs to be addressed:
+`replicaCount` - by default it's set to 1. To make sure it's production ready, make sure it has 2 or 3 replicas to provide high availability.
+`podDisruptionBudget.enabled` - by default this is set to `false`. Make sure to change it to `true` if you changed `replicaCount` to be different than 1. 
+`crds.enabled` - set to `true`. This will make sure to install all of the CRD's needed for optimal work. 
+`crds.keep` - make sure it's set to `true`. This will prevent Helm from uninstalling the CRD when the Helm release is uninstalled.
+:::
 
 
 Make sure the `ClusterIssuer` resource exist:
@@ -157,6 +222,7 @@ NAME                        READY   SECRET                      AGE
 ccx-ingress-cert            True    ccx-ingress-cert            19h
 ```
 If the value returned in the READY column is True, the certificate is valid.
+If you get any errors in this process, go to the [Troubleshoting](./Production-Openshift-installation#no-valid-certificates)
 
 ### Setup DNS
 Ensure you have a DNS A record set up, pointing the EXTERNAL_IP to the domain you wish to install CCX on, e.g., `ccx.example.com` (this is the endpoint the end-users will access):
@@ -199,18 +265,55 @@ kubectl config set-context --current --namespace=ccx
 
 First, we need to install the CCX dependencies (`ccxdeps`):
 
-- PostgreSQL - [read more about the operator](./Postgres-Operator-Installation). In this tutorial, we will use the defaults.
-- MySQL - [read more about the operator](./Mysql-Operator-Installation). In this tutorial, we will use the defaults.
+- PostgreSQL - [read more about the operator](./Postgres-Operator-Installation).
+- MySQL - [read more about the operator](./Mysql-Operator-Installation). Please take a look at how to setup backups in the documentation, as it will be needed on the production environment.
 - NATS
 - VictoriaMetrics
 - Loki
 - Keycloak
 
 ### Installing the Dependencies
-We will use the default values when setting up `ccxdeps`:
+
+Create a new file called `ccxdeps.yaml`. You can use the values below and modify them per your needs.
+```
+mysql-innodbcluster:
+  serverInstances: 3 # This is something you can chose, but it can only be 1,3,5,7 or 9.
+  podSpec:
+    containers:
+    - name: mysql
+      resources:
+        requests:
+          memory: "2048Mi"
+victoria-metrics-alert:
+  enabled: true
+victoria-metrics-single:
+  enabled: true
+ccx-monitoring:
+  alertmanager:
+    enabled: false
+  enabled: true
+  loki:
+    gateway:
+      ingress:
+        hosts:
+        - host: some-loki-domain.com
+          paths:
+          - path: /loki
+            pathType: Prefix
+        tls:
+        - hosts:
+          - some-loki-domain.com
+          secretName: loki-gateway-tls
+    loki_host_url: some-loki-domain.com
+oracle-mysql-operator:
+  enabled: true
+installOperators: true
 
 ```
-helm install ccxdeps s9s/ccxdeps --debug --wait -n ccx
+Please take a look at all [values](https://github.com/severalnines/helm-charts/blob/main/charts/ccxdeps/values.yaml), as you might be interested in some of the additional flags.
+
+```
+helm install ccxdeps s9s/ccxdeps --debug --wait -n ccx -f ccxdeps.yaml
 ```
 
 Check that the pods are `RUNNING`:
@@ -220,7 +323,9 @@ kubectl get pods -n ccx
 NAME                                         READY   STATUS    RESTARTS   AGE
 acid-ccx-0                                   1/1     Running   0          7m13s
 alertmanager-0                               1/1     Running   0          7m22s
-ccxdeps-0                                    1/2     Running   0          67s
+ccxdeps-0                                    2/2     Running   0          67s
+ccxdeps-1                                    2/2     Running   0          67s
+ccxdeps-2                                    2/2     Running   0          67s
 ccxdeps-ccx-nats-0                           3/3     Running   0          7m22s
 ccxdeps-ccx-nats-box-c777b9b98-thhfs         1/1     Running   0          7m22s
 ccxdeps-keycloak-0                           1/1     Running   0          7m22s
@@ -302,7 +407,7 @@ The secrets contain a number of fields starting with `MYCLOUD`. This must be rep
 If you want to identifty the cloud as `grok`, then replace `MYCLOUD` with `grok` in the `openstack-secrets.yaml` file and make sure you use `grok` in the `minimal-values.yaml` file referenced later in this tutorial. Later, your will also set a real name for your cloud. 
 :::
 
-`MYCLOUD_S3_ENDPOINT` URI must be specified without the protocol `http://` or `https://`. Thus it must look like `s3.example.com`.
+`MYCLOUD_S3_ENDPOINT` must be specified without `http://` or `https://`. Thus it should look like `s3.example.com`.
 
  Make sure you have your OpenStack RC file handy as it contains the information you need. Also ensure you have S3 credentials. S3 will be used to store backup data coming from the datastores the end user deploys.
 
@@ -343,6 +448,30 @@ kubectl apply -n ccx -f openstack-secrets.yaml
 kubectl apply -n ccx -f openstack-s3-secrets.yaml
 ```
 
+### Create Email secret
+
+In oder to setup the emailing for the ccx, create the secret in accordance to the following template:
+```
+apiVersion: v1
+data:
+  SMTP_FROM:  #email adress from which emails will be sent
+  SMTP_FROM_NAME: CCX
+  SMTP_HOST: #sender host
+  SMTP_PASSWORD: #email password
+  SMTP_PORT: #port
+  SMTP_USERNAME: #username
+kind: Secret
+metadata:
+  name: smtp
+  namespace: ccx
+type: Opaque
+
+```
+
+Use `kubectl apply -f smtp.yaml` to apply the secret.
+
+More documentation can be found [here.](../Day2/Notifications.md)
+
 ### Verify the secrets
 
 Verify that the secrets are created:
@@ -363,7 +492,6 @@ Thus, if you have a cloud called `grok`, then replace `MYCLOUD` with `grok` in t
 You must also create a security group. Let's call it `ccx-common`.
 
 `ccx-common` must allow all TCP traffic from all k8s nodes where CCX is running. 
-
 
 The Egress must also be allowed. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
 
@@ -470,83 +598,209 @@ A number of identifiers are case sensitive: `ccx.config.clouds[].regions[].code`
 :::
 
 ```yaml
-ccxFQDN: ccx.example.com
-ccFQDN: cc.example.com
 cc:
-  cidr: 0.0.0.0/0
-cmon:
-  licence: #insert the licence key you've received here
+  cidr: 0.0.0.0/0 #setup according to your network
+ccFQDN: cc.ccx.somedomain.com # dns name for ccx
+ccxFQDN: ccx.somedomain.com # dns name for cc
 ccx:
-  # List of Kubernetes secrets containing cloud credentials.
-  cidr: 0.0.0.0/0
-  cloudSecrets:
-    - openstack  # This secret must exist in Kubernetes. See 'secrets-template.yaml' for reference.
-    - openstack-s3
-  env:
-     DISABLE_ROLLBACK: "false" #if a datastore fails to deploy, then it will not be deleted. Helps with debugging. Set to "false" for prod.
-  ingress:
-    ssl:
-      clusterIssuer: letsencrypt-prod
+  cidr: 0.0.0.0/0 #setup according to your network
+  cloudSecrets: ccx # List of Kubernetes secrets containing cloud credentials.
+  - openstack # This secret must exist in Kubernetes. See 'secrets-template.yaml' for reference.
+  - openstack-s3
+  - smtp #secret made from email step
   config:
     clouds:
-      - code: mycloud  # Unique code for your cloud provider
-        name: MyCloud  # Human-readable name
-        instance_types:
-          - code: x4.2c4m.100g
-            cpu: 2
-            disk_size: 100
-            name: x4.2c4m.100g
-            ram: 4
-            type: x4.2c4m.100g
-        volume_types:
-        - code: fastdisk #the code must match the openstack volume type name.
-          has_iops: false
-          info: Optimized for performance
-          name: Fast storage
-          size:
-            default: 60 # we recommend 100GB as minimum for production systems.
-            max: 1000
-            min: 30
-        network_types:
-          - code: public
-            name: Public
-            in_vpc: false
-            info: >
-              All instances will be deployed with public IPs.
-              Access to the public IPs is controlled by a firewall.
-        regions:
-          - code: sto1  # this is your region code. Case-sensitive.
-            display_code: my-region1
-            name: Stockholm # Human-readable name
-            city: Stockholm
-            country_code: SE
-            continent_code: EU
-            availability_zones:
-              - code: nova # Case-sensitive 
-                name: az1 # Human-readable name
+    - code: mycloud # Unique code for your cloud provider
+      name: MyCloudName # Human-readable name
+      instance_types: #Type of instances that will be used 
+      - code: large-1 #code must match the one used on cloud
+        cpu: 2           #must match the instance template 
+        disk_size: 64
+        name: Small
+        ram: 8  #must match the instance template 
+        type: large-1
+      - code: large-2
+        cpu: 4
+        disk_size: 64
+        name: Medium
+        ram: 16
+        type: large-2
+      network_types:
+      - code: public
+        in_vpc: false
+        info: |
+          All instances will be deployed with public IPs. Access to the public IPs is controlled by a firewall.
+        name: Public
+      regions:
+      - availability_zones:
+        - code: nova # Case-sensitive 
+          name: az1 # Human-readable name
+        city: Stockholm
+        code: my-region1 # this is your region code. Case-sensitive.
+        continent_code: EU
+        country_code: SE
+        display_code: my-region1
+        name: my-region1
+      volume_types:
+      - code: ssd
+        has_iops: false
+        info: Optimized for performance
+        name: SSD network attached
+        size:
+          default: 60
+          max: 1000
+          min: 30
+    databases: #database variations
+    - code: mariadb
+      enabled: true
+      info: Deploy MariaDB with either multi-master (MariaDB Cluster) or master/replicas.
+      name: MariaDB
+      num_nodes:
+      - 1
+      - 2
+      - 3
+      ports:
+      - 3306
+      types:
+      - code: galera
+        name: Multi-Master
+        size_hints:
+          "1": 1 master node
+          "3": 3 multi-master nodes
+      - code: replication
+        name: Master / Replicas
+        size_hints:
+          "1": 1 master node
+          "2": 1 master, 1 replica
+          "3": 1 master, 2 replicas
+      versions:
+      - "10.11"
+      - "11.4"
+    - code: percona
+      enabled: true
+      info: Deploy MySQL with either multi-master (PXC) or master/replicas.
+      name: MySQL
+      num_nodes:
+      - 1
+      - 2
+      - 3
+      ports:
+      - 3306
+      types:
+      - code: galera
+        name: Multi-Master
+        size_hints:
+          "1": 1 master node
+          "3": 3 multi-master nodes
+      - code: replication
+        name: Master / Replicas
+        size_hints:
+          "1": 1 master node
+          "2": 1 master, 1 replica
+          "3": 1 master, 2 replicas
+      versions:
+      - "8"
+      - "8.4"
+    - code: postgres
+      enabled: true
+      info: Deploy PostgreSQL using asynchronous replication for high-availability.
+      name: PostgreSQL
+      num_nodes:
+      - 1
+      - 2
+      - 3
+      ports:
+      - 5432
+      types:
+      - code: postgres_streaming
+        name: Streaming Replication
+        size_hints:
+          "1": 1 master node
+          "2": 1 master, 1 replica
+          "3": 1 master, 2 replicas
+      versions:
+      - "14"
+      - "15"
+      - "16"
+    - code: valkey_sentinel
+      enabled: true
+      info: Deploy Valkey Sentinel.
+      name: Valkey
+      num_nodes:
+      - 1
+      - 3
+      ports:
+      - 6379
+      types:
+      - code: valkey_sentinel
+        name: Sentinel
+        size_hints:
+          "1": 1 master node
+          "3": 1 master, 2 replicas
+      versions:
+      - "8"
+    - code: microsoft
+      enabled: true
+      info: Deploy Microsoft SQL Server.
+      name: Microsoft SQL Server
+      num_nodes:
+      - 1
+      - 2
+      ports:
+      - 1433
+      types:
+      - code: mssql_single
+        name: Single server
+        size_hints:
+          "1": 1 node
+      - code: mssql_ao_async
+        name: Always On (async commit mode)
+        size_hints:
+          "2": 1 primary, 1 secondary
+      versions:
+      - "2022"
+  env:
+    DISABLE_ROLLBACK: "false" #if a datastore fails to deploy, then it will not be deleted. Helps with debugging. Set to "false" for prod.
+  ingress:
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: somedomain.com # domain used for databases. It has to match with ExternalDNS used one.
+    ssl:
+      clusterIssuer: letsencrypt-prod # Make sure it's the one you created in cert-manager step
   services:
     deployer:
       config:
         openstack_vendors:
           mycloud:
             compute_api_microversion: "2.79"
-            floating_network_id: b19680b3-c00e-40f0-ad77-4448e81ae226  # Replace with actual ID
-            #public_pool: b19680b3-c00e-40f0-ad77-4448e81ae226 # Enable this if a public pool is used.
+            floating_network_id: some_id  # Replace with actual ID
             network_api_version: NetworkNeutron
-            network_id: 21dfbb3d-a948-449b-b727-5fdda2026b45  # Replace with actual network ID
-            project_id: 5b8e951e41f34b5394bb7cf7992a95de  # Replace with your OpenStack project ID
-            regions:
-              sto1:  # region id, must be consistently set/named. Case-sensitive.
+            network_id: some_network_id # Replace with actual network ID
+            project_id: project_id # Replace with your OpenStack project ID
+            regions: 
+              sto1: # region id, must be consistently set/named. Case-sensitive.
                 image_id: 936c8ba7-343a-4172-8eab-86dda97f12c5  # Replace with image ID for the region
                 # secgrp_name refers to the security group name used by CCX to access datastore VMs.
                 # It must be created manually and allow all TCP traffic from all Kubernetes nodes where CCX is running.
                 secgrp_name: ccx-common  # Recommended to use a dedicated security group
+    uiapp:
+      env:
+        FE_REACT_APP_FAVICON_URL: your_icon_link #link to your company icon
+        FE_REACT_APP_LOGO_URL: your_link #link to your company logo
+        FE_EXTERNAL_CSS_URL: your.css.url #ult to the ccss you will be using 
+        FE_NODE_ENV: "production"
+        FE_VPC_DISABLED: true #turn off this unless using AWS
+      replicas: 3
+    runner:
+      replicas: 5 # Minimum is 3 that should be used in prduction. Prefferable is to have 5 or more
+  userDomain: somedomain.com # domain used for databases. It has to match with ExternalDNS used one.
+cmon:
+  licence: xxx # insert licence here
 ```
 
 ## Install CCX
 Now it is finally time to install CCX.
 
-Make sure you change `cc.example.com` and `ccx.example.com` to the domain names you use. 
+Make sure you change `cc.ccx.somedomain.com` and `ccx.somedomain.com` to the domain names you use. 
 Also change the `clusterIssuer` to the one you created previously.
 
 ```
@@ -667,5 +921,3 @@ See our [Troubleshooting](docs/admin/Troubleshooting/Troubleshooting.md) section
 - [White-labeling UI and customization](docs/admin/Customisation/Frontend.md).
 - [JWT authentication](docs/admin/Customisation/JWT.md).
 - Configure more Instance types (VMs, storage, etc.)
-- [Billing API](docs/admin/Other/Billing.md).
-- [Upgrading to be production ready](docs/admin/Day2/Upgrading-to-be-production-ready.md).
