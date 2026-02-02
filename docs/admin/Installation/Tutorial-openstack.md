@@ -668,3 +668,4 @@ See our [Troubleshooting](docs/admin/Troubleshooting/Troubleshooting.md) section
 - [JWT authentication](docs/admin/Customisation/JWT.md).
 - Configure more Instance types (VMs, storage, etc.)
 - [Billing API](docs/admin/Other/Billing.md).
+- [Upgrading to be production ready](docs/admin/Day2/Upgrading-to-be-production-ready.md).
