@@ -157,7 +157,7 @@ helm install cert-manager --namespace cert-manager --version xxx jetstack/cert-m
 
 ```
 :::Note
-When setting up production version of cert-manager, there are a few configurtations parameter that needs to be adressed:
+When setting up production version of cert-manager, there are a few configuration parameter that needs to be addressed:
 `replicaCount` - by default it's set to 1. To make sure it's production ready, make sure it has 2 or 3 replicas to provide high availability.
 `podDisruptionBudget.enabled` - by default this is set to `false`. Make sure to change it to `true` if you changed `replicaCount` to be different than 1. 
 `crds.enabled` - set to `true`. This will make sure to install all of the CRD's needed for optimal work. 
@@ -274,7 +274,7 @@ First, we need to install the CCX dependencies (`ccxdeps`):
 
 ### Installing the Dependencies
 
-Create a new file called `ccxdeps.yaml`. You can use te values below and modify them per your needs.
+Create a new file called `ccxdeps.yaml`. You can use the values below and modify them per your needs.
 ```
 mysql-innodbcluster:
   serverInstances: 3 # This is something you can chose, but it can only be 1,3,5,7 or 9.

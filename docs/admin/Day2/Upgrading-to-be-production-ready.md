@@ -1,7 +1,7 @@
 # Upgrading CCX to be production ready
 
 :::danger
-At this point, it's presumed that you have already installed CCX following the tutorial. In case that you wish to upgrade it to be production ready, isntead of creating everything from scratch, this page will show you how to do so. Just before doing so, make sure you have adequate resources at your disposal to do so.
+At this point, it's presumed that you have already installed CCX following the tutorial. In case that you wish to upgrade it to be production ready, instead of creating everything from scratch, this page will show you how to do so. Just before doing so, make sure you have adequate resources at your disposal to do so.
 ::::
 
 :::note
@@ -29,7 +29,7 @@ If you installed ingress controller with the `helm chart` and you are in control
       hide-headers: "Server,X-Powered-By"
 ```
 
-If you don't have control over the ingress controler values (e.x. controler comes up installed in cluster upon boot), do the follwoing:
+If you don't have control over the ingress controller values (e.x. controller comes up installed in cluster upon boot), do the following:
 
 Create new ConfigMap that contains the following:
 ```
@@ -63,7 +63,7 @@ Once this is done, restart all of the nginx pods in order for them to pick up ne
 
 ### Cert Manager
 
-When setting up production version of cert-manager, there are a few configurtations parameter that needs to be adressed:
+When setting up production version of cert-manager, there are a few configuration parameters that needs to be addressed:
 `replicaCount` - by default it's set to 1. To make sure it's production ready, make sure it has 2 or 3 replicas to provide high availability.
 `podDisruptionBudget.enabled` - by default this is set to `false`. Make sure to change it to `true` if you changed `replicaCount` to be different than 1. 
 `crds.enabled` - set to `true`. This will make sure to install all of the CRD's needed for optimal work. 
@@ -74,12 +74,12 @@ Depending on how you wish to use this instance of `cert-manager`, make sure that
 
 ### Dependencies update
 
-Originaly the `ccxdeps` helm chart was installed in tutorial using the default values. Create a new file called `ccxdeps.yaml`. You can use te values below and modify them per your needs.
+Originally the `ccxdeps` helm chart was installed in tutorial using the default values. Create a new file called `ccxdeps.yaml`. You can use the values below and modify them per your needs.
 
 ```
 mysql-innodbcluster:
   serverInstances: 3 # This is something you can chose, but it can only be 1,3,5,7 or 9.
-  podSpec: #whaever is set under podSpec can't be changed in future, so take care in using correct settings
+  podSpec: #whatever is set under podSpec can't be changed in future, so take care in using correct settings
     containers:
     - name: mysql
       resources:
@@ -123,7 +123,7 @@ Configure the credentials to use your project you made for production. If the pr
 
 ## Add the email configuration
 
-In oder to setup the emailing for the ccx, create the secret in accordance to the following template:
+In order to setup the emailing for the ccx, create the secret in accordance to the following template:
 ```
 apiVersion: v1
 data:
@@ -147,7 +147,7 @@ More documentation can be found [here.](../Day2/Notifications.md)
 
 ### Security Group ccx-common
 
-ccx-common` must allow all TCP traffic from all k8s nodes where CCX is running. 
+`ccx-common` must allow all TCP traffic from all k8s nodes where CCX is running. 
 
 The Egress must also be allowed. Below is a screenshot showing the `ccx-common`. The EXTERNAL-IP is specified for the port range 1-65535.
 
@@ -162,7 +162,7 @@ If you have three worker nodes, and they have different IP addresses then you mu
 A number of identifiers are case sensitive: `ccx.config.clouds[].regions[].code`, `ccx.config.clouds[].regions[].availabiliity_zones[].code`, `ccx.services.deployer.config.openstack_vendors[].regions[].identifier` and also the codes for the `instance_types`, `flavors`, `volumes` are `network_types` case-sensitive. Be consistent!
 :::
 
-At this point, ccx should be deployed with minimal values yaml. The following values.yaml is minimal for production evnironment:
+At this point, ccx should be deployed with minimal values yaml. The following values.yaml is minimal for production environment:
 
 :::
 
