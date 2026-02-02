@@ -35,5 +35,20 @@ fluentbit:
 ```
 This allows you to forward logs to other systems like Elasticsearch, S3, or Splunk alongside Loki.
 
+#### Visualizing Logs with Grafana
+
+#### Pre-requisites
+
+* `ccx-monitoring` helm chart must be deployed with Grafana enabled.
+
+
+If Loki is used from the `ccxdeps` helm chart, make sure that the value in the `ccx-monitoring` helm chart called `lokiHostname` is set to `ccxdeps-loki.${namespace}.svc`.
+If Loki is enabled through `ccx-monitoring` helm chart, Loki will be automaticly impored as a datasource. 
+Both can be enabled.
+
+To verify it, go to `Connection --> Data Sources` in Grafana. Loki data sources shoud be shown there.
+
+To take a look at the logs, got to `Explore` tab in Grafana. Make sure that you pick Loki as a datasource. In Label filters pick a datastoreId, and for value the database which logs you wish to see. Pick a time perioud on which you'd like to see logs and press Run quiery. That will show you the logs for the chosen database. 
+
 ### Custom loki Setup (Optional)
 Click here for Advanced setup [Custom Loki](Custom-Loki.md)

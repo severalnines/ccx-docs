@@ -1,6 +1,6 @@
 # Observability
 
-CCX delivers the observability stack as a separate deployment available as a Helm chart here - https://github.com/severalnines/observability/.
+CCX delivers the observability stack as a separate deployment available as a Helm chart.
 
 This page describes how to set up observability. The observability solution for CCX relies heavily on VictoriaMetrics/VM-alerts (or Prometheus/AlertManager) with Grafana for visualisation. We recommend using VictoriaMetrics and hence Prometheus is not covered in any more detail in this document.
 
@@ -10,7 +10,7 @@ Moreover, the datastores are also visualized in the ClusterControl UI.
 
 This stack uses:
 
-- Victoria metrics - Prometheus compatibile observability for metrics and alerting (vmsingle/vmalert) - https://docs.victoriametrics.com/Single-server-VictoriaMetrics.html
+- Victoria metrics - Prometheus compatibile observability for metrics and alerting (vmsingle/vmalert or vmcluster/vmagent/vmalert) 
 - Alertmanager - https://prometheus.io/docs/alerting/latest/alertmanager/
 - Grafana - https://grafana.com/docs/
 - kube-state-metrics - https://github.com/kubernetes/kube-state-metrics
@@ -21,9 +21,11 @@ This stack uses:
 
 - kubernetes cluster
 - helm - https://helm.sh/docs/intro/install/
-- ccx-monitoring helm chart - https://github.com/severalnines/observability/
+- ccx-monitoring helm chart 
 
 ### Namespace
+
+The observability stack is quite resource-intensive. When deploying it for production use, it’s recommended to have a dedicated node group, separate from the one used by the ccx or ccxdeps Helm charts. This can be achieved by using a combination of affinity and toleration rules.
 
 It's preferred to have a dedicated namespace for this stack. Create namespace:
 
@@ -39,41 +41,31 @@ helm repo add s9s https://severalnines.github.io/helm-charts/
 helm repo update
 ```
 
-### Pull the chart
-
+### Pull the chart values
+ 
 ```
-helm pull s9s/ccx-monitoring --untar
+helm show values s9s/ccx-monitoring > values.yaml
 ```
 
-### Helm dependencies
-
-Update your helm dependencies by running:
-
-```
-helm dependencies update
-```
 
 ### Values
 
 It is very important to edit `values` file and set variables like cluster name, ingress host, etc. Please make sure to go through `values` file and modify it as necessary.
 
-```
-helm show values ccx-monitoring > YOUR_VALUES.yaml
-```
-
 ## Installation & upgrade
 
 ```
-helm upgrade --install ccx-monitoring ccx-monitoring --values YOUR_VALUES.yaml --debug
+helm upgrade --install ccx-monitoring s9s/ccx-monitoring --values YOUR_VALUES.yaml --debug
 ```
-
-Please note that this guide as some other documents and URLs assumes that you use `ccx-monitoring` release name.
 
 ## Grafana dashboards
 
-Grafana dashboards and datasources are kept as a code in the repo.
+When installing Grafana, dasboard for CCX monitoring will be automaticly imported.
+
+(Optional) Repository aslo contains additional dashboards, that can be imported in order to track entire kubernetes cluster. 
 
 ```
+helm pull s9s/ccx-monitoring --untar
 kubectl delete -k ccx-monitoring/dashboards
 kubectl create -k ccx-monitoring/dashboards
 ```
@@ -82,11 +74,9 @@ Additional dashboards can be placed as `.json` files in folders inside `dashboar
 
 ### Grafana datasources
 
-Grafana dashboards and datasources are kept as a code in the repo. Navigate to `datasources` directory, edit `grafana_datasource.yaml` and apply using:
+Depending on the compnents that are enabled, when installing Grafana, Loki/VictoriaMetrics/Alertmanager datasources will be automaticly set, if they are deployed with `ccx-monitoring` helm chart.
 
-```
-kubectl apply -k ccx-monitoring/datasources
-```
+In case `ccx-monitoring` helm chart is used with Loki deployed with `ccxdeps` helm chart with default values, or with some other helm chart, make sure that the value `lokiHostname` points to the service used for Loki. For `ccxdeps`, it would be `ccxdeps-loki`.
 
 ### To get Grafana admin password
 
