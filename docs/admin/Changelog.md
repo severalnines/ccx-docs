@@ -11,6 +11,18 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.55.16
+CMON version 2.3.1-17837
+
+### fixes
+- Percona packages installation fix
+
+## Release Notes - CCX - v1.55.15
+CMON version 2.3.1-17837
+
+### fixes
+- Fix for cmon-cloud
+
 ## Release Notes - CCX - v1.55.13
 CMON version 2.3.1-17810
 
