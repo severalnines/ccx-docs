@@ -11,6 +11,55 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.56.0
+CMON version: 2.3.4-18168
+
+### New Features
+- PostgreSQL 18 support
+- Show database version in the Node page
+- MSSQL Log backups support
+- Invoice list pagination in the web UI
+- S3 Regions support
+- Periodic backup of cmon/ccx database to S3
+- Deploy as Cluster support
+- Added finalizers to cmon volumes to prevent accidental removal
+
+### Improvements
+- Valkey upgraded to version 8.0.6
+- Improved datastore upgrade process
+- CMON pool support improvements (upgrade handling, DevOps tools, cmon-ssh)
+- Periodic cleanup of unused k8s services and secrets
+- Valkey connection string now includes TLS flag information
+- Added Valkey 8 support in deployment configurations
+- Added Swagger documentation for JWT login endpoint
+- Datastore creation fix when only `cloud_group` is set in values file
+
+### Bugs
+- Percona MySQL 8.4 package conflict (`percona-xtradb-cluster-common` vs `percona-server-common`) breaking deployments
+- Create datastore dialog fails to load
+- Null exception in store-internal-metrics-sd
+- Extra node in Valkey addnode cmon job spec
+- ccx-notify-worker panic fix
+- Deployments failing across multiple cloud providers
+- Panic on upgrade servers fix
+- Panic when deleting disk fix
+- Panic during deployment and node removal fix
+- Panic when updating volume size fix
+- Panic with invalid store type for mysql:8.4:multi
+- No error message shown for promote replica errors
+- Quota error messages missing datastore ID
+- Cannot scale volume in private datastores
+- Connection assistant UI fix
+- Change user password not available without billing fix
+- cmon_cache foreign key constraint violation fix
+- CCX updates k8s services every minute fix
+- Can try to create datastore with invalid node count fix
+- Deleting database error handling improvements
+- Drop database job icon keeps spinning after completion fix
+- Valkey ACL: fix allowing all keys (`~*`) and channels (`&*`) together
+- Fix for failure to remove node
+- Security fixes: anti-clickjacking header, CSP header, hardcoded credentials
+
 ## Release Notes - CCX - v1.55.16
 CMON version 2.3.1-17837
 
