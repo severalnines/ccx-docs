@@ -14,9 +14,10 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 ## Release Notes - CCX - v1.56.3
 CMON version: 2.3.4-18168
 
-### Prer-equisites
+### Pre-requisites
 - Upgrade first to 1.55.16
-- Backup cmon db, and ccx db, and snapshot PVCs (varlibcmon and etccmon.d).
+- Backup cmon db, and ccx db, and snapshot PVCs (varlibcmon and etccmon.d). This version has breaking changes which are not backward compatible!
+- After upgrade, change the service discovery path for metrics from `cmon-master:8080` to `store-internal-metrics-sd-svc:8080` for prometheus metrics.
 
 ### New Features
 - PostgreSQL 18 support
@@ -37,6 +38,7 @@ CMON version: 2.3.4-18168
 - Added Valkey 8 support in deployment configurations
 - Added Swagger documentation for JWT login endpoint
 - Datastore creation fix when only `cloud_group` is set in values file
+- Service discovery moved away from cmon container
 
 ### Bugs
 - Percona MySQL 8.4 package conflict (`percona-xtradb-cluster-common` vs `percona-server-common`) breaking deployments
