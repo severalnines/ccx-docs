@@ -11,7 +11,7 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
-## Release Notes - CCX - v1.56.0
+## Release Notes - CCX - v1.56.3
 CMON version: 2.3.4-18168
 
 ### New Features
@@ -61,91 +61,12 @@ CMON version: 2.3.4-18168
 - Security fixes: anti-clickjacking header, CSP header, hardcoded credentials
 
 ## Release Notes - CCX - v1.55.16
-CMON version 2.3.1-17837
-
-### fixes
-- Percona packages installation fix
-
-## Release Notes - CCX - v1.55.15
-CMON version 2.3.1-17837
-
-### fixes
-- Fix for cmon-cloud
-
-## Release Notes - CCX - v1.55.13
-CMON version 2.3.1-17810
-
-### fixes
-- Additional logging info about primary/secondary nodes status
-
-## Release Notes - CCX - v1.55.12
-CMON version 2.3.1-17705
-
-### fixes
-- Increased timeouts (300 seconds) for connect_timeout, net_read_timeout, and net_write_timeout
-- Added more detailed debug information in job messages
-
-## Release Notes - CCX - v1.55.11
-CMON version 2.3.1-17376
-### fixes
-- scale volume in private datastores
-
-## Release Notes - CCX - v1.55.10
-CMON version 2.3.1-17376
-### fixes
-- MSSQL hardcoded datadir issue
-
-## Release Notes - CCX - v1.55.9
-CMON version 2.3.1-17373
-### fixes
-- CA Cert fix in cmon
-
-## Release Notes - CCX - v1.55.8
-CMON version 2.3.1-14751
-### fixes
-- Credit card note in create datastore from backup is not shown on envs without billing enabled
-
-## Release Notes - CCX - v1.55.7
-CMON version 2.3.1-14751
-### Bugs
-- Valkey ACL validation error on user creation. (Unable to allow all keys and channels with `~* &*`)
-
-## Release Notes - CCX - v1.55.6
-CMON version 2.3.1-14751
-### Bugs
-- Regression for individual node FQDNs when ExternalDNS is disabled
-
-## Release Notes - CCX - v1.55.5
-CMON version 2.3.1-14751
-### upgrades
-- Backend using 8.0.6 Valkey resolving security issues
-
-## Release Notes - CCX - v1.55.4
-CMON version 2.3.1-14751
-### Bugs
-- UI fix for create datastore from backup when changing node configuration
-
-## Release Notes - CCX - v1.55.3
-CMON version 2.3.1-14751
-### Bugs
-- Internal TLS fixes 
-
-## Release Notes - CCX - v1.55.2
-CMON version 2.3.1-14751
-### Bugs
-- Openstack s3 region fix
-
-## Release Notes - CCX - v1.55.1
-CMON version 2.3.1-14751
-### CMON Bugs
-- cmon config invalid save issues fix
-
-## Release Notes - CCX - v1.55.0 
 :::danger
 This release must be deployed, you cannot skip it when upgrading to later release
 ::::
 Release date: 20-08-2025
-CMON version 2.3.1-13878
+CMON version 2.3.1-17837
+
 ### New Features
 - change user onboarding flow
 - Tags change support in Terraform provider
@@ -155,6 +76,19 @@ CMON version 2.3.1-13878
 - Single server MSSQL datastore creation fails unless 1 node is manually chosen.
 - Unnecessary `primary.<cluster_id>.<domain>`  is created
 - Cannot create datastore from backup with different storage type
+- Percona packages installation fix
+- Increased timeouts (300 seconds) for connect_timeout, net_read_timeout, and net_write_timeout
+- Added more detailed debug information in job messages
+- cmon config invalid save issues fix
+- Openstack s3 region fix
+- Internal TLS fixes 
+- UI fix for create datastore from backup when changing node configuration
+- Backend using 8.0.6 Valkey resolving security issues
+- Regression for individual node FQDNs when ExternalDNS is disabled
+- Valkey ACL validation error on user creation. (Unable to allow all keys and channels with `~* &*`)
+- MSSQL hardcoded datadir issue
+- CA Cert fix in cmon
+- Fix for cmon-cloud
 
 ### Improvements
 - Cloud_credentials migration
