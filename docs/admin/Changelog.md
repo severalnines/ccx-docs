@@ -16,7 +16,7 @@ CMON version: 2.3.4-18168
 
 ### Prer-equisites
 - Upgrade first to 1.55.16
-- Backup cmon db, and ccx db, and snapshot PVCs.
+- Backup cmon db, and ccx db, and snapshot PVCs (varlibcmon and etccmon.d).
 
 ### New Features
 - PostgreSQL 18 support
