@@ -14,6 +14,10 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 ## Release Notes - CCX - v1.56.3
 CMON version: 2.3.4-18168
 
+### Prer-equisites
+- Upgrade first to 1.55.16
+- Backup cmon db, and ccx db, and snapshot PVCs.
+
 ### New Features
 - PostgreSQL 18 support
 - Show database version in the Node page
