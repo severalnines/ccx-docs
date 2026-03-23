@@ -21,7 +21,7 @@ And then you will see:
 2. Create a `terraform.tf`
 3. Set `client_id`, `client_secret`, below is a terraform.tf file:
 
-````terraform
+```terraform
 terraform {
   required_providers {
     ccx = {
