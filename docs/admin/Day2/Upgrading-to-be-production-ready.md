@@ -374,3 +374,49 @@ helm upgrade --install ccx s9s/ccx -n ccx --debug --wait -f openstack.yaml
 ```
 
 Once done, `https://ccx.somedomain.com/auth/register?from=ccx` in a web browser, register a new user and verify that datastore creatin is working properly.
+
+### IP Whitelisting for the CC Ingress
+
+The CC interface (`ccFQDN`) can be restricted to specific IP ranges at the ingress level. This is useful for limiting access to the ClusterControl UI to trusted networks (e.g. a VPN or office IP range) without touching firewall rules.
+
+#### How it works
+
+The helm-ccx chart translates `ccx.ingress.whitelist` in your values file into the nginx annotation `nginx.ingress.kubernetes.io/whitelist-source-range` on the CC ingress. If the value is empty or not set, the ingress is publicly accessible.
+
+#### Configuration
+
+Add the `whitelist` field under `ccx.ingress` in your values file:
+
+```yaml
+ccx:
+  ingress:
+    whitelist: "203.0.113.0/24,198.51.100.42/32"
+```
+
+The value is a comma-separated list of CIDR ranges. Any request from an IP not matching the list will receive a `403 Forbidden` response from nginx.
+
+:::note
+Only the CC ingress (`ccFQDN`) supports whitelisting through this value. The CCX user-facing ingress and other internal ingresses are not affected.
+:::
+
+To apply the change, upgrade the helm release:
+
+```bash
+helm upgrade --install ccx s9s/ccx -n ccx --debug --wait -f your-values.yaml
+```
+
+To verify the annotation was applied:
+
+```bash
+kubectl get ingress -n ccx -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.annotations.nginx\.ingress\.kubernetes\.io/whitelist-source-range}{"\n"}{end}'
+```
+
+#### Removing the whitelist
+
+To make the CC ingress publicly accessible again, set the value to an empty string or remove the field entirely and re-run the helm upgrade:
+
+```yaml
+ccx:
+  ingress:
+    whitelist: ""
+```
