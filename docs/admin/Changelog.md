@@ -11,6 +11,12 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.56.5
+CMON version: 2.3.4-18413
+
+### Bugs
+- MySQL/MariaDB exporters exposing excessive number of metrics (100k+ samples per scrape) due to `--collect.perf_schema.file_instances` being enabled by default, causing high memory and network usage in Victoria Metrics
+
 ## Release Notes - CCX - v1.56.4
 CMON version: 2.3.4-18168
 
