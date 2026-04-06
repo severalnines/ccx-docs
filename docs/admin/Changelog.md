@@ -15,7 +15,13 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 CMON version: 2.3.4-18413
 
 ### Bugs
-- MySQL/MariaDB exporters exposing excessive number of metrics (100k+ samples per scrape) due to `--collect.perf_schema.file_instances` being enabled by default, causing high memory and network usage in Victoria Metrics
+- MySQL/MariaDB exporters exposing excessive number of metrics (100k+ samples per scrape) due to `--collect.perf_schema.file_instances` being enabled by default, causing high memory and network usage in Victoria Metrics. In order to addess the currently deployed datastores, run the following command (it will take a while to complete):
+```
+s9s cluster --list --long --batch | awk '$3 == "replication" {print $1}' | while read id; do
+    s9s cluster --deploy-agents --cluster-id="$id" --log
+done
+```
+
 
 ## Release Notes - CCX - v1.56.4
 CMON version: 2.3.4-18168
