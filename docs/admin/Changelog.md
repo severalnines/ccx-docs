@@ -13,6 +13,10 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 ::::
 ## Release Notes - CCX - v1.57.0
 
+:::note
+There are changes to the ccx UI in this version. In order for everything to be operational, `ingress contriller (nginx)` needs to have `X-Frame-Options: SAMEORIGIN` header set. If it's not set, there is a possibility that some of the new frontend components will not function properly.
+:::
+
 ### New Features
 - Email address verification flow
 - Account deletion support — soft delete for users (disabling access) and clusters, hard delete with full resource cleanup
