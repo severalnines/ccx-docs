@@ -11,6 +11,51 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.57.0
+
+### New Features
+- Email address verification flow
+- Account deletion support — soft delete for users (disabling access) and clusters, hard delete with full resource cleanup
+- Admin ability to remove a user from CCX API
+- Audit log backend
+- Improved datastore upgrade cycle with updated UI
+- Project name display in the CCX UI
+- Valkey package repository server — Valkey packages now hosted internally and integrated into cloud-init scripts
+
+### Improvements
+- Sensitive secrets removed from cloud-init user-data
+- Improved UI warnings and confirmation dialogs for SUPERUSER database accounts
+- PostgreSQL system users added to reserved usernames blocklist
+- Database connection timeouts added for all connections and queries
+- Health probes added to ccx-rest and ccx-stores services
+- Empty Kubernetes services no longer created for datastores
+- ccx-migrate-cloud-credential job now waits for CMON to be ready before starting
+- Helm upgrade now handles CMON database credential changes correctly
+- Volume size monitoring and alerting
+- Loki authentication support added for datastore log access
+
+### Bugs
+- Cluster creation failure due to OAuth2 token refresh error when user account is disabled
+- Mismatch of type and spec struct when sending jobs to CMON
+- Email verification link not working
+- AWS S3 bucket not deleted on error, with error not forwarded
+- Backup struct missing in restore API response
+- Restore history tab shows "Invalid time value" and incorrect dates
+- Events tab shows all entries without pagination
+- Autoscale fails after changing volume type
+- CMON hostname not DNS-resolvable when init container hostname change fails
+- `ccxctl migrate-cloud-credentials` exits with error on fresh install with no CMON controllers
+- CCX fails to detect the correct PRIMARY role
+- Long-running jobs blocking other operations
+- Valkey version hardcoded in cloud-init template
+- Deleting a database displayed as a job but missing proper description
+- Panic fix: nil pointer dereference
+- Binlog backup schedule not paused when adding a new replica
+- Promoting replica in a failed state no longer permitted
+- Helm-ccx init container failure when connecting to MySQL
+- helm-ccxdeps missing RoleBinding and ClusterBinding RBAC roles for the innodbcluster operator service account, causing repeated permission errors
+- Security fixes: unsanitized database input (SNYK), backup ID exposed in API, datastore logs publicly accessible, hidden configuration file written to root directory
+
 ## Release Notes - CCX - v1.56.5
 CMON version: 2.3.4-18413
 
