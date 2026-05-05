@@ -3,7 +3,7 @@ This documentation outlines the functionality and usage of the billing report AP
 
 Billing reports can be created using the billing API or from the admin UI.
 
-Also see [Tagging](docs/admin/Other/Tagging.md).
+Also see [Tagging](Tagging.md).
 
 ## Admin UI
 

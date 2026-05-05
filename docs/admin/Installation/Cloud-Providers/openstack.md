@@ -37,6 +37,8 @@ Create a security group named ccx-common manually and this name needs to be upda
 `ccx.services.deployer.config.openstack_vendors.MYCLOUD.regions.REGIONNAME.secgrp_name`
 The Security group firewall rule should include a rule to allow CCX ip(CIDR address) to connect to it.
 
+For a complete list of all ports, external endpoints, and package repositories that must be reachable — including per-database-vendor requirements and air-gapped deployment guidance — see the [Firewall and Air-Gapped Deployment](../Firewall-and-Air-Gap.md) guide.
+
 ## Configuration
 
 ### CCX OpenStack Configuration
