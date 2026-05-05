@@ -43,7 +43,7 @@ Never use the ClusterControl UI to delete resources (nodes or datastores). This 
 
 ## S9S CLI
 
-[S9s CLI](docs/admin/Troubleshooting/Troubleshooting.md#s9s-cli-commands-and-cc-ui-commands) is a tool that provides access to CMON functionality and the tool can be run from the `cmon-master` service within Kubernetes.
+[S9s CLI](Troubleshooting.md#s9s-cli-commands-and-cc-ui-commands) is a tool that provides access to CMON functionality and the tool can be run from the `cmon-master` service within Kubernetes.
 
 :::danger
 Never use the S9S CLI to delete resources (nodes or datastores). This may lead to stray data.
