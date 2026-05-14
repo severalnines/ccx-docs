@@ -11,13 +11,13 @@ OpenStack will be configured as the cloud provider.
 | Item                              | Description                                                                                                    |
 |------------------------------------|----------------------------------------------------------------------------------------------------------------|
 | A few sub domains                  | E.g. `ccx.example.com` and `cc.example.com`. Please note that`cc` and `ccx` are just examples names. You can change them to e.g `adm` and `dbaas`. Just make sure you replace `ccx.example.com` and `cc.example.com` with the new names in the steps below.
-| Kubernetes                         | • Persistent Volume, Storage Class<br />• Nginx Ingress controller (The ingress controller must have an EXTERNAL-IP).<br />• External IP<br /><br />See [K8S requirements](docs/admin/Installation/Index.md#k8s-control-plane-requirements) for minimum size of cluster and K8S version, etc. |
+| Kubernetes                         | • Persistent Volume, Storage Class<br />• Nginx Ingress controller (The ingress controller must have an EXTERNAL-IP).<br />• External IP<br /><br />See [K8S requirements](Index.md#k8s-control-plane-requirements) for minimum size of cluster and K8S version, etc. |
 | Secrets Manager                    | K8S secrets                                                                                                    |
 | Openstack Credentials              | E.g an openstack RC file containing the auth urls, project id etc. |
 | Infrastructure Cloud               | • One "ccx-tenant" project<br />• VM flavors<br />• Attachable volumes<br />• Public Floating IPs (IPv4)<br />• Ubuntu 22.04 image |
 | Space for PVCs                     | Make sure you ahve at least 500Gi ready for production environment. Initial setup will use less, but it's better to have it in case it's needed. Depending on how detailed monitoring soultion is needed, it might require more memory. |
 | S3 storage                         | For datastore backups and Operator DB backup                                                                   |
-| DNS Provider                       | DNS providers supported by [external-dns](docs/admin/Installation/Dynamic-DNS.md). In order to use dynamic dns config.                               |
+| DNS Provider                       | DNS providers supported by [external-dns](Dynamic-DNS.md). In order to use dynamic dns config.                               |
 | Ubuntu 22.04LTS cloud image for VMs| Cloud image for VMs hosting database (i.e., db nodes/hosts)                                                    |
 | Root volume for VM                 | There must be at least a 40GB root volume on each VM                                                           |
 | Database volume on VM              | There must be at least 80GB data volume on each VM for database                                                |
@@ -912,12 +912,12 @@ namespaceSelector:
 Save it and restart all of the nginx ingress pods. After that is done, add label to the ccx namespace `kubernetes.io/metadata.name=ccx`.
 Give it 5 minutes for the internal stuff to sync, than remove the `ccx-ingress` manually. This will cause it to be recreated, and now it should be in ready state within few minutes. 
 
-See our [Troubleshooting](docs/admin/Troubleshooting/Troubleshooting.md) section for more information.
+See our [Troubleshooting](../Troubleshooting/Troubleshooting.md) section for more information.
 
 ## Next Steps
 
-- [Set up and configure ExternalDNS](docs/admin/Installation/Dynamic-DNS.md). This will give your endusers immutable endpoints to the database. Please make sure you have deleted all datastores before you set it up. 
-- [Run End-to-End Tests](docs/admin/Testing/E2E-tests.md).
-- [White-labeling UI and customization](docs/admin/Customisation/Frontend.md).
-- [JWT authentication](docs/admin/Customisation/JWT.md).
+- [Set up and configure ExternalDNS](Dynamic-DNS.md). This will give your endusers immutable endpoints to the database. Please make sure you have deleted all datastores before you set it up. 
+- [Run End-to-End Tests](../Testing/E2E-tests.md).
+- [White-labeling UI and customization](../Customisation/Frontend.md).
+- [JWT authentication](../Customisation/JWT.md).
 - Configure more Instance types (VMs, storage, etc.)
