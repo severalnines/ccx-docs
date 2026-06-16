@@ -81,6 +81,7 @@ Response format:
       "created_at": "2024-04-01T10:00:00Z",
       "deleted_at": null,
       "customer_id": "string",
+      "customer_reference": "string",
       "type": "string",
       "nodes_count": 0,
       "vendor": "string",
@@ -116,6 +117,8 @@ Response format:
 Notes on the per-datastore fields:
 
 - `created_at` / `deleted_at` — actual cluster lifecycle. `deleted_at` is `null` for clusters still alive at the end of the window.
+- `customer_id` — the internal CCX user id that owns the cluster. Always present.
+- `customer_reference` — the partner-side identifier for the cluster owner (the JWT `sub` claim recorded on first login for JWT-authenticated users on partner deployments). Use this to reconcile the report against the partner's own customer database. Omitted from the JSON for users that have no external identity recorded (non-JWT users / users created before JWT login was enabled).
 - `instances_types_usage[].hours` — instance-hours within the window, aggregated per instance type.
 - `volumes_types_usage[]` — per `(volume type, IOPS)` pair within the window. `gib_per_hours` is the GiB·hour integral; `average_gib` is the time-weighted average size; `iops_per_hour` is IOPS·hours.
 - `network_egress_usage_gib` — egress (GiB) recorded for this cluster within the window.
@@ -127,7 +130,7 @@ Notes on the per-datastore fields:
 curl -uadmin:PASSWORD -X GET "https://ccx.example.com/api/admin/datastores/billing/usage/csv?from=2024-04-01&to=2024-04-05"
 ```
 
-The CSV variant has the same data with one row per datastore; the response filename includes the resolved `from_to` range.
+The CSV variant has the same data with one row per datastore; the response filename includes the resolved `from_to` range. The CSV header includes a `Customer Reference` column right after `Customer ID`; the cell is empty for users without a recorded external identity.
 
 
 ## Defining prices
