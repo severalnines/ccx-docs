@@ -27,25 +27,28 @@ ssh-keygen -e -f ccx.key -m PEM > ccx.key.pub
 
 #### Public key configuration in CCX Helm values:
 
-You need to set the configuration parameters in `ccx.services.auth` in ccx values.yaml
+Both `ccx-auth-service` (which validates the JWT) and `ccx-user` (which creates or updates the user) read `JWT_PUBLIC_KEY_ID` and `JWT_PUBLIC_KEY_PEM`. The simplest way to set them is under the top-level `ccx.env` in your values file — that block becomes a shared ConfigMap that is `envFrom`'d into every CCX service:
 
+```yaml
+ccx:
+  env:
+    JWT_PUBLIC_KEY_ID: 'MYCLOUD'
+    JWT_PUBLIC_KEY_PEM: |-
+        -----BEGIN RSA PUBLIC KEY-----
+        MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxowkw7Zf2pXoehn2CkwQ
+        sHqbASdRp2DENgUEIGj+iqQPMDZor2CD1fVYpVZW+kcQkR9SgIvb+QiSgdHvWegs
+        -----END RSA PUBLIC KEY-----
 ```
-      env:
-        JWT_PUBLIC_KEY_ID: 'MYCLOUD'
-        JWT_PUBLIC_KEY_PEM: |-
-            -----BEGIN PUBLIC KEY-----
-            MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxowkw7Zf2pXoehn2CkwQ
-            sHqbASdRp2DENgUEIGj+iqQPMDZor2CD1fVYpVZW+kcQkR9SgIvb+QiSgdHvWegs
-            -----END PUBLIC KEY-----
-```
+
+The `ssh-keygen -e -m PEM` command above produces a PKCS#1 key (`-----BEGIN RSA PUBLIC KEY-----`), which is the default format CCX expects. If you instead supply a PKIX-encoded key (`-----BEGIN PUBLIC KEY-----`, e.g. from `openssl rsa -pubout`), also set `JWT_PUBLIC_KEY_PKIX: "1"`.
 
 #### JWT Environment Variables
 
-| Environment Variable    | Description                                               |
-| ----------------------- | --------------------------------------------------------- |
-| **JWT_PUBLIC_KEY_ID**   | The identifier of the provider, e.g., "MYCLOUD".      |
-| **JWT_PUBLIC_KEY_PEM**  | The public key in PEM format (contents of `ccx.key.pub`). |
-| **JWT_PUBLIC_KEY_PKIX** | Should be "1" if the key is in PKIX format (optional).    |
+| Environment Variable    | Description                                                                                                 |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **JWT_PUBLIC_KEY_ID**   | The identifier of the provider, e.g., "MYCLOUD".                                                            |
+| **JWT_PUBLIC_KEY_PEM**  | The public key in PEM format (contents of `ccx.key.pub`).                                                   |
+| **JWT_PUBLIC_KEY_PKIX** | Set to "1" if the key is in PKIX format (`-----BEGIN PUBLIC KEY-----`); leave unset for PKCS#1 (the default from `ssh-keygen -e -m PEM`). |
 
 ---
 
