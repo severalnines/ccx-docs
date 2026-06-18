@@ -60,6 +60,11 @@ There are changes to the ccx UI in this version. In order for everything to be o
 - helm-ccxdeps missing RoleBinding and ClusterBinding RBAC roles for the innodbcluster operator service account, causing repeated permission errors
 - Security fixes: unsanitized database input (SNYK), backup ID exposed in API, datastore logs publicly accessible, hidden configuration file written to root directory
 
+## Release Notes - CCX - v1.56.7
+
+### Improvements
+- Admin billing usage report (`GET /admin/datastores/billing/usage/{type}`) now exposes a new `customer_reference` field (CSV column "Customer Reference") containing the partner-side user identifier (the JWT `sub` claim) alongside the existing `customer_id`. The field is populated for JWT-authenticated users and omitted for users without an external ID; `customer_id` is unchanged.
+
 ## Release Notes - CCX - v1.56.5
 CMON version: 2.3.4-18413
 
