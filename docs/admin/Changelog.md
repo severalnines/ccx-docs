@@ -60,6 +60,11 @@ There are changes to the ccx UI in this version. In order for everything to be o
 - helm-ccxdeps missing RoleBinding and ClusterBinding RBAC roles for the innodbcluster operator service account, causing repeated permission errors
 - Security fixes: unsanitized database input (SNYK), backup ID exposed in API, datastore logs publicly accessible, hidden configuration file written to root directory
 
+## Release Notes - CCX - v1.56.8
+
+### Bugs
+- Deleted datastores could remain in the admin billing usage report with an empty "Deleted At" (`deleted_at = null`) and keep being billed after removal. Datastore deletion now reliably finalizes billing — it sets `deleted_at` and stops counting instance and storage usage at the moment of removal — even when a later best-effort cleanup step (such as deleting backups or DNS records) fails. Usage rows left behind by datastores that were already removed are no longer reported as active.
+
 ## Release Notes - CCX - v1.56.7
 
 ### Improvements
