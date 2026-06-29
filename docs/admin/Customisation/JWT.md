@@ -35,8 +35,7 @@ ccx:
     JWT_PUBLIC_KEY_ID: 'MYCLOUD'
     JWT_PUBLIC_KEY_PEM: |-
         -----BEGIN RSA PUBLIC KEY-----
-        MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxowkw7Zf2pXoehn2CkwQ
-        sHqbASdRp2DENgUEIGj+iqQPMDZor2CD1fVYpVZW+kcQkR9SgIvb+QiSgdHvWegs
+        <paste the contents of ccx.key.pub here>
         -----END RSA PUBLIC KEY-----
 ```
 
