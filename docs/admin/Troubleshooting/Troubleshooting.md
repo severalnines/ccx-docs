@@ -206,6 +206,68 @@ Example logs:
 [2024-12-13 05:25:55,001] kopf.objects         [INFO    ] Handler 'on_spec/spec' succeeded.
 ```
 
+## MySQL Too Many Connections
+
+Fires when `Threads_connected` has been above 80% of `max_connections` for more than 2 minutes (alert: `MysqlTooManyConnections(>80%)`). Once `max_connections` is reached, MySQL will reject new connections (`ERROR 1040: Too many connections`), which breaks both the application and CCX's own control-plane operations against that datastore.
+
+### Diagnose the issue
+
+Check which users/hosts are actually holding connections open. The following command will connect you to the MySQL pod running inside the Kubernetes cluster (`<mysql-pod-name>`), and will report a per-user/host connection breakdown:
+```bash
+kubectl exec -it <mysql-pod-name> -- mysql -uroot -p -e \
+  "SELECT user, host, COUNT(*) FROM information_schema.processlist GROUP BY user, host ORDER BY COUNT(*) DESC;"
+```
+To see long-running transactions that are holding a connection open without committing (MySQL's equivalent of Postgres's `idle in transaction`), check `information_schema.innodb_trx`:
+```bash
+kubectl exec -it <mysql-pod-name> -- mysql -uroot -p -e \
+  "SELECT trx_id, trx_mysql_thread_id, trx_started, TIMESTAMPDIFF(SECOND, trx_started, NOW()) AS trx_age_seconds FROM information_schema.innodb_trx ORDER BY trx_started ASC;"
+```
+
+### Common causes
+
+- Application-side connection leak (connections got opened but never closed or returned to a pool).
+- No connection pooler (e.g. ProxySQL) in front of a high-concurrency application.
+- Long-running transactions holding connections open (see `innodb_trx` query above).
+- Legitimate sustained increase in application load.
+
+### Resolving the issue
+
+- Terminate leaked or stuck connections, if it is safe to do so, using the thread ID from the `innodb_trx` query above:
+  ```sql
+  KILL <trx_mysql_thread_id>;
+  ```
+- Fix the root cause at the application/pooler level so connections get closed and reused properly.
+- If the load increase is legitimate and sustained, raise `max_connections` — this can be set dynamically without a restart (`SET GLOBAL max_connections = <value>;`), but to persist across pod restarts also add it to the `mysql-innodbcluster.serverConfig.mycnf` field on the Helm values (rendered into the InnoDB Cluster CR's `mycnf` field).
+
+## MySQL Slave Replication Lag
+
+Fires when a replica's replication lag, minus any intentional `sql_delay`, has been above 30 seconds for more than a minute (alert: `MysqlSlaveReplicationLag`). This alert only evaluates on instances that are actually configured as an asynchronous replica of another server — it does not apply to the core members of an InnoDB Cluster's Group Replication group, which use a different replication mechanism; it's relevant when an InnoDB Cluster Read Replica is attached to the cluster.
+
+### Diagnose the issue
+
+Check the replica's status directly:
+```bash
+kubectl exec -it <mysql-pod-name> -- mysql -uroot -p -e "SHOW REPLICA STATUS\G"
+```
+The key fields to look at:
+- `Seconds_Behind_Source` — how far behind the replica currently is.
+- `Replica_IO_Running` / `Replica_SQL_Running` — whether both replication threads are actually running; if either shows `No`, replication has stopped rather than merely lagging.
+- `Last_SQL_Error` / `Last_IO_Error` — populated if replication has stopped due to an error.
+
+### Common causes
+
+- The replica is under-resourced relative to the write rate on the source (slower disk/CPU can't keep up).
+- Large or bulk transactions on the source take a while to apply on the replica.
+- Read queries on the replica lock-contend with the replication applier thread.
+- Network issues between source and replica.
+- Replication has stopped outright due to an error (check `Last_SQL_Error`/`Last_IO_Error` above), rather than gradually falling behind.
+
+### Resolving the issue
+
+- If a replication thread has stopped due to an error, resolve the underlying issue (or, if safe, skip the offending statement) and resume with `START REPLICA;`. In cases of significant data drift, re-provisioning the replica from the source may be safer than skipping errors.
+- If the replica is just falling behind under normal load, look at replica resourcing and consider tuning parallel replication (`replica_parallel_workers`), reducing the size of large transactions on the source, or moving conflicting read traffic off the lagging replica.
+- Restarting the replica on its own does not resolve genuine lag — it only helps if replication had stopped due to a transient, already-resolved condition.
+
 ### Zalando Postgres Operator Backup Validation
 Validate backups in PostgreSQL pods:
 ```bash
