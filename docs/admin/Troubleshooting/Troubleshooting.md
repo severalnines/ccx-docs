@@ -228,6 +228,116 @@ Example logs:
 2024-12-13 04:05:06,290 INFO: cloning cluster acid-ccx using wal-g backup-fetch /home/postgres/pgdata/pgroot/data base_000000010000000000000002
 ```
 
+## PostgreSQL Exporter Error
+
+Fires when the `postgres-exporter` sidecar reports that its last scrape of a datastore's Postgres instance failed (alert: `PostgresqlExporterError`, metric: `pg_exporter_last_scrape_error`). This means metrics for that instance may be stale or missing, which can hide other real issues from monitoring/alerting until it's resolved.
+
+### Diagnose the issue
+
+Check the exporter's own logs to see which query failed and why:
+```bash
+kubectl logs <postgres-pod-name> -c postgres-exporter
+```
+
+### Common causes
+
+- The exporter lost its connection to Postgres (instance restarting, credentials rotated/invalid, or a network interruption between the sidecar and `localhost:5432`).
+- A built-in exporter query references a system view/column not available on this Postgres version (can happen after an exporter image upgrade).
+- The exporter's scrape timed out because Postgres was under heavy load.
+- Permission errors, if the exporter's database user no longer has access to a stats view it queries (unlikely by default, since it uses the operator-managed superuser credentials).
+
+### Resolving the issue
+
+- Confirm the datastore's Postgres instance is up and reachable: `kubectl exec -it <postgres-pod-name> -- pg_isready`.
+- If credentials were rotated outside the operator, verify the `postgres.acid-ccx.credentials.postgresql.acid.zalan.do` secret still matches what the exporter sidecar is using, and restart the pod to pick up any secret changes.
+- If the error points to a specific query failing after an exporter version bump, check the [postgres_exporter release notes](https://github.com/prometheus-community/postgres_exporter/releases) for breaking changes against this Postgres version, and consider pinning back to the previously working image tag.
+
+
+## PostgreSQL Too Many Connections
+
+Fires when a database's active connection count has been above 80% of `max_connections` for more than 2 minutes (alert: `PostgresqlTooManyConnections`). Once `max_connections` is reached, PostgreSQL will reject any new connections (`FATAL: too many connections`), which breaks both the application and CCX's own control-plane operations against that datastore.
+
+### Diagnose the issue
+
+Check which database and which connection states are actually holding connections. The following command will connect you to the Postgres pod running inside the Kubernetes cluster (`<postgres-pod-name>`), and will report how many connections are in which state for each database:
+```bash
+kubectl exec -it <postgres-pod-name> -- psql -U postgres -c \
+  "SELECT datname, state, count(*) FROM pg_stat_activity GROUP BY datname, state ORDER BY count(*) DESC;"
+```
+
+Also check the "Active Connections" and "Connections by Database" panels on the `ccx-db-monitoring` Grafana dashboard to see whether the spike is isolated to one database or cluster-wide, and whether it climbed gradually which might indicate that there is a leak going on, or it jumped suddenly, meaning it could just be a sudden traffic spike.
+
+### Common causes
+
+- Application-side connection leak (connections got opened but never closed or returned to a pool).
+- No connection pooler (e.g. PgBouncer) in front of a high-concurrency application.
+- Long-running or stuck (`idle in transaction`) transactions holding connections open.
+- Legitimate sustained increase in application load.
+
+### Resolving the issue
+
+- Terminate leaked or stuck connections, if it is safe to do so, the following command will find every Postgres connection that's been stuck "idle in transaction" (including the "idle in transaction (aborted)" variant) for more than 10 minutes and forcibly kills those connections to free up the resources they're holding:
+  ```sql
+  SELECT pg_terminate_backend(pid) FROM pg_stat_activity
+  WHERE state LIKE 'idle in transaction%' AND now() - state_change > interval '10 minutes';
+  ```
+- Fix the root cause at the application/pooler level so connections get closed and reused properly.
+- If the load increase is legitimate and sustained, raise `max_connections` via the `postgresql.parameters.max_connections` field on the Postgresql CR (`acid-ccx`) — this requires a restart to take effect.
+
+## PostgreSQL Dead Locks
+
+Fires when more than 5 deadlocks have been detected on a database within a 1-minute window (alert: `PostgresqlDeadLocks`, metric: `pg_stat_database_deadlocks`). A deadlock happens when two or more transactions each hold a lock the other one needs, so none of them can proceed.
+
+Postgres detects this on its own (it checks every `deadlock_timeout`, 1 second by default) and automatically aborts one of the transactions to break the cycle — no manual intervention is needed to resolve an individual deadlock. A burst of deadlocks like this alert reports usually points to a recurring application-level issue worth investigating.
+
+### Diagnose the issue
+
+Postgres always logs deadlocks to its server log, regardless of the configured log level. Check the datastore's Postgres logs for the failing queries and tables:
+```bash
+kubectl logs <postgres-pod-name> | grep -i "deadlock detected" -A 20
+```
+Each log entry includes both transactions involved, the queries they were running, and which locks they held versus which they were waiting on — that detail is what points to the actual conflicting code paths.
+
+### Common causes
+
+- Different parts of the application acquiring locks on the same tables/rows in inconsistent order (e.g. one code path updates row A then row B, another updates B then A).
+- Long-running transactions holding locks while a conflicting transaction starts and needs the same rows.
+- High concurrency on a small set of frequently-updated rows.
+
+### Resolving the issue
+
+- Postgres has already rolled back the losing transaction by the time this alert fires, so there's nothing to terminate or revert manually.
+- Fix the application to acquire locks in a consistent order across all code paths that touch the same tables/rows, and keep transactions short so locks are held for as little time as possible.
+- Make sure the application catches `deadlock detected` errors and retries the aborted transaction — Postgres does not retry it automatically, so without retry logic the aborted transaction's work is simply lost.
+
+## PostgreSQL High Rollback Rate
+
+Fires when the ratio of rolled-back to committed transactions on a database exceeds 2% (alert: `PostgresqlHighRollbackRate`, metric: ratio of `pg_stat_database_xact_rollback` to `pg_stat_database_xact_commit`). This alert only tells that an unusual share of transactions are failing to commit, not why, so identifying which error type is actually driving the ratio is the main goal here.
+
+### Diagnose the issue
+
+Check the datastore's Postgres logs for the errors preceding the rollbacks, and see which one dominates:
+```bash
+kubectl logs <postgres-pod-name> | grep -i "^.*ERROR:" | sort | uniq -c | sort -rn | head -20
+```
+The error text tells you which cause applies:
+- `deadlock detected` — see [PostgreSQL Dead Locks](#postgresql-dead-locks) above; a deadlock burst will also show up here since every deadlock victim is a rollback.
+- Terminated `idle in transaction` sessions from the connections runbook also count as rollbacks — see [PostgreSQL Too Many Connections](#postgresql-too-many-connections) above.
+- `could not serialize access due to concurrent update` — a serialization failure under `REPEATABLE READ`/`SERIALIZABLE` isolation, see below.
+- `duplicate key value violates unique constraint`, `violates foreign key constraint`, `violates check constraint` — a constraint violation, see below.
+
+### Common causes
+
+- **Serialization failures**: the application uses `REPEATABLE READ` or `SERIALIZABLE` isolation under concurrent writes to the same rows, and Postgres aborts one side rather than let them commit inconsistently.
+- **Constraint violations**: the application is sending input that violates a unique/foreign-key/check constraint. This can be expected behavior if the database is being used to enforce validation, rather than a sign of a database problem, so it could be an issue on the application side.
+- **Deadlocks or terminated connections**: see the linked sections above.
+- **Client disconnects mid-transaction**, which Postgres rolls back automatically.
+
+### Resolving the issue
+
+- If serialization failures dominate, make sure the application retries transactions that fail with a serialization error — this is expected behavior under those isolation levels and requires retry logic on the client side, not a database-side fix.
+- If constraint violations dominate, confirm with the application team whether this is expected validation traffic; if not, fix the application logic generating invalid input before it reaches the database.
+- If deadlocks or terminated connections dominate, follow the resolution steps in the linked sections above rather than treating this as a separate issue.
 
 ### MySQL Operator InnoDB Cluster Pod NFS Mount Issue
 When using NFS as a volume provisioner, NFS servers map requests from unprivileged users to the 'nobody' user on the server, which may result in specific directories being owned by 'nobody'. Containers cannot modify these permissions. Therefore, it's necessary to enable `root_squash` on the NFS server to allow proper access.
