@@ -483,6 +483,47 @@ kubectl describe pvc <pvc-name> -n <namespace>
 - If the StorageClass has `allowVolumeExpansion: true`, expand the PVC directly (`kubectl edit pvc <pvc-name>`, raising `spec.resources.requests.storage`); otherwise, free up space or migrate to a larger volume.
 - If this PVC belongs to a datastore's data volume, check "Disk Autoscaling Issues" above first — CCX already auto-expands datastore storage once the underlying host disk crosses 75% usage, so this alert may just mean autoscaling hasn't caught up yet, rather than requiring manual expansion.
 
+## Kubernetes Node Not Ready
+
+Fires when a Kubernetes Node's `Ready` condition has been `false` for more than 5 minutes (alert: `KubeNodeNotReady`). This is Kubernetes' own top-level health verdict for the node — kubelet on that machine has stopped reporting a healthy heartbeat to the control plane.
+
+### Diagnose the issue
+
+```bash
+kubectl describe node <node-name>
+```
+The `Conditions` section shows `Type`/`Status`/`Reason`/`Message` for `Ready` (and the related `DiskPressure`/`MemoryPressure`/`PIDPressure`/`NetworkUnavailable` conditions below) — the `Message` field usually explains why directly, e.g. `KubeletNotReady`, `container runtime is down`, or `PLEG is not healthy`.
+
+### Common causes
+
+- kubelet crashed or stopped heartbeating to the control plane.
+- The container runtime (containerd) failed on that node.
+- A network partition between the node and the control plane.
+- The underlying machine itself is down (cloud provider issue, unexpected reboot).
+
+### Resolving the issue
+
+This often needs infrastructure-level investigation rather than a `kubectl`-only fix — check the cloud provider's console/node status alongside `kubectl describe node`. If the node doesn't self-heal, cordon and drain it (`kubectl cordon <node-name>`, `kubectl drain <node-name>`) so its pods reschedule elsewhere, then replace the underlying machine.
+
+## Kubernetes Disk/Memory Pressure
+
+Fires when a Node's `DiskPressure`/`MemoryPressure` condition is `true` for more than 2 minutes (alerts: `DiskPressure`, `MemoryPressure`). These come from kubelet's own hard-coded (but configurable) eviction thresholds — by default, things like root filesystem availability below 10% or available memory below 100Mi. Unlike the raw host-metric alerts elsewhere in this document, these mean kubelet has already started actively evicting pods from the node to reclaim the resource — this isn't just an observability signal, it has an immediate effect on running workloads.
+
+### Diagnose the issue
+
+Check what is going on inside the node — `kubectl describe node <node-name>`, check the `DiskPressure`/`MemoryPressure` condition's `Message` for the specific threshold that was crossed. Also check `kubectl get events -n <namespace> --field-selector reason=Evicted` to see which pods have already been evicted as a result.
+
+### Common causes
+
+- `DiskPressure`: container image sprawl not garbage-collected in time, logs filling the node's root filesystem, or a pod writing excessively to `emptyDir`/`hostPath` without limits.
+- `MemoryPressure`: too many pods scheduled on the node without proper memory requests/limits, causing overcommit, or a non-pod process consuming host memory.
+
+### Resolving the issue
+
+- These partially self-heal via kubelet's own eviction, but the underlying cause still needs fixing so it doesn't recur.
+- For disk pressure, free up space on the node (clean up unused images/logs, or increase disk size).
+- For memory pressure, review pod resource requests/limits across the node and consider node pool sizing — this is a Kubernetes-level scheduling concern, distinct from a single container's own memory limit (see "Kubernetes Container OOM Killer" above).
+
 ### MySQL Operator InnoDB Cluster Pod NFS Mount Issue
 When using NFS as a volume provisioner, NFS servers map requests from unprivileged users to the 'nobody' user on the server, which may result in specific directories being owned by 'nobody'. Containers cannot modify these permissions. Therefore, it's necessary to enable `root_squash` on the NFS server to allow proper access.
 
