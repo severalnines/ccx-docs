@@ -413,6 +413,76 @@ The error text tells you which cause applies:
 - If constraint violations dominate, confirm with the application team whether this is expected validation traffic; if not, fix the application logic generating invalid input before it reaches the database.
 - If deadlocks or terminated connections dominate, follow the resolution steps in the linked sections above rather than treating this as a separate issue.
 
+## Kubernetes Container OOM Killer
+
+Fires when a container's restart count increased in the last 10 minutes and its last termination reason was `OOMKilled` (alert: `KubernetesContainerOomKiller`). This means the container exceeded its own memory limit and the kernel killed it — distinct from the node running low on memory overall (see `Host Out Of Memory` below); a container can get OOM-killed on a machine with plenty of free memory if that container's individual limit is set too low.
+
+### Diagnose the issue
+
+Check the container's last termination details:
+```bash
+kubectl describe pod <pod-name> -n <namespace>
+```
+Look for `Last State: Terminated`, `Reason: OOMKilled`, `Exit Code: 137` under the affected container. To see how usage trended before the kill, compare `container_memory_working_set_bytes` against `kube_pod_container_resource_limits{resource="memory"}` for that container/pod in VictoriaMetrics/Grafana.
+
+### Common causes
+
+- The container's memory limit (`resources.limits.memory`) is set too low for its actual workload.
+- A genuine memory leak in the application.
+- A legitimate spike in load or data volume pushing usage above what was provisioned.
+
+### Resolving the issue
+
+- If the limit is simply undersized, raise `resources.limits.memory` for that container wherever it's defined (Helm values for CCX's own services, or the relevant operator CR's `podSpec` for MySQL/Postgres — see the `podSpec.containers` fields already referenced elsewhere in this doc for those).
+- If it's a leak, raising the limit only delays the next kill — this needs an application-level investigation.
+
+## Kubernetes Pod Crash Looping
+
+Fires when a container has restarted more than once within a 10-minute window, sustained for 15 minutes (alert: `KubernetesPodCrashLooping`). This alert is deliberately cause-agnostic — it doesn't distinguish *why* the container is restarting, only that it's stuck in a restart cycle.
+
+### Diagnose the issue
+
+Check the last termination reason and exit code:
+```bash
+kubectl describe pod <pod-name> -n <namespace>
+```
+Then pull the logs from the crashed instance, not the new one (which may not have logged the failure yet):
+```bash
+kubectl logs <pod-name> -n <namespace> --previous
+```
+
+### Common causes
+
+- Repeated OOM kills — see "Kubernetes Container OOM Killer" above, which would also trip this alert.
+- The application is crashing on startup (bad config, missing dependency, failed migration).
+- A failing liveness probe is causing Kubernetes to kill and restart a container that's otherwise fine but slow to respond.
+
+### Resolving the issue
+
+There's no generic fix here — the resolution depends entirely on what the logs from `--previous` show. If it's an OOM kill, follow the resolution steps in "Kubernetes Container OOM Killer" above rather than treating this as a separate issue.
+
+## PVC Volume Usage
+
+Fires when a PersistentVolumeClaim is using more than 90% of its provisioned capacity (alert: `PVCVolumeUsage`). This is the Kubernetes PVC abstraction over storage — distinct from the underlying host filesystem (see "Disk Autoscaling Issues" above) and applies to any PVC in the cluster, not just datastore data volumes.
+
+### Diagnose the issue
+
+```bash
+kubectl get pvc -n <namespace>
+kubectl describe pvc <pvc-name> -n <namespace>
+```
+`describe` shows which pod the PVC is mounted to and its StorageClass, which determines whether it can be expanded in place.
+
+### Common causes
+
+- Data growth on the volume (application data, logs, or backup staging files accumulating).
+- No autoscaling configured for this particular volume.
+
+### Resolving the issue
+
+- If the StorageClass has `allowVolumeExpansion: true`, expand the PVC directly (`kubectl edit pvc <pvc-name>`, raising `spec.resources.requests.storage`); otherwise, free up space or migrate to a larger volume.
+- If this PVC belongs to a datastore's data volume, check "Disk Autoscaling Issues" above first — CCX already auto-expands datastore storage once the underlying host disk crosses 75% usage, so this alert may just mean autoscaling hasn't caught up yet, rather than requiring manual expansion.
+
 ### MySQL Operator InnoDB Cluster Pod NFS Mount Issue
 When using NFS as a volume provisioner, NFS servers map requests from unprivileged users to the 'nobody' user on the server, which may result in specific directories being owned by 'nobody'. Containers cannot modify these permissions. Therefore, it's necessary to enable `root_squash` on the NFS server to allow proper access.
 
