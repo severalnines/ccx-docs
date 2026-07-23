@@ -102,6 +102,8 @@ Search for the alert alertname="HostAutoScaleDiskSpaceReached" by choosing the r
 
 ## Troubleshooting Datastore Backups Failing
 
+Fires as the `Backup Failed` alert when cmon reports a new backup failure alarm. This alert is controller-wide — it tells you that at least one datastore's backup failed somewhere, but not which one, so identifying the specific datastore requires the steps below.
+
 To debug failed datastore backups:
 
 ### Method 1: Using CC UI
@@ -175,6 +177,16 @@ Recovery:
 kubectl patch pod <mysql-pod-name> -p '{"metadata":{"finalizers":[]}}' --type=merge
 ```
 ## MySQL and Postgres Operator Backup and Restore Validation
+
+Fires as the `CCX Internal Backup Job Failed` alert when the Kubernetes Job backing up CCX's own control-plane database (the `logical-backup-acid-ccx-*` Job for the Postgres control-plane database, or the `ccxdeps-ccx-s3-backup-schedule*` Job for the MySQL control-plane database) fails — this is distinct from `Backup Failed` above, which is about *customer* datastore backups managed by cmon.
+
+### Diagnose the issue
+
+Check the failed Job directly and pull its logs:
+```bash
+kubectl get jobs -n ccx | grep -E "logical-backup-acid-ccx|ccxdeps-ccx-s3-backup-schedule"
+kubectl logs -n ccx job/<failed-job-name>
+```
 
 ### MySQL Operator Backup Validation
 To ensure backup validation:
