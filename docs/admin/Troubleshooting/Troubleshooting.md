@@ -505,13 +505,13 @@ The `Conditions` section shows `Type`/`Status`/`Reason`/`Message` for `Ready` (a
 
 This often needs infrastructure-level investigation rather than a `kubectl`-only fix — check the cloud provider's console/node status alongside `kubectl describe node`. If the node doesn't self-heal, cordon and drain it (`kubectl cordon <node-name>`, `kubectl drain <node-name>`) so its pods reschedule elsewhere, then replace the underlying machine.
 
-## Kubernetes Disk/Memory Pressure
+## Kubernetes Disk And Memory Pressure
 
-Fires when a Node's `DiskPressure`/`MemoryPressure` condition is `true` for more than 2 minutes (alerts: `DiskPressure`, `MemoryPressure`). These come from kubelet's own hard-coded (but configurable) eviction thresholds — by default, things like root filesystem availability below 10% or available memory below 100Mi. Unlike the raw host-metric alerts elsewhere in this document, these mean kubelet has already started actively evicting pods from the node to reclaim the resource — this isn't just an observability signal, it has an immediate effect on running workloads.
+Fires when a Node's `DiskPressure` or `MemoryPressure` condition is `true` for more than 2 minutes (alerts: `DiskPressure`, `MemoryPressure`). These come from kubelet's own hard-coded (but configurable) eviction thresholds — by default, things like root filesystem availability below 10% or available memory below 100Mi. Unlike the raw host-metric alerts elsewhere in this doc, these mean kubelet has already started **actively evicting pods** from the node to reclaim the resource — this isn't just an observability signal, it has an immediate effect on running workloads.
 
 ### Diagnose the issue
 
-Check what is going on inside the node — `kubectl describe node <node-name>`, check the `DiskPressure`/`MemoryPressure` condition's `Message` for the specific threshold that was crossed. Also check `kubectl get events -n <namespace> --field-selector reason=Evicted` to see which pods have already been evicted as a result.
+Same as above — `kubectl describe node <node-name>`, check the `DiskPressure`/`MemoryPressure` condition's `Message` for the specific threshold that was crossed. Also check `kubectl get events -n <namespace> --field-selector reason=Evicted` to see which pods have already been evicted as a result.
 
 ### Common causes
 
@@ -736,6 +736,37 @@ The `cs` column shows context switches per second per sample — a consistently 
 
 - Review pod CPU requests/limits and scheduling density on the affected node; reduce pod density per node or increase CPU allocation if it's overcommitted.
 - If it traces back to a specific application's threading/locking behavior, that needs application-level investigation rather than a node-level fix.
+
+## Cluster Failed, Degraded, or Failed to Init
+
+Fires when cmon reports at least one cluster entering a failed, degraded, or failed-to-initialize state (alerts: `Cluster Failed`, critical; `Cluster Degraded`, warning; `Cluster Failed to Init`, critical). Like `Backup Failed` above, these are controller-wide counters — they confirm *that* one of these states occurred somewhere, not *which* datastore.
+
+### Diagnose the issue
+
+Since the metric doesn't identify the specific cluster, find it via `s9s`:
+```bash
+s9s cluster --list --long
+```
+This lists every cluster with its current state in one of the columns — look for `FAILED`/`DEGRADED`, or a cluster stuck mid-creation for the failed-to-init case. Once you have the cluster ID, see "List jobs and view logs" above for drilling into its failed jobs.
+
+### Common causes
+
+- `Cluster Failed`: the datastore's underlying nodes are unreachable, or its primary/majority is down — a full outage.
+- `Cluster Degraded`: some nodes are down or unhealthy, but the cluster is still serving (e.g. a replica missing, reduced but intact quorum).
+- `Cluster Failed to Init`: the cluster never finished provisioning — see "Long-Running or Stuck Datastore" above, which covers recovering an interrupted create/add-node job.
+
+### Resolving the issue
+
+- For `Cluster Failed`/`Cluster Degraded`, check node status (`s9s node --list --long --cluster-id=NNN`) to identify which node(s) are down, then follow the relevant datastore-type recovery steps elsewhere in this doc (e.g. "MySQL Operator Failover, Adding Nodes, and Scaling Mechanism" for InnoDB Cluster, or the Zalando Postgres operator sections for Postgres).
+- For `Cluster Failed to Init`, follow "Long-Running or Stuck Datastore" above to unstick or clean up the failed provisioning job.
+
+## New User And Datastore Created
+
+These fire as informational notifications, not incidents (alerts: `New User` when a new admin user signs up, `Datastore Created` when a new datastore is created). Both are severity `info` and need no action — they exist purely as an audit trail of account/datastore creation activity.
+
+### What to check
+
+No diagnosis is needed. To confirm the details of a specific event, check the CC UI's activity log, or query the underlying counters directly (`admin_users_total`, `admin_datastores_total{status="all"}`) to see current totals.
 
 ### MySQL Operator InnoDB Cluster Pod NFS Mount Issue
 When using NFS as a volume provisioner, NFS servers map requests from unprivileged users to the 'nobody' user on the server, which may result in specific directories being owned by 'nobody'. Containers cannot modify these permissions. Therefore, it's necessary to enable `root_squash` on the NFS server to allow proper access.
