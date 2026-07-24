@@ -829,6 +829,37 @@ kubectl get pods -n monitoring
 - If it's a scrape-config regression, revert or correct the relevant scrape config in the Helm values.
 - If `MetricsJobMissing` fires, treat it as more urgent than it might look (severity `warning`) — it means the observability stack's own self-check is failing, which can mask other real problems from being alerted on at all.
 
+## Anomaly Detected
+
+Fires when a monitored metric's current value has been outside its own automatically-computed "normal" range for more than 5 minutes (alert: `AnomalyDetected`, severity warning). Unlike every other alert in this doc, this isn't a fixed threshold — it compares each metric against what's typical for that specific node/pod based on its own recent history, so what counts as "abnormal" varies over time and between instances.
+
+Four things are currently covered, identified by the alert's `anomaly_name` label:
+- `node_cpu` — a node's overall CPU utilization
+- `node_memory` — a node's overall memory utilization
+- `pod_cpu` — a specific pod's CPU usage
+- `pod_memory` — a specific pod's memory usage
+
+### Diagnose the issue
+
+Check the `anomaly_name` and `instance`/`pod`/`namespace` labels on the fired alert to see exactly what's abnormal and where:
+- For `node_cpu`/`node_memory`, cross-reference "Host High CPU Load" or "Host Out Of Memory" above for further diagnosis on that same node.
+- For `pod_cpu`/`pod_memory`, check the pod's current usage directly:
+  ```bash
+  kubectl top pod <pod-name> -n <namespace>
+  ```
+  This prints current CPU/memory usage for the pod — compare it against the pod's own recent history in Grafana/VictoriaMetrics to see whether this is a sudden spike or a new sustained level.
+
+### Common causes
+
+- A genuine change in load or workload behavior (more traffic, a bigger job, a new query pattern) that's simply new relative to recent history — not necessarily a problem on its own.
+- The same underlying causes as the fixed-threshold CPU/memory alerts elsewhere in this doc, just caught against a dynamic baseline instead of a fixed number.
+- A one-off spike shortly after a deploy or restart, when there isn't much history yet to compare against — the alert falls back to a wide margin band in that case, so it can be noisier early on.
+
+### Resolving the issue
+
+- If it correlates with a fixed-threshold alert elsewhere in this doc (`HostHighCpuLoad`, `HostOutOfMemory`), follow that alert's resolution steps — this one is a complementary, earlier-warning signal on the same underlying resource, not a separate problem to solve differently.
+- If it doesn't correlate with anything else and the new level looks legitimate (e.g. expected growth), no action is needed — the alert's own baseline adapts to the new normal as more history accumulates.
+
 ### MySQL Operator InnoDB Cluster Pod NFS Mount Issue
 When using NFS as a volume provisioner, NFS servers map requests from unprivileged users to the 'nobody' user on the server, which may result in specific directories being owned by 'nobody'. Containers cannot modify these permissions. Therefore, it's necessary to enable `root_squash` on the NFS server to allow proper access.
 
