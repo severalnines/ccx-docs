@@ -415,7 +415,7 @@ The error text tells you which cause applies:
 
 ## Kubernetes Container OOM Killer
 
-Fires when a container's restart count increased in the last 10 minutes and its last termination reason was `OOMKilled` (alert: `KubernetesContainerOomKiller`). This means the container exceeded its own memory limit and the kernel killed it — distinct from the node running low on memory overall (see `Host Out Of Memory` below); a container can get OOM-killed on a machine with plenty of free memory if that container's individual limit is set too low.
+Fires when a container's restart count increased in the last 10 minutes and its last termination reason was `OOMKilled` (alert: `KubernetesContainerOomKiller`). This means the container exceeded its own memory limit and the kernel killed it — distinct from the node running low on memory overall (see [Host Out Of Memory](#host-out-of-memory) below); a container can get OOM-killed on a machine with plenty of free memory if that container's individual limit is set too low.
 
 ### Diagnose the issue
 
@@ -523,6 +523,219 @@ Check what is going on inside the node — `kubectl describe node <node-name>`, 
 - These partially self-heal via kubelet's own eviction, but the underlying cause still needs fixing so it doesn't recur.
 - For disk pressure, free up space on the node (clean up unused images/logs, or increase disk size).
 - For memory pressure, review pod resource requests/limits across the node and consider node pool sizing — this is a Kubernetes-level scheduling concern, distinct from a single container's own memory limit (see "Kubernetes Container OOM Killer" above).
+
+## Host Out Of Memory
+
+Fires when less than 10% of a machine's total memory is available (alert: `HostOutOfMemory`). This is a raw, percentage-based host metric from node_exporter — distinct from Kubernetes' `MemoryPressure` node condition above, which uses kubelet's own absolute threshold and actively triggers pod eviction; this alert has no side effects of its own, it's purely observability.
+
+### Diagnose the issue
+
+```bash
+kubectl debug node/<node-name> -it --image=busybox -- free -h
+```
+This prints a memory summary table with `total`/`used`/`free`/`buff/cache`/`available` columns — look at `available`, not `free`: `free` alone is usually low since Linux uses spare RAM as reclaimable disk cache (`buff/cache`), while `available` is what this alert's metric actually tracks, so a low `available` value confirms real pressure. High swap usage alongside it is a further sign the machine is genuinely out of room.
+
+Or check `node_memory_MemAvailable_bytes` / `node_memory_MemTotal_bytes` directly in VictoriaMetrics/Grafana to see the trend leading up to the alert.
+
+### Common causes
+
+- Too many pods scheduled on the node without accurate memory requests, causing real overcommit.
+- A workload's actual memory usage growing beyond what was originally provisioned for the node.
+
+### Resolving the issue
+
+- Review pod resource requests/limits scheduled onto the affected node, and consider node pool sizing if this is a recurring, cluster-wide pattern rather than a one-off spike.
+- If this is accompanied by `HostMemoryUnderPressure` or `HostOomKillDetected` below, treat those as the more urgent signals — this alert alone just means memory is getting tight, not that anything has failed yet.
+
+## Host Memory Under Pressure
+
+Fires when the rate of major page faults exceeds 1000/s for more than 2 minutes (alert: `HostMemoryUnderPressure`). A major page fault happens when the kernel has to go all the way to disk (swap) to satisfy a memory access, as opposed to a minor fault satisfied from RAM already mapped elsewhere — a sustained high rate here means the machine is actively thrashing, swapping heavily because RAM is genuinely oversubscribed. This is often a stronger signal of real distress than `HostOutOfMemory` above, since "low available memory" by simple accounting can just mean reclaimable page cache, while a high major-fault rate means the system is actually struggling.
+
+### Diagnose the issue
+
+```bash
+kubectl debug node/<node-name> -it --image=busybox -- sh -c "cat /proc/vmstat | grep pgmajfault"
+```
+This prints a single cumulative counter (total major faults since boot), not a rate, so one reading alone isn't meaningful — either run it twice a minute apart and compare, or just check `rate(node_vmstat_pgmajfault[1m])` directly in VictoriaMetrics/Grafana, which is the same number the alert itself already evaluates, alongside memory usage to confirm actual swapping is happening rather than a temporary spike.
+
+### Common causes
+
+- Same as `HostOutOfMemory` above (overcommitted scheduling, workload growth) — this alert just confirms the machine is actually thrashing as a result, rather than merely running low on paper.
+
+### Resolving the issue
+
+- Same remediation as `HostOutOfMemory` above — this is a more severe confirmation of the same underlying resource problem, not a separate issue to solve differently.
+
+## Host OOM Kill Detected
+
+Fires when the kernel's OOM killer fires anywhere on the machine (alert: `HostOomKillDetected`). This is distinct from [Kubernetes Container OOM Killer](#kubernetes-container-oom-killer) above, which only fires when a *container* hits its own cgroup memory limit while the rest of the host may have plenty of free memory — this alert means the *entire machine* ran out of memory and the kernel picked some process to kill, which could be any process on the box, not necessarily a well-behaved containerized one. That's why this is `critical` rather than `warning`.
+
+### Diagnose the issue
+
+The kernel logs which process was killed and why — check the node's kernel log:
+```bash
+kubectl debug node/<node-name> -it --image=busybox -- sh -c "dmesg | grep -i 'killed process'"
+```
+Each matching line names the killed process and its PID, plus its memory usage at the time (`anon-rss` is the actual resident memory it was holding) — use that to identify whether it was a legitimate workload that needs more room or an unexpected/runaway process.
+
+### Common causes
+
+- The combination of causes described in `HostOutOfMemory`/`HostMemoryUnderPressure` above finally exhausted all available memory (including swap) on the machine.
+- A process outside of any pod's cgroup limits (a system daemon, or a process running with no memory limit at all) consumed enough memory to trigger a host-wide OOM condition.
+
+### Resolving the issue
+
+- Identify the killed process from the kernel log and determine whether it should have had a memory limit that would have contained it instead (redirecting this to a `KubernetesContainerOomKiller`-style contained failure rather than a host-wide one).
+- Address the underlying memory pressure per `HostOutOfMemory`/`HostMemoryUnderPressure` above — this alert is usually the end result of those going unaddressed.
+
+## Host Unusual Disk I/O Rate
+
+Fires when a host's aggregate disk throughput exceeds 50 MB/s sustained for 5 minutes, in either direction (alerts: `HostUnusualDiskReadRate` for reads, `HostUnusualDiskWriteRate` for writes). This can be entirely legitimate (a backup, a large query, a bulk import/export) or a symptom of a problem (swap thrashing amplifying disk I/O — see "Host Memory Under Pressure" above — or a missing index causing excessive table scans).
+
+### Diagnose the issue
+
+```bash
+kubectl debug node/<node-name> -it --image=busybox -- sh -c "cat /proc/diskstats"
+```
+This lists per-device read/write counters; to identify *which pod* is driving the I/O rather than just confirming the host-level rate, check `container_fs_reads_bytes_total`/`container_fs_writes_bytes_total` per pod in VictoriaMetrics/Grafana, then cross-reference against what's actually running on that node at the time (a backup job, a large query) via `kubectl get pods -o wide` and the relevant application/database logs.
+
+### Common causes
+
+- A legitimate, expected operation — a scheduled backup, restore, or large data import/export.
+- Swap thrashing amplifying disk I/O as a side effect of memory pressure (see "Host Memory Under Pressure" above) — check whether this alert and that one are firing together.
+- An unusually large or unindexed query causing excessive disk reads.
+
+### Resolving the issue
+
+- If it's a known, expected operation (a backup window, a planned migration), no action is needed — the alert clears once the operation finishes.
+- If it's driven by memory pressure, fix that first per "Host Memory Under Pressure" above rather than treating this as a separate issue.
+- If it's a recurring query pattern, investigate indexing/query optimization on the datastore involved, or consider scheduling heavy operations off-peak.
+
+## Host Out Of Disk Space
+
+Fires when less than 10% of space is free on any non-readonly filesystem on the host, for more than 5 minutes (alert: `HostOutOfDiskSpace`). This applies to *any* mountpoint on the machine — distinct from "Disk Autoscaling Issues" above, which watches specifically the datastore's `/data` mountpoint at a 70%-used threshold and has CCX's own autoscaling automation behind it. If this alert fires specifically on the `/data` mountpoint, that's a sign autoscaling failed or isn't keeping up, rather than a separate problem.
+
+### Diagnose the issue
+
+```bash
+kubectl debug node/<node-name> -it --image=busybox -- df -h
+```
+This lists each mounted filesystem with its size/used/available/use% — check the `Mounted on` column to identify which filesystem is actually low, then narrow down what's consuming the space on it (e.g. `du -sh /path/* | sort -rh | head` for that mountpoint).
+
+### Common causes
+
+- Logs that aren't being rotated or cleaned up.
+- Container image/layer buildup that garbage collection hasn't caught up with.
+- Orphaned data (old snapshots, temp files) left behind by a previous operation.
+- If it's the `/data` mountpoint specifically: CCX's disk autoscaling either isn't enabled for that datastore or isn't keeping pace with growth — see "Disk Autoscaling Issues" above.
+
+### Resolving the issue
+
+- Free up space directly (rotate/purge logs, clean up unused container images, remove orphaned data).
+- If it's a non-`/data` mountpoint (e.g. the OS root partition), expand the underlying volume if the growth is legitimate and recurring.
+- If it's the `/data` mountpoint, check the datastore's autoscaling configuration per "Disk Autoscaling Issues" above rather than only manually freeing space.
+
+## Host Disk Will Fill In 24 Hours
+
+Fires under the same condition as "Host Out Of Disk Space" above (less than 10% free), **plus** a linear projection (`predict_linear` over the last hour) predicting the filesystem will hit zero within 24 hours (alert: `HostDiskWillFillIn24Hours`). Despite the name, this is not an early-warning that fires *before* `HostOutOfDiskSpace` — it requires the same threshold to already be crossed, so it fires alongside or after that alert, adding "and it's still trending toward zero" as extra context rather than being a separate predictive system.
+
+### Diagnose and resolve
+
+Same as "Host Out Of Disk Space" above — treat this as a confirmation that the situation is actively worsening rather than plateauing at a low-but-stable usage level, not as a distinct problem needing separate steps.
+
+## Host Out Of Inodes
+
+Fires when less than 10% of a filesystem's inodes are free, for more than 5 minutes (alert: `HostOutOfInodes`). Inodes are filesystem metadata slots — one per file or directory — so a filesystem can run out of inodes while still having plenty of raw disk space free, if something is creating a huge number of small files. `df -h` (used for the disk-space alerts above) won't show this problem at all.
+
+### Diagnose the issue
+
+```bash
+kubectl debug node/<node-name> -it --image=busybox -- df -i
+```
+This shows inode counts (`Inodes`/`IUsed`/`IFree`/`IUse%`) per filesystem instead of byte sizes — look for a high `IUse%` alongside a normal-looking `df -h` for the same mountpoint, which confirms it's an inode problem rather than a space problem. To find the culprit directory, count files per top-level directory on the affected mountpoint (e.g. `find <path> -xdev -printf '%h\n' | sort | uniq -c | sort -rn | head`).
+
+### Common causes
+
+- A large volume of small files accumulating — logs, cache files, or session files that aren't being cleaned up.
+- A bug or runaway process creating files without ever removing them.
+
+### Resolving the issue
+
+- Clean up or rotate the files in the offending directory.
+- If this is a systemic pattern rather than a one-off, add a cleanup/rotation job or reduce whatever is generating the files at that volume.
+
+## Host High CPU Load
+
+Fires when a host's CPUs are busy (non-idle) more than 80% of the time, averaged over 2 minutes (alert: `HostHighCpuLoad`). This alone only says the CPU is busy, not *why* — it could be legitimate load, or it could be inflated by steal time or iowait (both below) without any useful work actually happening.
+
+### Diagnose the issue
+
+```bash
+kubectl debug node/<node-name> -it --image=busybox -- sh -c "top -bn1 | head -20"
+```
+The `%CPU` column per process combined with the summary line's breakdown by `us`/`sy`/`id`/`wa`/`st` (user/system/idle/iowait/steal) tells you whether this is real compute load or one of the other CPU alerts below masquerading as high load — a high `wa` or `st` percentage here means check "Host CPU High Iowait" or "Host CPU Steal Noisy Neighbor" instead of assuming a compute problem. To find which pod is responsible, cross-reference with `kubectl top pod -A --sort-by=cpu` for pods scheduled on that node.
+
+### Common causes
+
+- Legitimate heavy workload (a busy datastore, batch processing, backups running).
+- A runaway or misbehaving process.
+- Insufficient CPU allocated for the actual load on that node.
+- Steal time or iowait inflating the "non-idle" percentage without real compute happening — see the two alerts below.
+
+### Resolving the issue
+
+- Identify the responsible pod/process and either scale up its CPU allocation or optimize the workload.
+- If steal time or iowait dominates, address those specific causes (below) rather than treating this as a raw compute shortage.
+
+## Host CPU Steal Noisy Neighbor
+
+Fires when CPU "steal" time exceeds 10% for more than 5 minutes (alert: `HostCpuStealNoisyNeighbor`). Steal time is CPU cycles your VM wanted to run but the hypervisor gave to something else — another tenant sharing the same physical host, or your instance running out of burst credits on a burstable/spot instance type. This one is unusual among the alerts in this doc: there's genuinely nothing to fix *inside* the machine — it's an infrastructure-provider-side condition, not something the guest OS has visibility into beyond confirming it's happening.
+
+### Diagnose the issue
+
+```bash
+kubectl debug node/<node-name> -it --image=busybox -- sh -c "top -bn1 | head -3"
+```
+The summary line's `st` (steal) percentage confirms and quantifies it — but there's nothing further to inspect from inside the guest; the cause lives on the hypervisor/cloud provider side.
+
+### Common causes
+
+- A noisy neighbor: another VM/tenant on the same physical host consuming excessive CPU.
+- A burstable or spot instance type running out of allotted CPU credits.
+
+### Resolving the issue
+
+- This can't be resolved from inside the affected VM. Options are to resize/migrate to a non-burstable or dedicated instance type, or raise it with the cloud provider if it's a shared-host contention issue.
+
+## Host CPU High Iowait
+
+Fires when CPU iowait exceeds 5% for more than 5 minutes (alert: `HostCpuHighIowait`) — the CPU sitting idle specifically because it's waiting on outstanding disk I/O to complete, rather than genuinely having nothing to do. This connects directly to "Host Unusual Disk I/O Rate" and "Host Memory Under Pressure" (swap thrashing) above.
+
+### Diagnose and resolve
+
+Follow the diagnose/resolve steps in "Host Unusual Disk I/O Rate" and "Host Memory Under Pressure" above rather than treating this as a separate investigation — high iowait is usually the CPU-side symptom of the same disk or memory pressure those sections already cover.
+
+## Host Context Switching
+
+Fires when the rate of context switches per second, normalized per available CPU, exceeds 1000 (alert: `HostContextSwitching`). A high rate here means the scheduler is juggling far more runnable threads/processes than there are CPUs to run them on.
+
+### Diagnose the issue
+
+```bash
+kubectl debug node/<node-name> -it --image=busybox -- sh -c "vmstat 1 5"
+```
+The `cs` column shows context switches per second per sample — a consistently high value confirms the scheduler churn. Cross-reference with `kubectl get pods -o wide` for that node and each pod's CPU requests/limits to see whether the node is simply overcommitted on scheduled work.
+
+### Common causes
+
+- Too many pods/threads scheduled per CPU on that node (overcommitted scheduling).
+- An application with heavy lock contention, causing frequent thread hand-offs rather than sustained execution.
+- A high interrupt rate from network or disk devices.
+
+### Resolving the issue
+
+- Review pod CPU requests/limits and scheduling density on the affected node; reduce pod density per node or increase CPU allocation if it's overcommitted.
+- If it traces back to a specific application's threading/locking behavior, that needs application-level investigation rather than a node-level fix.
 
 ### MySQL Operator InnoDB Cluster Pod NFS Mount Issue
 When using NFS as a volume provisioner, NFS servers map requests from unprivileged users to the 'nobody' user on the server, which may result in specific directories being owned by 'nobody'. Containers cannot modify these permissions. Therefore, it's necessary to enable `root_squash` on the NFS server to allow proper access.
