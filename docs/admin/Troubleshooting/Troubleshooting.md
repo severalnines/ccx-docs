@@ -768,6 +768,67 @@ These fire as informational notifications, not incidents (alerts: `New User` whe
 
 No diagnosis is needed. To confirm the details of a specific event, check the CC UI's activity log, or query the underlying counters directly (`admin_users_total`, `admin_datastores_total{status="all"}`) to see current totals.
 
+## Service Down
+
+Fires when a Kubernetes Deployment or StatefulSet has zero available replicas for more than 5 minutes (alert: `service-down`, used identically by two separate rule groups — "Deployment status" and "Statefulset status"). Both are distinguished in Alertmanager only by their `namespace`/`name` labels, not by alert name. Nearly everything covered elsewhere in this doc — Postgres, MySQL, cmon, VictoriaMetrics itself — runs as a StatefulSet rather than a Deployment, so the Statefulset variant is the one most likely to matter in practice.
+
+### Diagnose the issue
+
+```bash
+kubectl get deployment <name> -n <namespace>
+# or
+kubectl get statefulset <name> -n <namespace>
+```
+This shows the desired vs. available replica counts directly. To find out why replicas aren't coming up, check the pods it's supposed to manage:
+```bash
+kubectl describe pod -n <namespace> -l app=<name>
+```
+Look at each pod's `Events` section and last termination reason — the same categories covered in "Kubernetes Pod Crash Looping" above (crash on startup, image pull failure, failing probe) apply here too, since a service with zero available replicas is usually the sustained end-state of pods that keep failing to become ready.
+
+### Common causes
+
+- Pods crash-looping or failing readiness probes — see "Kubernetes Pod Crash Looping" above.
+- An image pull failure (bad tag, registry auth issue).
+- Insufficient cluster resources to schedule replacement pods (see the Host/Node resource sections above).
+- A bad rollout — a recent change to the Deployment/StatefulSet spec broke every replica at once.
+
+### Resolving the issue
+
+- If it's a bad rollout, roll back to the previous working revision (`kubectl rollout undo`).
+- Otherwise, follow whichever specific cause the pod events/logs point to — this alert itself is a symptom, not a diagnosis; the fix lives in whichever underlying issue (crash loop, resourcing, image) is actually responsible.
+
+## Metrics Stack Self-Monitoring
+
+These three alerts watch the health of the monitoring stack itself, in increasing order of severity/specificity:
+
+- **`MetricsJobMissing`** (`absent(up{job="victoriametrics"})`): fires if VictoriaMetrics' own self-monitoring scrape target disappears *entirely* — not failing, literally not configured or discovered anymore. If this fires, other alerts may not be trustworthy either, since the monitoring stack may not be evaluating rules or scraping properly.
+- **`MetricsTargetMissing`** (`up == 0` for 10m): unfiltered — fires for *any single* scrape target going down anywhere in the system (any exporter, any instance).
+- **`MetricsAllTargetsMissing`** (`sum by (job) (up) == 0` for 10m): distinguishes a single flaky target (already covered by the alert above) from *every* instance of an entire job disappearing at once (e.g. all `node_exporter` instances across every host going down simultaneously) — a much more systemic problem than one instance failing.
+
+### Diagnose the issue
+
+For `MetricsTargetMissing`/`MetricsAllTargetsMissing`, the `{{ $labels.instance }}`/`{{ $labels.job }}` values in the alert identify exactly which target/job is down — check that specific pod:
+```bash
+kubectl get pods -A | grep <exporter-or-job-name>
+kubectl logs <pod-name> -n <namespace>
+```
+For `MetricsJobMissing`, check the VictoriaMetrics pod itself and its scrape configuration, since this means VM's own self-scrape target was removed or misconfigured, not that a single exporter crashed:
+```bash
+kubectl get pods -n monitoring
+```
+
+### Common causes
+
+- The exporter's pod crashed, OOM'd, or lost network connectivity (see the relevant OOM/resource sections above if applicable).
+- A DaemonSet-based exporter (like `node_exporter`) failed to schedule on some or all nodes.
+- A scrape-config change accidentally removed or broke service discovery for that job — worth checking recent changes to `observability/values.yaml`/the onboarding override if this fires right after a deploy.
+
+### Resolving the issue
+
+- Restart or fix the specific crashed exporter/pod identified by the alert's labels.
+- If it's a scrape-config regression, revert or correct the relevant scrape config in the Helm values.
+- If `MetricsJobMissing` fires, treat it as more urgent than it might look (severity `warning`) — it means the observability stack's own self-check is failing, which can mask other real problems from being alerted on at all.
+
 ### MySQL Operator InnoDB Cluster Pod NFS Mount Issue
 When using NFS as a volume provisioner, NFS servers map requests from unprivileged users to the 'nobody' user on the server, which may result in specific directories being owned by 'nobody'. Containers cannot modify these permissions. Therefore, it's necessary to enable `root_squash` on the NFS server to allow proper access.
 
