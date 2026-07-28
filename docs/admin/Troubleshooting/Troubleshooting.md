@@ -350,7 +350,7 @@ Also check the "Active Connections" and "Connections by Database" panels on the 
 
 ### Resolving the issue
 
-- Terminate leaked or stuck connections, if it is safe to do so, the following command will find every Postgres connection that's been stuck "idle in transaction" (including the "idle in transaction (aborted)" variant) for more than 10 minutes and forcibly kills those connections to free up the resources they're holding:
+- Terminate leaked or stuck connections, if it is safe to do so. The following command finds every Postgres connection that's been stuck "idle in transaction" (including the "idle in transaction (aborted)" variant) for more than 10 minutes and forcibly terminates those connections to free up the resources they're holding:
   ```sql
   SELECT pg_terminate_backend(pid) FROM pg_stat_activity
   WHERE state LIKE 'idle in transaction%' AND now() - state_change > interval '10 minutes';
