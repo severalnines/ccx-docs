@@ -494,8 +494,8 @@ ccx:
     stores_service:
       replicas: 3
       serviceType: LoadBalancer
-    stores_worker:
-      replicas: 3
+    state-worker:
+      replicas: 1
     user:
       replicas: 3
     uiauth:
@@ -507,7 +507,7 @@ cmon:
   licence: xxx # insert licence here
 ```
 
-There might be more stuff that needs to be added/changed, but that will depend on your infrastructure.
+There might be more things that needs to be added/changed, but that will depend on your infrastructure.
 
 To upgrade ccx helm chart, run the following command:
 ```
