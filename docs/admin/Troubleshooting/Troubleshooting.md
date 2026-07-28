@@ -415,7 +415,7 @@ The error text tells you which cause applies:
 
 ## Kubernetes Container OOM Killer
 
-Fires when a container's restart count increased in the last 10 minutes and its last termination reason was `OOMKilled` (alert: `KubernetesContainerOomKiller`). This means the container exceeded its own memory limit and the kernel killed it — distinct from the node running low on memory overall (see [Host Out Of Memory](#host-out-of-memory) below); a container can get OOM-killed on a machine with plenty of free memory if that container's individual limit is set too low.
+Fires when a container's restart count has increased in the last 10 minutes and its last termination reason was `OOMKilled` (alert: `KubernetesContainerOomKiller`). This means the container exceeded its own memory limit and the kernel killed it — distinct from the node running low on memory overall (see [Host Out Of Memory](#host-out-of-memory) below); a container can get OOM-killed on a machine with plenty of free memory if that container's individual limit is set too low.
 
 ### Diagnose the issue
 
