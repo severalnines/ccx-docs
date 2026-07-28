@@ -2,113 +2,177 @@
 
 :::danger
 At this point, it's presumed that you have already installed CCX following the tutorial. In case that you wish to upgrade it to be production ready, instead of creating everything from scratch, this page will show you how to do so. Just before doing so, make sure you have adequate resources at your disposal to do so.
-::::
-
-:::note
-Make sure that you have at least 300Gi of storage capacity for the upgrade. The actual size will depend on your need for the retention policy of metrics and logs.
 :::
 
-### Ingress Controller
-
-At this point, it's presumed that ingress controller is properly deployed, as well as that you have externally facing load balancers.
-
-To be production ready, we will need to add a couple of headers, as well as change a couple of configuration parameters. Depending on how you deployed the ingress controler, you will need to do the following:
-
-If you installed ingress controller with the `helm chart` and you are in control of it's `values file`, you will need to add the follwing configuration to it and redeploy the helm cart:
-
-```
-  controller:
-    addHeaders:
-      Referrer-Policy: no-referrer
-      X-Content-Type-Options: nosniff
-      X-Frame-Options: DENY
-      X-XSS-Protection: 1; mode=block
-    config:
-      allow-backend-server-header: "true"
-      use-forwarded-headers: "true"
-      hide-headers: "Server,X-Powered-By"
-```
-
-If you don't have control over the ingress controller values (e.x. controller comes up installed in cluster upon boot), do the following:
-
-Create new ConfigMap that contains the following:
-```
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: ingress-nginx-custom-add-headers
-  namespace: ingress-nginx
-data:
-  X-Frame-Options: "DENY"
-  X-Content-Type-Options: "nosniff"
-  X-XSS-Protection: "1; mode=block"
-  Referrer-Policy: "no-referrer"
-  Content-Security-Policy: "default-src 'self';"
-```
-Once applied, find the configuration map that contains configuration for the ingress controller. 
-`kubectl get configmap -n nginx-ingress-controller`
-Edit the ConfigMap so that in contains the following configurations:
-
-```
-allow-backend-server-header: "true"
-use-forwarded-headers: "true"
-hide-headers: "Server,X-Powered-By"
-add-headers: "nginx-ingress-controller/ingress-nginx-custom-add-headers"
-```
 :::note
-Make sure that add-headers field matches the path of the previously generated configuration map for headers. First part is namespace, second is the ConfigMap name.
+Make sure that you have at least 350Gi of storage capacity for the upgrade — the MySQL and Postgres data volumes alone account for 300Gi (50Gi × 3 replicas each) with the sizing used below, plus NATS JetStream and CMON's own volumes on top of that. The actual size will depend on your need for the retention policy of metrics and logs.
 :::
-
-Once this is done, restart all of the nginx pods in order for them to pick up new configurations.
-
-### Cert Manager
-
-When setting up production version of cert-manager, there are a few configuration parameters that needs to be addressed:
-`replicaCount` - by default it's set to 1. To make sure it's production ready, make sure it has 2 or 3 replicas to provide high availability.
-`podDisruptionBudget.enabled` - by default this is set to `false`. Make sure to change it to `true` if you changed `replicaCount` to be different than 1. 
-`crds.enabled` - set to `true`. This will make sure to install all of the CRD's needed for optimal work. 
-`crds.keep` - make sure it's set to `true`. This will prevent Helm from uninstalling the CRD when the Helm release is uninstalled.
-
-Depending on how you wish to use this instance of `cert-manager`, make sure that `Issuer` or `ClusterIssuer` exists and is configured properly.
-
 
 ### Dependencies update
+
+In order to move to production ready state, cmondb and ccxdb need to have backups enabled. In order to do so, set secrets for the backups with the following values:
+
+```
+apiVersion: v1
+data:
+  AWS_ACCESS_KEY_ID: 
+  AWS_ENDPOINT: 
+  AWS_REGION: 
+  AWS_SECRET_ACCESS_KEY: 
+  WALG_S3_PREFIX: 
+kind: Secret
+metadata:
+  name: s3-backup-postgres
+type: Opaque
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: s3-backup-innodb
+type: Opaque
+stringData:
+  credentials: |
+    [default]
+    aws_access_key_id = 
+    aws_secret_access_key = 
+```
 
 Originally the `ccxdeps` helm chart was installed in tutorial using the default values. Create a new file called `ccxdeps.yaml`. You can use the values below and modify them per your needs.
 
 ```
-mysql-innodbcluster:
-  serverInstances: 3 # This is something you can chose, but it can only be 1,3,5,7 or 9.
-  podSpec: #whatever is set under podSpec can't be changed in future, so take care in using correct settings
-    containers:
-    - name: mysql
-      resources:
-        requests:
-          memory: "2048Mi" #make sure this is set properly
-victoria-metrics-alert:
-  enabled: true
-victoria-metrics-single:
-  enabled: true
+keycloak:
+  enabled: false
+
+ingressController:
+  enabled: false
+
+external-dns:
+  enabled: false
+
 ccx-monitoring:
-  alertmanager:
-    enabled: false
-  enabled: true
-  loki:
-    gateway:
-      ingress:
-        hosts:
-        - host: some-loki-domain.com
-          paths:
-          - path: /loki
-            pathType: Prefix
-        tls:
-        - hosts:
-          - some-loki-domain.com
-          secretName: loki-gateway-tls
-    loki_host_url: some-loki-domain.com
+  enabled: false
+
+installOperators: true
+
 oracle-mysql-operator:
   enabled: true
-installOperators: true
+
+postgres-operator:
+  configKubernetes:
+    pod_environment_secret: "" #secret name from previous step
+  configLogicalBackup:
+    logical_backup_s3_bucket: "ccxdb" #change if you want to have it named different
+    logical_backup_s3_bucket_prefix: "" #to do
+    logical_backup_s3_endpoint: "" #to do
+    logical_backup_s3_region: "" #to do
+    logical_backup_s3_sse: ""  # leave empty
+    logical_backup_schedule: "0 1 * * *"  #change to match what you want
+    logical_backup_s3_access_key_id: ""  # leave empty
+    logical_backup_s3_secret_access_key: "" # leave empty
+    logical_backup_cronjob_environment_secret: ""  #secret name from previous steps
+  configWalBackup:
+    wal_s3_bucket: "ccxdb" #change if you want to have it named differently
+    wal_bucket_scope_prefix: "wal-g"
+    wal_s3_endpoint: "" #to do
+    wal_s3_region: "" # leave empty
+    wal_s3_sse: "" # leave empty
+    wal_s3_access_key_id: "" # leave empty
+    wal_s3_secret_access_key: "" # leave empty
+
+postgresql:
+  datadirVolumeClaimTemplate:
+    resources:
+      requests:
+        storage: 50Gi
+  enableLogicalBackup: true
+  monitoring:
+    enabled: false
+  podAnnotations:
+    prometheus.io/path: /metrics
+    prometheus.io/port: "9187"
+    prometheus.io/scrape: "true"
+  replicas: 3
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+
+mysql-innodbcluster:
+  serverInstances: 3
+  routerInstances: 2
+  backupProfiles:
+   - dumpInstance:
+        dumpOptions:
+          includeSchemas:
+            - cmon
+        storage:
+          s3:
+            bucketName: cmondb-backups #set as you see fit
+            config: elastx-s3-mysql #secret name from previous step
+            endpoint: "cmondb" #to be set
+            prefix:  "" #to be set
+     name: s3-cmondb-backup
+  backupSchedules:
+    - backupProfileName: s3-cmondb-backup #must match name from two lines above
+      deleteBackupData: false
+      enabled: true
+      name: s3-cmondb-daily-backup
+      schedule: "0 1 * * *" #to be set
+  datadirVolumeClaimTemplate:
+    resources:
+      requests:
+        storage: 50Gi
+  serverVersion: 8.4.7
+  baseServerId: 2000
+  serverConfig:
+    mycnf: |-
+      [mysqld]
+      binlog_expire_logs_seconds=259200
+      slow_query_log=ON
+      long_query_time=2
+      innodb_buffer_pool_size=1024M
+      loose_group_replication_message_cache_size=512M
+      innodb_redo_log_capacity=256M
+      performance_schema=ON
+      performance_schema_digests_size=10000
+      loose_group_replication_member_expel_timeout=30
+      loose_group_replication_autorejoin_tries=5
+nats:
+  enabled: true
+  nameOverride: "ccx-nats"
+  exporter:
+    enabled: true
+  config:
+    cluster:
+      enabled: true
+      replicas: 3
+    jetstream:
+      enabled: true
+      fileStorage:
+        enabled: true
+        storageClassName: # REQUIRED: fast SSD storage class (e.g. "premium-rwo", "gp3")
+        size: 10Gi
+    logging:
+      debug: false
+      trace: false
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+  container:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: nats
+          topologyKey: kubernetes.io/hostname
 ```
 Please take a look at all [values](https://github.com/severalnines/helm-charts/blob/main/charts/ccxdeps/values.yaml), as you might be interested in some of the additional flags.
 
@@ -116,6 +180,56 @@ To upgrade the chart, use the following command:
 ```
 helm upgrade --install ccxdeps s9s/ccxdeps --debug --wait -n ccx -f ccxdeps.yaml
 ```
+
+:::note
+The steps below aren't normal steady-state behavior — they work around real limitations we've hit in the postgres-operator and mysql-operator's reconcile logic on an already-running cluster (as opposed to a fresh install). A config change that should apply cleanly sometimes doesn't get propagated to already-running pods, and Patroni's own Kubernetes-native config store can get stuck with stale state. None of this is expected to be necessary indefinitely — treat it as a known-issue workaround, not the intended long-term procedure, and re-check whether it's still needed on future operator versions.
+:::
+
+There are some fields which will not be upgraded properly, so they have to be updated manually.
+
+:::note
+The `mycnf` block above uses the `loose_` prefix on every `group_replication_*` variable (e.g. `loose_group_replication_message_cache_size`). This is required — without it, mysqld will error out at startup on an unrecognized variable name, since the Group Replication plugin hasn't loaded yet when the config file is first parsed. If you add more Group Replication variables later, keep the `loose_` prefix on all of them.
+:::
+
+If the Postgres cluster gets stuck after the upgrade (`kubectl get postgresql -n ccx` shows a non-`Running` status, or `acid-ccx-*` pods sit logging `waiting for leader to bootstrap`), it's a sign of stale Patroni state left over in the cluster's Kubernetes-native config store. Clear it so Patroni starts clean and re-elects a leader:
+
+```
+kubectl delete endpoints acid-ccx acid-ccx-config acid-ccx-repl -n ccx
+```
+
+This isn't a step every upgrade needs — only run it if the cluster is actually stuck as described above.
+
+The `serverConfig.mycnf` change above generally does not get propagated to an already-running InnoDB Cluster reliably (a known limitation with this operator version) — most of it can be applied directly and immediately via `SET PERSIST`, with no restart, on **each** of the 3 members. Set user/password in the following commands before running them:
+```
+kubectl exec -n ccx ccxdeps-0 -c mysql -- mysqlsh --no-wizard --uri=<user>:<pass>@localhost --sql -e "SET PERSIST binlog_expire_logs_seconds = 259200; SET PERSIST slow_query_log = ON; SET PERSIST long_query_time = 2; SET PERSIST innodb_buffer_pool_size = 1073741824; SET PERSIST group_replication_message_cache_size = 536870912; SET PERSIST innodb_redo_log_capacity = 268435456; SET PERSIST group_replication_member_expel_timeout = 30; SET PERSIST group_replication_autorejoin_tries = 5;"
+
+
+kubectl exec -n ccx ccxdeps-1 -c mysql -- mysqlsh --no-wizard --uri=<user>:<pass>@localhost --sql -e "SET PERSIST binlog_expire_logs_seconds = 259200; SET PERSIST slow_query_log = ON; SET PERSIST long_query_time = 2; SET PERSIST innodb_buffer_pool_size = 1073741824; SET PERSIST group_replication_message_cache_size = 536870912; SET PERSIST innodb_redo_log_capacity = 268435456; SET PERSIST group_replication_member_expel_timeout = 30; SET PERSIST group_replication_autorejoin_tries = 5;"
+
+
+kubectl exec -n ccx ccxdeps-2 -c mysql -- mysqlsh --no-wizard --uri=<user>:<pass>@localhost --sql -e "SET PERSIST binlog_expire_logs_seconds = 259200; SET PERSIST slow_query_log = ON; SET PERSIST long_query_time = 2; SET PERSIST innodb_buffer_pool_size = 1073741824; SET PERSIST group_replication_message_cache_size = 536870912; SET PERSIST innodb_redo_log_capacity = 268435456; SET PERSIST group_replication_member_expel_timeout = 30; SET PERSIST group_replication_autorejoin_tries = 5;"
+
+```
+
+One more manual step for this section: `datadirVolumeClaimTemplate` only controls the size of *newly created* PVCs. If `postgresql`/`mysql-innodbcluster` already existed before this upgrade, their existing PVCs will **not** be resized just because the values above changed — StatefulSet volume claim templates are effectively create-time-only in Kubernetes. Patch the existing PVCs directly to match:
+
+:::note
+This requires the underlying StorageClass to support online expansion. Check with `kubectl get storageclass <name> -o jsonpath='{.allowVolumeExpansion}'` — if it doesn't return `true`, these patches will have no effect and a different migration approach is needed.
+:::
+
+```
+# MySQL — bring the actual disks up to match what the CRD says (50Gi)
+kubectl patch pvc datadir-ccxdeps-0 -n ccx -p '{"spec":{"resources":{"requests":{"storage":"50Gi"}}}}'
+kubectl patch pvc datadir-ccxdeps-1 -n ccx -p '{"spec":{"resources":{"requests":{"storage":"50Gi"}}}}'
+kubectl patch pvc datadir-ccxdeps-2 -n ccx -p '{"spec":{"resources":{"requests":{"storage":"50Gi"}}}}'
+
+# Postgres — same story, bring the disks up to match the 50Gi set above
+kubectl patch pvc pgdata-acid-ccx-0 -n ccx -p '{"spec":{"resources":{"requests":{"storage":"50Gi"}}}}'
+kubectl patch pvc pgdata-acid-ccx-1 -n ccx -p '{"spec":{"resources":{"requests":{"storage":"50Gi"}}}}'
+kubectl patch pvc pgdata-acid-ccx-2 -n ccx -p '{"spec":{"resources":{"requests":{"storage":"50Gi"}}}}'
+```
+
+Confirm the resize actually took with `kubectl get pvc -n ccx` — some CSI drivers apply the new capacity online immediately, others only pick it up after the pod restarts.
 
 ### Configuring Cloud Credentials in K8s Secrets
 
@@ -159,7 +273,7 @@ If you have three worker nodes, and they have different IP addresses then you mu
 
 
 :::note
-A number of identifiers are case sensitive: `ccx.config.clouds[].regions[].code`, `ccx.config.clouds[].regions[].availabiliity_zones[].code`, `ccx.services.deployer.config.openstack_vendors[].regions[].identifier` and also the codes for the `instance_types`, `flavors`, `volumes` are `network_types` case-sensitive. Be consistent!
+A number of identifiers are case sensitive: `ccx.config.clouds[].regions[].code`, `ccx.config.clouds[].regions[].availability_zones[].code`, `ccx.services.deployer.config.openstack_vendors[].regions[].identifier`, and also the codes for `instance_types`, `flavors`, `volumes`, and `network_types` are case-sensitive. Be consistent!
 :::
 
 At this point, ccx should be deployed with minimal values yaml. The following values.yaml is minimal for production environment:
@@ -173,7 +287,7 @@ ccFQDN: cc.ccx.somedomain.com # dns name for ccx
 ccxFQDN: ccx.somedomain.com # dns name for cc
 ccx:
   cidr: 0.0.0.0/0 #setup according to your network
-  cloudSecrets: ccx # List of Kubernetes secrets containing cloud credentials.
+  cloudSecrets: # List of Kubernetes secrets containing cloud credentials.
   - openstack # This secret must exist in Kubernetes. See 'secrets-template.yaml' for reference.
   - openstack-s3
   - smtp #secret made from email step
@@ -268,7 +382,6 @@ ccx:
           "2": 1 master, 1 replica
           "3": 1 master, 2 replicas
       versions:
-      - "8"
       - "8.4"
     - code: postgres
       enabled: true
@@ -288,9 +401,10 @@ ccx:
           "2": 1 master, 1 replica
           "3": 1 master, 2 replicas
       versions:
-      - "14"
       - "15"
       - "16"
+      - "17"
+      - "18"
     - code: valkey_sentinel
       enabled: true
       info: Deploy Valkey Sentinel.
@@ -329,7 +443,7 @@ ccx:
       versions:
       - "2022"
   env:
-    DISABLE_ROLLBACK: "false" #if a datastore fails to deploy, then it will not be deleted. Helps with debugging. Set to "false" for prod.
+    DISABLE_ROLLBACK: "false" #when "true", a datastore that fails to deploy is kept instead of deleted, which helps with debugging. Set to "false" for prod so failed deployments are cleaned up automatically.
   ingress:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: somedomain.com # domain used for databases. It has to match with ExternalDNS used one.
@@ -355,12 +469,39 @@ ccx:
       env:
         FE_REACT_APP_FAVICON_URL: your_icon_link #link to your company icon
         FE_REACT_APP_LOGO_URL: your_link #link to your company logo
-        FE_EXTERNAL_CSS_URL: your.css.url #ult to the ccss you will be using 
+        FE_EXTERNAL_CSS_URL: your.css.url #url to the css you will be using
         FE_NODE_ENV: "production"
-        FE_VPC_DISABLED: true #turn off this unless using AWS
+        FE_VPC_DISABLED: true #turn this off unless using AWS
       replicas: 3
     runner:
-      replicas: 5 # Minimum is 3 that should be used in prduction. Prefferable is to have 5 or more
+      replicas: 5 # Minimum is 3 that should be used in production. Preferable is to have 5 or more
+    admin:
+      replicas: 3
+    auth:
+      replicas: 3
+    billingupdater:
+      replicas: 3
+    dispatcher:
+      replicas: 3
+    hook:
+      replicas: 3
+    notify_worker:
+      replicas: 3
+    rest_service:
+      replicas: 3
+    stores_listener:
+      replicas: 3
+    stores_service:
+      replicas: 3
+      serviceType: LoadBalancer
+    stores_worker:
+      replicas: 3
+    user:
+      replicas: 3
+    uiauth:
+      replicas: 3
+      env:
+        FE_NODE_ENV: "production"  
   userDomain: somedomain.com # domain used for databases. It has to match with ExternalDNS used one.
 cmon:
   licence: xxx # insert licence here
@@ -373,7 +514,7 @@ To upgrade ccx helm chart, run the following command:
 helm upgrade --install ccx s9s/ccx -n ccx --debug --wait -f openstack.yaml
 ```
 
-Once done, `https://ccx.somedomain.com/auth/register?from=ccx` in a web browser, register a new user and verify that datastore creatin is working properly.
+Once done, open `https://ccx.somedomain.com/auth/register?from=ccx` in a web browser, register a new user and verify that datastore creation is working properly.
 
 ### IP Whitelisting for the CC Ingress
 
