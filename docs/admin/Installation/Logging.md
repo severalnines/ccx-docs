@@ -14,9 +14,17 @@ Fluent Bit deployed on datastore nodes will be configured to send logs to Loki u
 The chart will automatically configure the Loki URL using the value of ccxFQDN from ccx chart. This ensures that there’s always a valid FQDN for the logging service even if no customization is made.
 
 :::note
-If the Loki gateway ingress is not found, a warning will be shown when you deploy ccx. Make sure you have updated and deployed ccxdeps, else the logging feature will be disabled.
+If the `ccxdeps-loki-gateway` Service is not found, a warning will be shown when you deploy `ccx`. Make sure you have updated and deployed `ccxdeps` first, otherwise the logging feature will be disabled.
 :::
 
+#### Built-in vs. external Loki
+
+CCX logging can reach Loki in one of two ways, and only one is meant to be active at a time:
+
+- **Built-in Loki (default)**: `ccxdeps` deploys its own Loki instance in-cluster, reachable at the Service `ccxdeps-loki-gateway`. Fluent Bit sends logs there automatically, and the CCX chart creates an Ingress (`ccx-fluentbit-ingress`) proxying `<ccxFQDN>/loki` to that Service so it's reachable from outside the cluster too. No extra configuration is needed beyond deploying `ccxdeps`.
+- **External Loki**: point Fluent Bit at a Loki instance you already run yourself, instead of the one `ccxdeps` deploys, by setting `fluentbit.host` in the CCX chart to that instance's hostname. When `fluentbit.host` is set to anything other than the built-in default, the CCX chart automatically skips creating the `ccx-fluentbit-ingress` Ingress, since traffic no longer needs to route through `<ccxFQDN>/loki` at all.
+
+Either way, to view the logs in Grafana, the `ccx-monitoring` chart's `lokiHostname` value must point at whichever Loki instance is actually receiving the logs — see [Visualizing Logs with Grafana](#visualizing-logs-with-grafana) below.
 
 #### Additional Fluent Bit Output Host Configuration
 
@@ -58,6 +66,10 @@ Click here for Advanced setup [Custom Loki](Custom-Loki.md)
 
 Loki helm chart doesn't support authentication, so the only way to secure the Loki endpoint is to add the nginx authentication on the loki ingress.
 
+:::warning
+`ccxdeps` no longer auto-generates the `loki-ingress-secret`. If you're upgrading an existing deployment that relied on that auto-generated secret, you must create both secrets below manually (or via your secrets manager, e.g. Vault/OpenBao) before upgrading, otherwise the CCX REST service will lose its Loki credentials.
+:::
+
 When Loki auth is enabled, two Kubernetes secrets are required:
 
 - **`loki.authSecret`** — used by the NGINX ingress controller to enforce HTTP basic auth on the `/loki` endpoint.
@@ -89,6 +101,38 @@ kubectl create secret generic loki-ingress-secret \
   --from-literal=LOKI_PASSWORD=<your-password> \
   -n <namespace>
 ```
+
+#### Using a secret that already exists (e.g. Vault/OpenBao)
+
+Steps 2 and 3 above are just one way to create the secrets. If your secrets already exist on the cluster — provisioned by Vault/OpenBao, External Secrets Operator, or any other tool — you can skip those `kubectl` commands entirely, as long as the resulting Secrets have this shape:
+
+```yaml
+# Equivalent to Step 2 — read by the NGINX ingress controller for basic auth.
+# The `auth` key must contain a bcrypt-hashed htpasswd entry, not a plain password.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: loki-basic-auth
+  namespace: <namespace>
+type: Opaque
+data:
+  auth: <base64-encoded htpasswd file contents>
+```
+
+```yaml
+# Equivalent to Step 3 — read by the CCX REST service to authenticate against Loki.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: loki-ingress-secret
+  namespace: <namespace>
+type: Opaque
+stringData:
+  LOKI_USERNAME: admin
+  LOKI_PASSWORD: <your-password>
+```
+
+Whatever creates them, point Step 4 below at their actual names via `loki.authSecret` and `loki.ingressSecret`.
 
 #### Step 4: Configure the CCX Helm chart
 
