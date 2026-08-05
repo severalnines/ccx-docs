@@ -95,7 +95,7 @@ Field values:
 
 ### Default maintenance window
 
-If no maintenance window is configured for a datastore, it defaults to **Monday 00:00–02:00 UTC**.
+Every datastore always has a maintenance window — it cannot be disabled or unset. If the user has not configured one, the default of **Monday 00:00–02:00 UTC** applies.
 
 ### How automatic upgrades interact with maintenance windows
 
@@ -107,9 +107,18 @@ CCX runs a maintenance loop that periodically calls `MaintainStore` for each dat
 
 A 2-second pause is applied between datastores to avoid sudden activity spikes during the maintenance sweep.
 
+### When no upgrade is pending
+
+The upgrade notification in the UI appears only when an upgrade is actually pending. A datastore has no pending upgrade when both of the following are true:
+
+- All of its nodes were provisioned after the current `LATEST_SERVER_CONFIG` timestamp.
+- No OS package updates have been reported by the ccx-monitor-service on any node (see [OS upgrade impact](#os-upgrade-impact)).
+
+The maintenance window settings are always shown in the UI, even when there is no pending upgrade. The absence of an upgrade notification means there is nothing to upgrade — not that the maintenance window is inactive.
+
 ## Limitations
 
 - **Microsoft SQL Server (single-node)** — the roll-forward upgrade is not supported for Microsoft SQL Server deployed in single-node mode. A SQL Server upgrade requires manual intervention.
-- **User-initiated delays** — users can indefinitely defer an upgrade by not scheduling it and having no maintenance window active. As the CSP, if a critical OS patch needs to be applied urgently, you must coordinate with affected users or force the upgrade by setting `LATEST_SERVER_CONFIG` to the current date and contacting users to schedule their maintenance window.
-- **Maintenance window timezone** — the window is evaluated against server time (UTC). Users setting windows based on their local timezone should account for the offset.
+- **Upgrades wait for the maintenance window** — users cannot defer an upgrade indefinitely: a maintenance window is always configured (Monday 00:00–02:00 UTC by default) and cannot be disabled, so a pending upgrade is applied automatically during the datastore's next maintenance window. This does mean an upgrade can wait up to a week for the window to arrive. As the CSP, if a critical OS patch needs to be applied urgently, set `LATEST_SERVER_CONFIG` to the current date and time (RFC 3339 format) and coordinate with affected users to trigger the upgrade immediately via the **Upgrade Now** action instead of waiting for their maintenance windows.
+- **Maintenance window timezone** — the window is evaluated in the server's local timezone (UTC by default in Kubernetes deployments). Users setting windows based on their local timezone should account for the offset.
 - **No in-place patches** — there is no mechanism to apply a hotfix to a running node. All OS-level changes require a node replacement via the roll-forward procedure.
