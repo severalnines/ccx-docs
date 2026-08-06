@@ -19,8 +19,7 @@ If the `ccxdeps-loki-gateway` Service is not found, a warning will be shown when
 
 #### Built-in vs. external Loki
 
-CCX logging can reach Loki in one of two ways, and only one is meant to be active at a time:
-
+Fluent Bit can ship datastore logs to Loki in one of two ways (choose one endpoint for Fluent Bit output):
 - **Built-in Loki (default)**: `ccxdeps` deploys its own Loki instance in-cluster, reachable at the Service `ccxdeps-loki-gateway`. Fluent Bit sends logs there automatically, and the CCX chart creates an Ingress (`ccx-fluentbit-ingress`) proxying `<ccxFQDN>/loki` to that Service so it's reachable from outside the cluster too. No extra configuration is needed beyond deploying `ccxdeps`.
 - **External Loki**: point Fluent Bit at a Loki instance you already run yourself, instead of the one `ccxdeps` deploys, by setting `fluentbit.host` in the CCX chart to that instance's hostname. When `fluentbit.host` is set to anything other than the built-in default, the CCX chart automatically skips creating the `ccx-fluentbit-ingress` Ingress, since traffic no longer needs to route through `<ccxFQDN>/loki` at all.
 
