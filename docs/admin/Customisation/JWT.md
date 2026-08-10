@@ -145,7 +145,7 @@ crossOrigins:
   - https://portal.example.com
 ```
 
-Entries are full origins (scheme + host), comma-joined into the `CROSS_ORIGINS` environment variable.
+Entries are full origins (scheme + host, plus the port when it is non-default, e.g. `https://portal.example.com:8443`), comma-joined into the `CROSS_ORIGINS` environment variable.
 
 ### 2. Make the session cookie work inside the iframe
 
