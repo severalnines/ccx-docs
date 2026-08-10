@@ -83,6 +83,7 @@ There are four endpoints for handling JWTs:
 
 - **Description**: Creates a session for the provided user. The user must exist in the CCX database.
 - **Response**: Returns `303 See other` on success. Redirects the user to the URL provided in the `LOGIN_REDIRECT_URL` environment variable in `ccx-auth-service`.
+- If you call this endpoint from inside an `<iframe>`, see [Embedding CCX in an iframe](#embedding-ccx-in-an-iframe) — additional configuration is required for the session cookie and CSP.
 
 **Query Parameters:**
 
@@ -126,6 +127,54 @@ There are four endpoints for handling JWTs:
   "expires_at": "..."
 }
 ```
+
+---
+
+## Embedding CCX in an iframe
+
+A common integration pattern is to embed the CCX UI in an `<iframe>` on the Service Portal and log the user in by pointing the iframe at `GET /api/auth/jwt-login?issuer=...&jwt=...`. For this to work, **two** independent browser mechanisms must allow it: the Content-Security-Policy of CCX must permit your portal to frame it, and the CCX session cookie must survive a cross-site context.
+
+### 1. Allow your portal to frame CCX (`crossOrigins`)
+
+CCX sends a `Content-Security-Policy` header with `frame-ancestors 'self' <origins>`. If the portal's origin is not listed, the browser refuses to render the iframe at all — before any cookie is involved. The same list is used as the CORS allow-list for API requests.
+
+Add the portal origin(s) to the `crossOrigins` list in the Helm values:
+
+```yaml
+crossOrigins:
+  - https://portal.example.com
+```
+
+Entries are full origins (scheme + host), comma-joined into the `CROSS_ORIGINS` environment variable.
+
+### 2. Make the session cookie work inside the iframe
+
+The `ccx-session` cookie is set with `Secure; HttpOnly`. What happens next depends on whether the embedding is **same-site** or **cross-site**:
+
+- **Same-site (recommended):** serve CCX on a subdomain of the same registrable domain as the portal — e.g. portal on `portal.example.com` and CCX on `ccx.example.com`. Browsers treat the iframe as same-site: the session cookie works with no extra configuration, in **all** browsers, and third-party-cookie blocking does not apply. This only requires a DNS record and a TLS certificate on the shared domain; both sites must be HTTPS.
+
+- **Cross-site:** if the portal and CCX are on different registrable domains, browsers default the cookie to `SameSite=Lax` and **reject it inside the iframe** (the DevTools warning is "the Set-Cookie header didn't specify a SameSite attribute … was blocked"). Starting with CCX 1.58 you can opt in to cross-site cookies:
+
+  ```yaml
+  ccx:
+    env:
+      SESSION_COOKIE_SAMESITE: 'none'
+  ```
+
+  | Environment Variable        | Description                                                                                                    |
+  | --------------------------- | -------------------------------------------------------------------------------------------------------------- |
+  | **SESSION_COOKIE_SAMESITE** | `SameSite` attribute for session cookies: `none`, `lax` or `strict`. Unset (default) keeps the browser default. |
+
+  Caveats of `SameSite=None`:
+
+  - **Safari still blocks it.** Safari's Intelligent Tracking Prevention rejects all third-party cookies regardless of `SameSite`, and Chrome does the same when the user has third-party cookies disabled. Cross-site embedding therefore cannot be made to work reliably in every browser — if you need that, use the same-site setup above.
+  - **CSRF exposure.** `SameSite=None` makes the browser attach the session cookie to all cross-site requests, removing the implicit CSRF protection of the `Lax` default. Enable it only on deployments that actually need embedding.
+
+### Troubleshooting
+
+- Blank iframe, console shows a `frame-ancestors` CSP violation → the portal origin is missing from `crossOrigins`.
+- The `jwt-login` request returns 303 but no session appears → check the `Set-Cookie` line of the response in DevTools; a `SameSite` warning means you are in the cross-site case above.
+- Works in Chrome but not Safari → expected for cross-site embedding; switch to the same-site (subdomain) setup.
 
 ---
 
