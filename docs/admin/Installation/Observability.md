@@ -97,3 +97,94 @@ helm uninstall ccx-monitoring
 ## Integratation with Slack
 
 To integrate with slack, please see example in `values.yaml` file. See https://prometheus.io/docs/alerting/latest/configuration/ - for various integration and configuration options.
+
+## Alertmanager & vmalert Ingress Authentication
+
+If Alertmanager and/or vmalert are exposed externally via Ingress (e.g. to make Slack action buttons like Silence and Query work, since they need to open a browser-reachable URL), they should be protected with authentication. Neither Alertmanager nor vmalert has robust native auth, so this is handled at the Ingress level via nginx-ingress Basic Auth.
+
+Each component uses its own separate Secret and credentials — they are not shared.
+
+### Creating the auth secret
+
+Requires `htpasswd` (part of `apache2-utils` on Debian/Ubuntu, or `httpd` on macOS via Homebrew).
+
+Run the following commands to create the password and secrets that will be used for authentication:
+
+```
+htpasswd -c auth <username>
+kubectl create secret generic alertmanager-basic-auth --from-file=auth -n monitoring
+kubectl create secret generic vmalert-basic-auth --from-file=auth -n monitoring
+```
+
+Use a different `auth` file per component if you want independent credentials for each. Verify both secrets exist:
+
+```
+kubectl get secret -n monitoring | grep basic-auth
+```
+
+### Values configuration
+
+Add the following annotations to each component's `ingress` block. Double-check that each component's `auth-secret` points to its **own** secret — mixing these up is an easy mistake that fails silently (no error, just the wrong credentials being accepted).
+
+```yaml
+alertmanager:
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/auth-type: basic
+      nginx.ingress.kubernetes.io/auth-secret: alertmanager-basic-auth
+      nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+    hosts:
+      - host: <your-alertmanager-hostname>
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls:
+      - secretName: alertmanager-cert
+        hosts:
+          - <your-alertmanager-hostname>
+
+victoria-metrics-alert:
+  server:
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/auth-type: basic
+        nginx.ingress.kubernetes.io/auth-secret: vmalert-basic-auth
+        nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+      hosts:
+        - name: <your-vmalert-hostname>
+          path: /
+      tls:
+        - secretName: vmalert-cert
+          hosts:
+            - <your-vmalert-hostname>
+```
+
+Also requires `--web.external-url` (Alertmanager) and `-external.url` (vmalert) to be set to each component's own Ingress hostname, so that self-referential links they generate (e.g. Alertmanager's silence link, vmalert's `GeneratorURL`) point to a browser-reachable address rather than an internal cluster URL:
+
+```yaml
+alertmanager:
+  extraArgs:
+    web.external-url: "https://<your-alertmanager-hostname>"
+
+victoria-metrics-alert:
+  server:
+    extraArgs:
+      external.url: "https://<your-vmalert-hostname>"
+```
+
+### Verifying it's working
+
+Confirm the annotations and args rendered correctly:
+
+```
+helm template <release> s9s/ccx-monitoring --values YOUR_VALUES.yaml | grep -B5 -A15 "kind: Ingress"
+helm template <release> s9s/ccx-monitoring --values YOUR_VALUES.yaml | grep "web.external-url|external.url"
+```
