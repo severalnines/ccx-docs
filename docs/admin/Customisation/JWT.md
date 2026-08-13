@@ -151,7 +151,7 @@ Entries are full origins (scheme + host, plus the port when it is non-default, e
 
 The `ccxdeps` chart configures ingress-nginx to add `X-Frame-Options: SAMEORIGIN` to every response by default. This is a legacy predecessor of `frame-ancestors` with no way to allow a specific third-party origin, so it blocks the iframe even when `crossOrigins` is configured correctly (the browser console shows "denied by X-Frame-Options"). Browsers ignore `X-Frame-Options` when a response carries a `frame-ancestors` CSP, but the CCX UI pages are served without one, so the header does apply to them.
 
-Remove the header in your `ccxdeps` values (`null` deletes the key from the chart's defaults; the other default headers stay in place):
+Remove the header in your `ccxdeps` values (`null` overrides the chart's default so the header is no longer sent; the other default headers stay in place):
 
 ```yaml
 ingress-nginx:
@@ -160,7 +160,20 @@ ingress-nginx:
       X-Frame-Options: null
 ```
 
-Apply with `helm upgrade` and note that ingress-nginx may need a restart to pick up the header change. If you expose CCX through your own ingress or proxy instead, check it for the same header.
+Apply the change and restart the ingress-nginx controller — it renders these headers into the nginx configuration at startup and does not watch this ConfigMap for changes:
+
+```sh
+helm upgrade --install ccxdeps s9s/ccxdeps --debug --wait -n ccx -f ccxdeps-values.yaml
+kubectl -n ccx rollout restart daemonset ccxdeps-ingress-nginx-controller
+```
+
+Verify that the header is gone (no output means it is):
+
+```sh
+curl -sk -D - -o /dev/null https://ccx.example.com/ | grep -i x-frame
+```
+
+If you expose CCX through your own ingress or proxy instead, check it for the same header.
 
 ### 3. Make the session cookie work inside the iframe
 
