@@ -108,15 +108,15 @@ Each component uses its own separate Secret and credentials — they are not sha
 
 Requires `htpasswd` (part of `apache2-utils` on Debian/Ubuntu, or `httpd` on macOS via Homebrew).
 
-Run the following commands to create the password and secrets that will be used for authentication:
+Run the following commands to create the passwords and secrets that will be used for authentication:
 
-```
-htpasswd -c auth <username>
-kubectl create secret generic alertmanager-basic-auth --from-file=auth -n monitoring
-kubectl create secret generic vmalert-basic-auth --from-file=auth -n monitoring
-```
+    htpasswd -c -B auth-alertmanager <username>
+    kubectl create secret generic alertmanager-basic-auth --from-file=auth=auth-alertmanager -n monitoring
 
-Use a different `auth` file per component if you want independent credentials for each. Verify both secrets exist:
+    htpasswd -c -B auth-vmalert <username>
+    kubectl create secret generic vmalert-basic-auth --from-file=auth=auth-vmalert -n monitoring
+
+This creates independent credentials per component. If you prefer shared credentials, reuse the same htpasswd file for both secrets.
 
 ```
 kubectl get secret -n monitoring | grep basic-auth
