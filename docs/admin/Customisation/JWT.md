@@ -83,7 +83,7 @@ There are four endpoints for handling JWTs:
 
 - **Description**: Creates a session for the provided user. The user must exist in the CCX database.
 - **Response**: Returns `303 See other` on success. Redirects the user to the URL provided in the `LOGIN_REDIRECT_URL` environment variable in `ccx-auth-service`.
-- If you call this endpoint from inside an `<iframe>`, see [Embedding CCX in an iframe](#embedding-ccx-in-an-iframe) — additional configuration is required for the session cookie and CSP.
+- If you call this endpoint from inside an `<iframe>`, see [Embedding CCX in an iframe](#embedding-ccx-in-an-iframe) — additional configuration is required for the CSP, the `X-Frame-Options` header and the session cookie.
 
 **Query Parameters:**
 
@@ -173,7 +173,12 @@ Verify that the header is gone (no output means it is):
 curl -sk -D - -o /dev/null https://ccx.example.com/ | grep -i x-frame
 ```
 
-If you expose CCX through your own ingress or proxy instead, check it for the same header.
+Two more things to check:
+
+- If your values file already sets `X-Frame-Options` explicitly (the [Production OpenShift guide](../Installation/Production-Openshift-installation.md) uses `DENY`, and older releases required `SAMEORIGIN` — see the 1.57 changelog), replace that value with `null` — deleting the line alone would fall back to the chart's `SAMEORIGIN` default. Removing the header does not break the CCX UI's own same-origin frames (such as cmon-ssh): no header means no restriction.
+- If you expose CCX through your own ingress or proxy instead of `ccxdeps`, check it for the same header.
+
+Note that removing the header disables clickjacking protection for responses that carry no `frame-ancestors` CSP — like `crossOrigins` and `SESSION_COOKIE_SAMESITE`, do this only on deployments that actually need embedding.
 
 ### 3. Make the session cookie work inside the iframe
 
@@ -192,6 +197,10 @@ The `ccx-session` cookie is set with `Secure; HttpOnly`. What happens next depen
   | Environment Variable        | Description                                                                                                    |
   | --------------------------- | -------------------------------------------------------------------------------------------------------------- |
   | **SESSION_COOKIE_SAMESITE** | `SameSite` attribute for session cookies: `none`, `lax` or `strict`. Unset (default) keeps the browser default. |
+
+  :::warning Development and testing only
+  Use `SESSION_COOKIE_SAMESITE: 'none'` only for development and testing (e.g. a portal on localhost embedding a shared CCX instance) — never in production. Besides the caveats below, cross-site embedding stays broken in Safari and in Chrome with third-party cookies disabled, no matter the configuration. For production embedding, use the same-site setup above: serve CCX on a subdomain of the portal's registrable domain, where the session cookie works in every browser with no override. The `crossOrigins` and `X-Frame-Options` steps still apply there — framing is checked per origin, and a subdomain is a different origin.
+  :::
 
   Caveats of `SameSite=None`:
 
