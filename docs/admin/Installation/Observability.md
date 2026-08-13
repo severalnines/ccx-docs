@@ -110,11 +110,13 @@ Requires `htpasswd` (part of `apache2-utils` on Debian/Ubuntu, or `httpd` on mac
 
 Run the following commands to create the passwords and secrets that will be used for authentication:
 
-    htpasswd -c -B auth-alertmanager <username>
-    kubectl create secret generic alertmanager-basic-auth --from-file=auth=auth-alertmanager -n monitoring
+```bash
+htpasswd -c -B auth-alertmanager <username>
+kubectl create secret generic alertmanager-basic-auth --from-file=auth=auth-alertmanager -n monitoring
 
-    htpasswd -c -B auth-vmalert <username>
-    kubectl create secret generic vmalert-basic-auth --from-file=auth=auth-vmalert -n monitoring
+htpasswd -c -B auth-vmalert <username>
+kubectl create secret generic vmalert-basic-auth --from-file=auth=auth-vmalert -n monitoring
+```
 
 This creates independent credentials per component. If you prefer shared credentials, reuse the same htpasswd file for both secrets.
 
@@ -184,7 +186,7 @@ victoria-metrics-alert:
 
 Confirm the annotations and args rendered correctly:
 
-```
+```bash
 helm template <release> s9s/ccx-monitoring --values YOUR_VALUES.yaml | grep -B5 -A15 "kind: Ingress"
 helm template <release> s9s/ccx-monitoring --values YOUR_VALUES.yaml | grep "web.external-url|external.url"
 ```
@@ -228,7 +230,7 @@ annotations:
 
 ### Verifying it's working
 
-```
+```bash
 helm template <release> s9s/ccx-monitoring --values YOUR_VALUES.yaml | grep "external.label"
 ```
 
@@ -253,7 +255,7 @@ There's no substitute for watching real alert volume after a change — these ar
 
 ### Verifying it's working
 
-```
+```bash
 helm template <release> s9s/ccx-monitoring --values YOUR_VALUES.yaml --show-only charts/victoria-metrics-alert/templates/server-alerts-configmap.yaml | grep -B1 "record: anomaly:adaptive:stddev_multiplier"
 ```
 
