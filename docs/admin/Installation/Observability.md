@@ -233,3 +233,28 @@ helm template <release> s9s/ccx-monitoring --values YOUR_VALUES.yaml | grep "ext
 ```
 
 Confirm the value matches your intended Grafana hostname, then trigger a real alert with a `dashboard_url` annotation and click the Dashboard button in Slack to confirm it resolves to the correct, fully-formed URL.
+
+## Tuning Anomaly Detection Alert Sensitivity
+
+The `AnomalyDetected` alert (`AnomalyAdaptiveAlerts` rule group) fires when a tagged metric moves outside a rolling mean/standard-deviation band computed from its own recent history. It's based on the ["adaptive" strategy](https://github.com/grafana/promql-anomaly-detection) — currently only node/pod CPU and memory usage are tagged for this (see the `AnomalyTaggingNodeExporter` rule group).
+
+The band's width — and therefore how often the alert fires — is controlled by a few constants defined as their own recording rules, rather than as literal numbers inline in the band calculation. To change one, edit its `expr` value directly in `values.yaml` under `victoria-metrics-alert.server.config.alerts.groups` (group `AnomalyAdaptiveShortTerm`):
+
+| Recording rule | Default | Effect |
+|---|---|---|
+| `anomaly:adaptive:stddev_multiplier` | `3` | Main sensitivity knob. The band is `average ± (stddev × this value)`. Higher = wider band = fewer, larger-deviation-only alerts. Lower = narrower band = more alerts, including smaller deviations. |
+| `anomaly:adaptive:margin_multiplier` | `0.5` | Floor band width (`± average × this value`), used when a metric's recent variance is too low/filtered out to produce a useful stddev-based band (e.g. a mostly-flat metric). Prevents the band from collapsing to near-zero width on quiet series. |
+| `anomaly:adaptive:threshold_by_covar` | `0.5` | Coefficient-of-variation cutoff used when smoothing the standard deviation over time: a given 1h window's stddev is only folded into the 26h smoothed average if it exceeds `average × this value`. Filters out abnormally quiet windows so they don't artificially tighten the long-term band. |
+| `anomaly:adaptive:sparse_threshold` | `5/60` | Only applies to `anomaly_type="requests"` metrics. Series whose average is below this rate are treated as too sparse/low-traffic to reliably anomaly-detect, and are excluded. |
+
+`stddev_multiplier` is the one to reach for first if the alert is firing too often (increase it) or missing real issues (decrease it). As a mental model: assuming roughly normal metric behavior, a multiplier of `2` lets ~4.5% of evaluations fall outside the band by chance alone, while `3` (the standard ["3-sigma rule"](https://en.wikipedia.org/wiki/68%E2%80%9395%E2%80%9399.7_rule)) cuts that to ~0.27% — since this evaluates continuously across every tagged series, even a small per-series false-positive rate compounds into frequent noise fleet-wide.
+
+There's no substitute for watching real alert volume after a change — these are statistical approximations, not derived from this deployment's actual historical firing rate.
+
+### Verifying it's working
+
+```
+helm template <release> s9s/ccx-monitoring --values YOUR_VALUES.yaml --show-only charts/victoria-metrics-alert/templates/server-alerts-configmap.yaml | grep -B1 "record: anomaly:adaptive:stddev_multiplier"
+```
+
+After deploying a change, monitor the alert channel for a few days (or check the `anomalies-adaptive` Grafana dashboard, which plots the actual band against real values) to judge whether it needs further adjustment.
