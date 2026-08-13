@@ -74,7 +74,7 @@ postgresql:
 Once configured and `ccxdeps-values.yaml` is ready, then run the command:
 
 ```bash
-helm upgrade --install ccxdeps ccxdeps/ccxdeps --debug -f ccxdeps-values.yaml
+helm upgrade --install ccxdeps s9s/ccxdeps --debug -f ccxdeps-values.yaml
 ```
 
 ### Restoring a backup for recovery
@@ -104,7 +104,7 @@ postgresql:
 Once configured, upgrade it to use values:
 
 ```bash
-helm upgrade --install ccxdeps ccxdeps/ccxdeps --debug -f ccxdeps-values.yaml
+helm upgrade --install ccxdeps s9s/ccxdeps --debug -f ccxdeps-values.yaml
 ```
 
 ### Postgres cluster options
