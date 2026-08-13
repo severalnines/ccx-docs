@@ -188,3 +188,48 @@ Confirm the annotations and args rendered correctly:
 helm template <release> s9s/ccx-monitoring --values YOUR_VALUES.yaml | grep -B5 -A15 "kind: Ingress"
 helm template <release> s9s/ccx-monitoring --values YOUR_VALUES.yaml | grep "web.external-url|external.url"
 ```
+
+## Configuring the Grafana URL for Alert Dashboard Links
+
+Alert rule annotations can include a `dashboard_url` pointing to a relevant Grafana dashboard, pre-filtered to the specific instance/pod/node that triggered the alert (shown as the "Dashboard" button on Slack notifications). Rather than hardcoding your Grafana hostname into every individual alert rule, it is set **once** as a vmalert external label and referenced from rule annotations via `$externalLabels`.
+
+This means switching to a different Grafana instance (e.g. moving from a test environment to production) only requires changing **one value**, not editing every alert rule that has a `dashboard_url`.
+
+### Setting the Grafana URL
+
+Add `external.label` to vmalert's `extraArgs`, alongside the external URL flag already required for the Query button (see Ingress Authentication section above):
+
+```yaml
+victoria-metrics-alert:
+  server:
+    extraArgs:
+      external.url: "https://<your-vmalert-hostname>"
+      external.label: "grafana_url=https://<your-grafana-hostname>"
+```
+
+`external.label` takes a `key=value` pair. The key (`grafana_url` in this example) can be any name you choose, as long as it matches what's referenced in your alert rule annotations (see below). Do not include a trailing slash on the URL value.
+
+### Referencing it in alert rules
+
+In any alert rule's `dashboard_url` annotation, reference the label as `{{ $externalLabels.grafana_url }}` (or whatever key name you chose above), followed by the dashboard's path and query parameters:
+
+```yaml
+annotations:
+  dashboard_url: "{{ $externalLabels.grafana_url }}/d/<dashboard-uid>/<dashboard-slug>?orgId=1&var-instance={{ $labels.instance }}"
+```
+
+`{{ $externalLabels.grafana_url }}` resolves to whatever was set via `external.label` above. `{{ $labels.instance }}` (or any other `$labels.*` reference) still comes from the individual alert's own labels, as usual — only the Grafana base URL itself is centralized.
+
+### Important notes
+
+- **`$externalLabels` vs `$labels`** — these are not interchangeable. `$externalLabels` refers to labels set globally on the vmalert instance itself (via `external.label`), while `$labels` refers to labels on the specific alert/metric that fired.
+- **Every `dashboard_url` in this chart's alert rules must use `{{ $externalLabels.grafana_url }}`** rather than a hardcoded Grafana hostname, so that changing environments only requires updating the one `external.label` value. If a hardcoded hostname is found in any rule's `dashboard_url`, it should be migrated to this pattern.
+- If `external.label` is not set at all, `{{ $externalLabels.grafana_url }}` will render as an empty string, and any `dashboard_url` referencing it will produce a broken/incomplete link (missing scheme and host). The Dashboard button will still render in Slack, but will not lead anywhere valid.
+
+### Verifying it's working
+
+```
+helm template <release> s9s/ccx-monitoring --values YOUR_VALUES.yaml | grep "external.label"
+```
+
+Confirm the value matches your intended Grafana hostname, then trigger a real alert with a `dashboard_url` annotation and click the Dashboard button in Slack to confirm it resolves to the correct, fully-formed URL.
