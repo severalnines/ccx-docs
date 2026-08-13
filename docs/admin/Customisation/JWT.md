@@ -83,7 +83,7 @@ There are four endpoints for handling JWTs:
 
 - **Description**: Creates a session for the provided user. The user must exist in the CCX database.
 - **Response**: Returns `303 See other` on success. Redirects the user to the URL provided in the `LOGIN_REDIRECT_URL` environment variable in `ccx-auth-service`.
-- If you call this endpoint from inside an `<iframe>`, see [Embedding CCX in an iframe](#embedding-ccx-in-an-iframe) — additional configuration is required for the session cookie and CSP.
+- If you call this endpoint from inside an `<iframe>`, see [Embedding CCX in an iframe](#embedding-ccx-in-an-iframe) — additional configuration is required for the CSP, the `X-Frame-Options` header and the session cookie.
 
 **Query Parameters:**
 
@@ -132,7 +132,7 @@ There are four endpoints for handling JWTs:
 
 ## Embedding CCX in an iframe
 
-A common integration pattern is to embed the CCX UI in an `<iframe>` on the Service Portal and log the user in by pointing the iframe at `GET /api/auth/jwt-login?issuer=...&jwt=...`. For this to work, **two** independent browser mechanisms must allow it: the Content-Security-Policy of CCX must permit your portal to frame it, and the CCX session cookie must survive a cross-site context.
+A common integration pattern is to embed the CCX UI in an `<iframe>` on the Service Portal and log the user in by pointing the iframe at `GET /api/auth/jwt-login?issuer=...&jwt=...`. For this to work, **three** independent browser mechanisms must allow it: the Content-Security-Policy of CCX must permit your portal to frame it, no `X-Frame-Options` header may forbid framing, and the CCX session cookie must survive a cross-site context.
 
 ### 1. Allow your portal to frame CCX (`crossOrigins`)
 
@@ -147,13 +147,46 @@ crossOrigins:
 
 Entries are full origins (scheme + host, plus the port when it is non-default, e.g. `https://portal.example.com:8443`), comma-joined into the `CROSS_ORIGINS` environment variable.
 
-### 2. Make the session cookie work inside the iframe
+### 2. Remove the `X-Frame-Options` header from the ingress
+
+The `ccxdeps` chart configures ingress-nginx to add `X-Frame-Options: SAMEORIGIN` to every response by default. This is a legacy predecessor of `frame-ancestors` with no way to allow a specific third-party origin, so it blocks the iframe even when `crossOrigins` is configured correctly (the browser console shows "denied by X-Frame-Options"). Browsers ignore `X-Frame-Options` when a response carries a `frame-ancestors` CSP, but the CCX UI pages are served without one, so the header does apply to them.
+
+Remove the header in your `ccxdeps` values (`null` overrides the chart's default so the header is no longer sent; the other default headers stay in place):
+
+```yaml
+ingress-nginx:
+  controller:
+    addHeaders:
+      X-Frame-Options: null
+```
+
+Apply the change and restart the ingress-nginx controller — it renders these headers into the nginx configuration at startup and does not watch this ConfigMap for changes:
+
+```sh
+helm upgrade --install ccxdeps s9s/ccxdeps --debug --wait -n ccx -f ccxdeps-values.yaml
+kubectl -n ccx rollout restart daemonset ccxdeps-ingress-nginx-controller
+```
+
+Verify that the header is gone (no output means it is):
+
+```sh
+curl -sk -D - -o /dev/null https://ccx.example.com/ | grep -i x-frame
+```
+
+Two more things to check:
+
+- If your values file already sets `X-Frame-Options` explicitly (the [Production OpenShift guide](../Installation/Production-Openshift-installation.md) uses `DENY`, and older releases required `SAMEORIGIN` — see the 1.57 changelog), replace that value with `null` — deleting the line alone would fall back to the chart's `SAMEORIGIN` default. Removing the header does not break the CCX UI's own same-origin frames (such as cmon-ssh): no header means no restriction.
+- If you expose CCX through your own ingress or proxy instead of `ccxdeps`, check it for the same header.
+
+Note that removing the header disables clickjacking protection for responses that carry no `frame-ancestors` CSP — like `crossOrigins` and `SESSION_COOKIE_SAMESITE`, do this only on deployments that actually need embedding.
+
+### 3. Make the session cookie work inside the iframe
 
 The `ccx-session` cookie is set with `Secure; HttpOnly`. What happens next depends on whether the embedding is **same-site** or **cross-site**:
 
-- **Same-site (recommended):** serve CCX on a subdomain of the same registrable domain as the portal — e.g. portal on `portal.example.com` and CCX on `ccx.example.com`. Browsers treat the iframe as same-site: the session cookie works with no extra configuration, in **all** browsers, and third-party-cookie blocking does not apply. This only requires a DNS record and a TLS certificate on the shared domain; both sites must be HTTPS.
+- **Same-site (recommended):** serve CCX on a subdomain of the same registrable domain as the portal — e.g. portal on `portal.example.com` and CCX on `ccx.example.com`. Browsers treat the iframe as same-site: the session cookie works with no extra configuration, in **all** browsers, and third-party-cookie blocking does not apply. This only requires a DNS record and a TLS certificate on the shared domain; both sites must be HTTPS. The same applies to two ports on the same host (e.g. `localhost:4200` and `localhost:8080` during development): ports are ignored in the site comparison, so the cookie works without extra configuration — but `crossOrigins` and `X-Frame-Options` (steps 1 and 2) match the full origin *including* the port, so they still apply. (`localhost` is exempt from the HTTPS requirement: browsers treat it as trustworthy, so the `Secure` cookie works over plain HTTP there.)
 
-- **Cross-site:** if the portal and CCX are on different registrable domains, browsers default the cookie to `SameSite=Lax` and **reject it inside the iframe** (the DevTools warning is "the Set-Cookie header didn't specify a SameSite attribute … was blocked"). Starting with CCX 1.58 you can opt in to cross-site cookies:
+- **Cross-site:** if the portal and CCX are on different registrable domains, Chromium-based browsers (Chrome, Edge) default the cookie to `SameSite=Lax` and **reject it inside the iframe** (the DevTools warning is "the Set-Cookie header didn't specify a SameSite attribute … was blocked"). Starting with CCX 1.58 you can opt in to cross-site cookies:
 
   ```yaml
   ccx:
@@ -165,14 +198,19 @@ The `ccx-session` cookie is set with `Secure; HttpOnly`. What happens next depen
   | --------------------------- | -------------------------------------------------------------------------------------------------------------- |
   | **SESSION_COOKIE_SAMESITE** | `SameSite` attribute for session cookies: `none`, `lax` or `strict`. Unset (default) keeps the browser default. |
 
+  :::warning Development and testing only
+  Use `SESSION_COOKIE_SAMESITE: 'none'` only for development and testing (e.g. a portal on localhost embedding a shared CCX instance) — never in production. Besides the caveats below, cross-site embedding stays broken in Safari and in Chrome with third-party cookies disabled, no matter the configuration. For production embedding, use the same-site setup above: serve CCX on a subdomain of the portal's registrable domain, where the session cookie works in every browser with no override. The `crossOrigins` and `X-Frame-Options` steps still apply there — framing is checked per origin, and a subdomain is a different origin.
+  :::
+
   Caveats of `SameSite=None`:
 
-  - **Safari still blocks it.** Safari's Intelligent Tracking Prevention rejects all third-party cookies regardless of `SameSite`, and Chrome does the same when the user has third-party cookies disabled. Cross-site embedding therefore cannot be made to work reliably in every browser — if you need that, use the same-site setup above.
+  - **Browsers differ.** Firefox does not apply Lax-by-default; it partitions third-party cookies instead, so embedding may appear to work there even without the setting — do not use Firefox alone to verify the configuration. Safari's Intelligent Tracking Prevention rejects all third-party cookies regardless of `SameSite`, and Chrome does the same when the user has third-party cookies disabled. Cross-site embedding therefore cannot be made to work reliably in every browser — if you need that, use the same-site setup above.
   - **CSRF exposure.** `SameSite=None` makes the browser attach the session cookie to all cross-site requests, removing the implicit CSRF protection of the `Lax` default. Enable it only on deployments that actually need embedding.
 
 ### Troubleshooting
 
 - Blank iframe, console shows a `frame-ancestors` CSP violation → the portal origin is missing from `crossOrigins`.
+- Blank iframe, console says loading was denied by `X-Frame-Options: SAMEORIGIN` (wording varies by browser) → the ingress is adding the header; see step 2 above.
 - The `jwt-login` request returns 303 but no session appears → check the `Set-Cookie` line of the response in DevTools; a `SameSite` warning means you are in the cross-site case above.
 - Works in Chrome but not Safari → expected for cross-site embedding; switch to the same-site (subdomain) setup.
 
