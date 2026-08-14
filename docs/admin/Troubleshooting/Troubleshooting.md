@@ -590,7 +590,7 @@ Each matching line names the killed process and its PID, plus its memory usage a
 
 ## Host Unusual Disk I/O Rate
 
-Fires when a host's aggregate disk throughput exceeds 50 MB/s sustained for 5 minutes, in either direction (alerts: `HostUnusualDiskReadRate` for reads, `HostUnusualDiskWriteRate` for writes). This can be entirely legitimate (a backup, a large query, a bulk import/export) or a symptom of a problem (swap thrashing amplifying disk I/O — see "Host Memory Under Pressure" above — or a missing index causing excessive table scans).
+Fires when a host's aggregate disk throughput exceeds 50 MB/s sustained for 10 minutes, in either direction (alerts: `HostUnusualDiskReadRate` for reads, `HostUnusualDiskWriteRate` for writes). This can be entirely legitimate (a backup, a large query, a bulk import/export) or a symptom of a problem (swap thrashing amplifying disk I/O — see "Host Memory Under Pressure" above — or a missing index causing excessive table scans).
 
 ### Diagnose the issue
 
