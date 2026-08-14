@@ -37,7 +37,7 @@ stringData:
     aws_secret_access_key = 
 ```
 
-Originally the `ccxdeps` helm chart was installed in tutorial using the default values. Create a new file called `ccxdeps.yaml`. You can use the values below and modify them per your needs.
+Originally the `ccxdeps` helm chart was installed in tutorial using the default values. Create a new file called `ccxdeps-values.yaml`. You can use the values below and modify them per your needs.
 
 ```
 keycloak:
@@ -178,7 +178,7 @@ Please take a look at all [values](https://github.com/severalnines/helm-charts/b
 
 To upgrade the chart, use the following command:
 ```
-helm upgrade --install ccxdeps s9s/ccxdeps --debug --wait -n ccx -f ccxdeps.yaml
+helm upgrade --install ccxdeps s9s/ccxdeps --debug --wait -n ccx -f ccxdeps-values.yaml
 ```
 
 :::note

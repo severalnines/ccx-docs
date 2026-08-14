@@ -274,7 +274,7 @@ First, we need to install the CCX dependencies (`ccxdeps`):
 
 ### Installing the Dependencies
 
-Create a new file called `ccxdeps.yaml`. You can use the values below and modify them per your needs.
+Create a new file called `ccxdeps-values.yaml`. You can use the values below and modify them per your needs.
 ```
 mysql-innodbcluster:
   serverInstances: 3 # This is something you can chose, but it can only be 1,3,5,7 or 9.
@@ -313,7 +313,7 @@ installOperators: true
 Please take a look at all [values](https://github.com/severalnines/helm-charts/blob/main/charts/ccxdeps/values.yaml), as you might be interested in some of the additional flags.
 
 ```
-helm install ccxdeps s9s/ccxdeps --debug --wait -n ccx -f ccxdeps.yaml
+helm install ccxdeps s9s/ccxdeps --debug --wait -n ccx -f ccxdeps-values.yaml
 ```
 
 Check that the pods are `RUNNING`:

@@ -102,7 +102,7 @@ It is recommended to have backup enabled so that it can be restored on cluster f
 Once the `ccxdeps-values.yaml` is ready, then run:
 
 ```bash
-helm install ccxdeps ccxdeps/ccxdeps --debug -f ccxdeps-values.yaml
+helm install ccxdeps s9s/ccxdeps --debug -f ccxdeps-values.yaml
 ```
 
 You should see running Pods such as one MySQL router instance, MySQL Operator and MySQL servers.
