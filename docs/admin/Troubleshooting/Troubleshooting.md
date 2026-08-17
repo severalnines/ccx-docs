@@ -797,6 +797,108 @@ Look at each pod's `Events` section and last termination reason — the same cat
 - If it's a bad rollout, roll back to the previous working revision (`kubectl rollout undo`).
 - Otherwise, follow whichever specific cause the pod events/logs point to — this alert itself is a symptom, not a diagnosis; the fix lives in whichever underlying issue (crash loop, resourcing, image) is actually responsible.
 
+## Redis Down
+
+Fires when `redis_up` is 0 for 5 minutes (alert: `RedisDown`, severity critical, metric from the `redis_exporter` sidecar — used for both Redis and Valkey instances). This means the exporter can reach the host but the Redis/Valkey process itself is not responding, which is more severe than an exporter/scrape failure.
+
+### Diagnose the issue
+
+```bash
+kubectl exec -it <valkey-pod-name> -- redis-cli ping
+```
+If this doesn't return `PONG`, the process itself is down or unresponsive. Check the container's own logs for the actual failure:
+```bash
+kubectl logs <valkey-pod-name>
+```
+
+### Common causes
+
+- The process crashed or was OOM-killed — check for a recent restart (`kubectl get pod <valkey-pod-name>`) and correlate with "Host Out Of Memory"/"Kubernetes Container OOM Killer" above.
+- A persistence failure (RDB/AOF) caused the process to crash and fail to restart cleanly.
+- The underlying host is down or unreachable — check the Host sections above.
+
+### Resolving the issue
+
+- If the container was OOM-killed, follow the resolution steps in "Kubernetes Container OOM Killer" above rather than just restarting — an unresolved memory issue will recur.
+- If it's a clean crash with no resource pressure, restart the pod and inspect logs for the specific persistence/config error before it recurs.
+
+## Endpoint Down
+
+Fires when `probe_success{job="blackbox-exporter"}` is 0 for 10 minutes for a monitored external URL (alert: `EndpointDown`, severity critical). This means the blackbox exporter's HTTP probe against that URL has been failing continuously — distinct from a single flaky check.
+
+### Diagnose the issue
+
+Check the probe result and failure reason directly against the same URL the alert fired for:
+```bash
+curl -v <url>
+```
+Also check the blackbox exporter's own logs and config, since a probe can fail because of the exporter's own misconfiguration rather than the target itself:
+```bash
+kubectl logs -n victoriametrics deployment/ccx-monitoring-prometheus-blackbox-exporter
+```
+
+### Common causes
+
+- The target service is genuinely down or returning a non-2xx status.
+- DNS resolution for the URL is failing (see "DNS Records Are Not Updated/Synced" above if this is a CCX-managed hostname).
+- A TLS/certificate problem is causing the probe to fail before it can even check the HTTP response — see "SSL Cert Expiring Soon" below.
+- A network policy or firewall change is blocking the blackbox exporter from reaching the target.
+
+### Resolving the issue
+
+- Confirm the target service itself is healthy first — this alert is a symptom of whatever's actually wrong with the endpoint, not a standalone issue.
+- If DNS is the cause, follow "DNS Records Are Not Updated/Synced" above.
+- If it's a cert issue, follow "SSL Cert Expiring Soon" below.
+
+## SSL Cert Expiring Soon
+
+Fires when the earliest-expiring certificate in a monitored URL's chain expires in less than 10 days (alert: `SSLCertExpiringSoon`, severity critical, metric: `probe_ssl_earliest_cert_expiry`).
+
+### Diagnose the issue
+
+Check the certificate's actual expiry against the live endpoint:
+```bash
+echo | openssl s_client -connect <host>:443 -servername <host> 2>/dev/null | openssl x509 -noout -dates
+```
+
+### Common causes
+
+- `cert-manager` failed to renew the certificate (ACME challenge failure, rate limiting, or a misconfigured `ClusterIssuer`).
+- The certificate was issued/installed manually and isn't on any auto-renewal path.
+
+### Resolving the issue
+
+- If the certificate is `cert-manager`-issued, check its renewal status and events:
+  ```bash
+  kubectl get certificate -n <namespace>
+  kubectl describe certificate <name> -n <namespace>
+  ```
+  and check `cert-manager`'s own logs for ACME errors if the renewal is stuck.
+- If it's an externally/manually-managed certificate, renew and redeploy it before it expires.
+
+## Datastore DNS Unreachable
+
+Fires when `probe_success{job=~"datastore-dns-check-.*"}` is 0 for 5 minutes for a specific customer datastore (alert: `DatastoreDnsUnreachable`, severity critical). This means the datastore's main DNS record is not resolving or reachable on that environment — the alert's `DatastoreName`, `ClusterName`, `ClusterID`, and `environment` labels identify exactly which datastore.
+
+### Diagnose the issue
+
+```bash
+dig +short <datastore-dns-record>
+```
+Compare the result against the expected target — if it doesn't resolve at all, or resolves to something unexpected, check whether external-dns has synced the record correctly per "DNS Records Are Not Updated/Synced" above.
+
+### Common causes
+
+- external-dns failed to sync or update the record — see "DNS Records Are Not Updated/Synced" above.
+- The underlying host is down or unreachable — see the Host sections above.
+- A recent failover moved the datastore's primary/service endpoint faster than DNS propagated the change.
+
+### Resolving the issue
+
+- Check "DNS Records Are Not Updated/Synced" above first — this is the most common cause.
+- If a failover just occurred, confirm the new primary is healthy and give DNS propagation a few minutes before treating this as a standalone incident.
+- If the host itself is down, follow the relevant Host section above rather than treating this as a DNS-specific problem.
+
 ## Metrics Stack Self-Monitoring
 
 These three alerts watch the health of the monitoring stack itself, in increasing order of severity/specificity:
