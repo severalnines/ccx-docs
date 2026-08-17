@@ -156,7 +156,7 @@ helm repo add jetstack https://charts.jetstack.io --force-update
 helm install cert-manager --namespace cert-manager --version xxx jetstack/cert-manager --set crds.enabled=true #switch xxx for the version you wish to install, making sure it's not lower than 1.18.0
 
 ```
-:::Note
+:::note
 When setting up production version of cert-manager, there are a few configuration parameter that needs to be addressed:
 `replicaCount` - by default it's set to 1. To make sure it's production ready, make sure it has 2 or 3 replicas to provide high availability.
 `podDisruptionBudget.enabled` - by default this is set to `false`. Make sure to change it to `true` if you changed `replicaCount` to be different than 1. 
