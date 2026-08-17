@@ -127,6 +127,14 @@ ccx:
     REQUIRE_SUBSCRIPTION: "false"
 ```
 
+Apply that with `-f <your-values>.yaml`, or pass it inline:
+
+```
+helm upgrade --install ccx s9s/ccx --debug --wait \
+  --set ccx.env.REQUIRE_EMAIL_VERIFICATION=false \
+  --set ccx.env.REQUIRE_SUBSCRIPTION=false
+```
+
 See [Configuring the Helm install](Configuring-Helm-Install.md#common-configs)
 for the full list of these settings.
 
@@ -134,10 +142,11 @@ for the full list of these settings.
 
 To be able to deploy datastores to a cloud provider (AWS by default) you need to provide cloud credentials.
 Cloud credentials should be created as kubernetes secrets in format specified in - https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template.yaml
+(or [secrets-template-openstack.yaml](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template-openstack.yaml) for OpenStack).
 
 At least one of these secrets must exist before the first `helm install ccx` —
 see [Create the cloud credential secret](#create-the-cloud-credential-secret) for
-the AWS one-liner and the error you get without it.
+the per-provider steps and the error you get without them.
 
 To add credentials for a further provider, create the secret and then list every
 secret name in `ccx.cloudSecrets`:
