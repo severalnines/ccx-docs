@@ -38,6 +38,16 @@ each other directly on the guest network. Using the public address for both role
 breaks replication, because CloudStack static NAT does not route back into the
 guest network it came from.
 
+The symptom when that is wrong is a replica that cannot reach its primary — on
+postgres it looks like this:
+
+```
+pg_basebackup: error: connection to server at "<public-ip>", port 5432 failed: Connection timed out
+```
+
+A node timing out against another node's **public** address is the signature of
+this misconfiguration. Node-to-node traffic should be using the private address.
+
 ### `USE_PUBLIC_IPS`
 
 This switch says "my control plane and my end users address nodes publicly". It
