@@ -22,3 +22,6 @@ package-lock.json
 mkdocs-nav.yml
 sidebars.json
 .idea
+
+# Claude Code local settings (machine-specific, not shared)
+.claude/settings.local.json
