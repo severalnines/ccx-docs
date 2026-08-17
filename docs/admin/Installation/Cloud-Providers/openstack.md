@@ -167,7 +167,7 @@ openstack_vendors:
            from_port: 22
            ip_protocol: tcp
            to_port: 22
-         - cidr: 37.30.16.41/32
+         - cidr: x.x.x.x/32
            from_port: 1000
            ip_protocol: tcp
            to_port: 65535

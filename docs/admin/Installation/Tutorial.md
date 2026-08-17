@@ -46,7 +46,7 @@ should look like the following:
 
 ```
 NAME                                 TYPE           CLUSTER-IP      EXTERNAL-IP                                 PORT(S)                      AGE
-ingress-nginx-controller             LoadBalancer   10.108.22.0     146.190.177.145,2a03:b0c0:3:f0::9cb5:3000   80:31096/TCP,443:31148/TCP   5h40m
+ingress-nginx-controller             LoadBalancer   10.108.22.0     203.0.113.10,2001:db8:3:f0::9cb5:3000       80:31096/TCP,443:31148/TCP   5h40m
 ingress-nginx-controller-admission   ClusterIP      10.108.28.137   <none>                                      443/TCP                      5h40m
 ingress-nginx-controller-metrics     ClusterIP      10.108.13.85    <none>                                      9090/TCP                     5h40m
 ```
@@ -71,7 +71,7 @@ cert-manager-webhook-5f454c484c-bx8gx      1/1     Running   0          11d
 ### Setup DNS
 Ensure you have a DNS A record setup, pointing the EXTERNAL_IP with the domain you wish to install CCX on, e.g `ccx.example.com`: 
 
-`A 146.190.177.145  ccx.example.com`
+`A 203.0.113.10  ccx.example.com`
 
 ## Preparations
 ### Add Severalnines Helm Chart repository

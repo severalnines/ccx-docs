@@ -88,7 +88,7 @@ kubectl get svc -n ingress-nginx
 
 ```
 NAME                       TYPE           CLUSTER-IP     EXTERNAL-IP       PORT(S)
-ingress-nginx-controller   LoadBalancer   10.108.22.0    146.190.177.145   80:31096/TCP,443:31148/TCP
+ingress-nginx-controller   LoadBalancer   10.108.22.0    203.0.113.10      80:31096/TCP,443:31148/TCP
 ```
 
 :::important
@@ -169,8 +169,8 @@ The `READY` column must show `True`.
 Create two DNS `A` records pointing to your ingress `EXTERNAL-IP`:
 
 ```
-A  146.190.177.145  ccx.example.com
-A  146.190.177.145  cc.example.com
+A  203.0.113.10  ccx.example.com
+A  203.0.113.10  cc.example.com
 ```
 
 - `ccx.example.com` — end-user portal
