@@ -22,6 +22,40 @@ helm repo add s9s https://severalnines.github.io/helm-charts/
 helm repo update
 ```
 
+### Create the cloud credential secret
+
+This step must come **before** installing the `ccx` chart.
+
+:::important
+`ccx.cloudSecrets` defaults to `[aws]`, and the chart refuses to render if a
+secret named in that list does not already exist in the release namespace:
+
+```
+Error: execution error at (ccx/templates/cmon/stateful-set.yaml:20:19):
+Missing secret defined in .Values.ccx.cloudSecrets - aws
+```
+
+Emptying the list is not a way around this — the chart then fails with
+`No secrets defined in .Values.ccx.cloudSecrets`. At least one cloud credential
+secret must exist before the first `helm install ccx`.
+:::
+
+To set up cloud credentials for AWS (the default provider), run the following
+one-liner:
+
+```
+# Create k8s secret from AWS credentials stored in ~/.aws/credentials
+kubectl create secret generic aws --from-literal=AWS_ACCESS_KEY_ID=$(awk 'tolower($0) ~ /aws_access_key_id/ {print $NF; exit}' ~/.aws/credentials) --from-literal=AWS_SECRET_ACCESS_KEY=$(awk 'tolower($0) ~ /aws_secret_access_key/ {print $NF; exit}' ~/.aws/credentials)
+```
+
+Create the secret in the same namespace you install the release into. If you
+install into a `ccx` namespace, add `-n ccx` to the command above.
+
+For any other cloud provider, create the secret for that provider and name it in
+`ccx.cloudSecrets` — see [Providing cloud credentials](#providing-cloud-credentials)
+below. On a CloudStack- or OpenStack-only install there is no reason to hold AWS
+credentials, but the default list still names `aws`, so you must override it.
+
 ### Installation
 
 ```
@@ -29,6 +63,12 @@ helm repo update
 helm install ccxdeps s9s/ccxdeps --debug --wait
 # Install CCX
 helm install ccx s9s/ccx --debug --wait
+```
+
+If your cloud credential secret is not named `aws`, name it explicitly:
+
+```
+helm install ccx s9s/ccx --debug --wait --set ccx.cloudSecrets[0]=<secret-name>
 ```
 
 If you do **NOT** have nginx ingress controller installed in your kubernetes cluster (very common in minikube or docker for desktop).You can install one that comes with `ccxdeps` chart like so:
@@ -49,18 +89,21 @@ Please note that this will install CCX on `ccx.localhost`.
 To be able to deploy datastores to a cloud provider (AWS by default) you need to provide cloud credentials.
 Cloud credentials should be created as kubernetes secrets in format specified in - https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template.yaml
 
-To setup cloud credentials for AWS (default provider) you can run the following one-liner:
+At least one of these secrets must exist before the first `helm install ccx` —
+see [Create the cloud credential secret](#create-the-cloud-credential-secret) for
+the AWS one-liner and the error you get without it.
+
+To add credentials for a further provider, create the secret and then list every
+secret name in `ccx.cloudSecrets`:
 
 ```
-# Create k8s secret from AWS credentials stored in ~/.aws/credentials
-kubectl create secret generic aws --from-literal=AWS_ACCESS_KEY_ID=$(awk 'tolower($0) ~ /aws_access_key_id/ {print $NF; exit}' ~/.aws/credentials) --from-literal=AWS_SECRET_ACCESS_KEY=$(awk 'tolower($0) ~ /aws_secret_access_key/ {print $NF; exit}' ~/.aws/credentials)
+helm upgrade --install ccx s9s/ccx --debug --wait \
+  --set ccx.cloudSecrets[0]=aws \
+  --set ccx.cloudSecrets[1]=mycloud
 ```
 
-Upgrade CCX to apply new config:
-
-```
-helm upgrade --install ccx s9s/ccx --debug --wait --set ccx.cloudSecrets[0]=aws
-```
+Every secret named in `ccx.cloudSecrets` must exist, so create each one before
+running the upgrade.
 
 
 #### Setting up public access - custom domain name
