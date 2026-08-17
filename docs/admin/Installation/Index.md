@@ -40,35 +40,54 @@ Emptying the list is not a way around this — the chart then fails with
 secret must exist before the first `helm install ccx`.
 :::
 
-To set up cloud credentials for AWS (the default provider), run the following
-one-liner:
+Every secret named in `ccx.cloudSecrets` must exist before you install, and the
+names must match. Create the secrets in the same namespace you install the
+release into — if you install into a `ccx` namespace, add `-n ccx` to the
+commands below. Follow the path for your provider:
+
+**AWS.** One secret, and it matches the chart default, so no override is needed:
 
 ```
 # Create k8s secret from AWS credentials stored in ~/.aws/credentials
 kubectl create secret generic aws --from-literal=AWS_ACCESS_KEY_ID=$(awk 'tolower($0) ~ /aws_access_key_id/ {print $NF; exit}' ~/.aws/credentials) --from-literal=AWS_SECRET_ACCESS_KEY=$(awk 'tolower($0) ~ /aws_secret_access_key/ {print $NF; exit}' ~/.aws/credentials)
 ```
 
-Create the secret in the same namespace you install the release into. If you
-install into a `ccx` namespace, add `-n ccx` to the command above.
+**OpenStack.** Two secrets are required — `openstack` for the cloud credentials
+and `openstack-s3` for backup storage. Both are multi-key; fill in and apply
+[secrets-template-openstack.yaml](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template-openstack.yaml),
+then name both in `ccx.cloudSecrets` at install time. The
+[OpenStack tutorial](Tutorial-openstack.md) walks through this end to end and is
+the recommended path for OpenStack.
 
-For any other cloud provider, create the secret for that provider and name it in
-`ccx.cloudSecrets` — see [Providing cloud credentials](#providing-cloud-credentials)
-below. On a CloudStack- or OpenStack-only install there is no reason to hold AWS
-credentials, but the default list still names `aws`, so you must override it.
+**CloudStack and other providers.** See
+[CCX Cloud Provider Configuration](Cloud-Providers/Cloud-Providers.md) for the
+secret each provider expects, and
+[secrets-template.yaml](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template.yaml)
+for the formats.
+
+On a non-AWS install there is no reason to hold AWS credentials, but the default
+list still names `aws` — so you must override `ccx.cloudSecrets`, as shown below.
 
 ### Installation
 
 ```
 # Install CCX dependencies
 helm install ccxdeps s9s/ccxdeps --debug --wait
-# Install CCX
+```
+
+Then install CCX, naming the secrets you created. For AWS the default already
+matches, so no override is needed:
+
+```
 helm install ccx s9s/ccx --debug --wait
 ```
 
-If your cloud credential secret is not named `aws`, name it explicitly:
+For any other provider, name every secret explicitly — for example OpenStack:
 
 ```
-helm install ccx s9s/ccx --debug --wait --set ccx.cloudSecrets[0]=<secret-name>
+helm install ccx s9s/ccx --debug --wait \
+  --set ccx.cloudSecrets[0]=openstack \
+  --set ccx.cloudSecrets[1]=openstack-s3
 ```
 
 If you do **NOT** have nginx ingress controller installed in your kubernetes cluster (very common in minikube or docker for desktop).You can install one that comes with `ccxdeps` chart like so:
@@ -76,9 +95,10 @@ If you do **NOT** have nginx ingress controller installed in your kubernetes clu
 ```
 # Install CCX dependencies
 helm install ccxdeps s9s/ccxdeps --debug --wait --set ingressController.enabled=true
-# Install CCX
-helm install ccx s9s/ccx --debug --wait
 ```
+
+Then install CCX as above, naming your cloud secrets if they are not the `aws`
+default.
 
 Please note that this will install CCX on `ccx.localhost`.
 
