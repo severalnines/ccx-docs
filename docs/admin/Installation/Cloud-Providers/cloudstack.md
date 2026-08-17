@@ -7,6 +7,111 @@ benefiting from the agility and flexibility that cloud environments offer.
 
 CCX allows users to leverage CloudStack’s API to automate the creation, configuration, and deployment of databases, reducing manual effort and minimizing the risk of configuration errors.
 
+## Networking model
+
+CloudStack is not a special case in CCX — it is the same shape as OpenStack with
+different names:
+
+| OpenStack | CloudStack | CCX field |
+|---|---|---|
+| Tenant network | Isolated guest network | `node.IPAddr` (private) |
+| Floating IP | Static NAT public IP | `node.PublicIP` |
+| Security group (+ shared `ccx-common`) | Per-public-IP firewall rules | `database_vendors[].security_groups` |
+| `USE_PUBLIC_IPS=true` | identical | cmon `hostname` = public, `hostname_internal` = private |
+
+### Every node has two addresses
+
+Both matter, and they are not interchangeable.
+
+| Address | Where it lives | What uses it | If it is wrong |
+|---|---|---|---|
+| **Public** (static NAT) | On the virtual router — **never** on the guest interface | End users connecting to the database; the CCX control plane and cmon reaching the node to manage and monitor it | The control plane cannot reach the node: deploys fail at host init and metric scraping breaks |
+| **Private** (guest network) | The node's `ens3` | Node-to-node traffic, which is what replication uses | Replication between nodes fails |
+
+The single most useful fact for a CloudStack admin: **static NAT lives on the
+virtual router, so the public address is never configured on the guest
+interface.** A node's `ens3` only ever holds the private address.
+
+This is also why a node needs both rather than one. The control plane sits
+outside the zone and can only reach nodes through static NAT, while nodes reach
+each other directly on the guest network. Using the public address for both roles
+breaks replication, because CloudStack static NAT does not route back into the
+guest network it came from.
+
+### `USE_PUBLIC_IPS`
+
+This switch says "my control plane and my end users address nodes publicly". It
+is provider-agnostic, not a CloudStack quirk — OpenStack uses the same flag the
+same way.
+
+| | `USE_PUBLIC_IPS=true` | `USE_PUBLIC_IPS=false` |
+|---|---|---|
+| cmon `hostname` | node's **public** IP | node's **private** IP |
+| cmon `hostname_internal` | node's private IP | node's private IP |
+| Control plane → node | Works, via static NAT | Only if the control plane can route to the guest network directly |
+| End users → database | Works, over the public IP | Only for users already on the guest network |
+| Replication (node → node) | Private address | Private address |
+| Monitoring / metric scraping | Works | **Fails** when the control plane is outside the zone — monitoring reads the same field |
+| Deploy | Succeeds | **Fails at host init** when the control plane is outside the zone |
+
+:::important
+**`USE_PUBLIC_IPS=true` is required whenever the CCX control plane runs outside
+the CloudStack zone**, which is the normal case. It is the chart default, set
+under `ccx.env`:
+
+```yaml
+ccx:
+  env:
+    USE_PUBLIC_IPS: "true"
+```
+
+Set there, it reaches every service that reads it — `ccx-stores` stamps it onto
+the datastore at create time, and `ccx-runner-service` uses it when building the
+cmon job. If you instead set it per service under
+`ccx.services.<service>.env`, you must set it on **both**: if the two disagree,
+the datastore is recorded with one addressing mode and managed with the other.
+
+Set it to `false` only when the control plane sits inside the guest network and
+your end users do too.
+:::
+
+### What CCX creates on your behalf
+
+So that nothing appears to happen by magic, per datastore CCX creates:
+
+- one keypair per cluster;
+- one VM plus a data volume per node;
+- one public IP with static NAT per node;
+- firewall rules from `security_groups`, plus one rule per node allowing
+  `TCP 1000-65535` from that node's own public `/32`.
+
+### Public IP capacity
+
+One public IP per node via static NAT — the same arithmetic as one floating IP
+per instance on OpenStack — plus one for the virtual router's source NAT. A
+3-node datastore consumes 3.
+
+Worked example: a `192.168.1.246-254` pool is 9 addresses. The console proxy, the
+secondary storage VM and the virtual router hold 3 of them, leaving about 6 for
+datastore nodes.
+
+Undersizing shows up as a deploy failing partway through, so size the pool for
+peak concurrent nodes rather than for one datastore.
+
+### DNS
+
+Configure a DNS domain for the zone. Without one, `host_fqdn` and
+`host_fqdn_private` stay empty and cmon addresses nodes by raw IP, so an end
+user's connection string breaks whenever a node is replaced. With a domain, users
+get stable names — the same way OpenStack deployments are run.
+
+### Guest template
+
+The one genuinely CloudStack-specific prerequisite: a stock Ubuntu cloud image
+**cannot deploy a datastore**. See
+[Guest template requirements](#guest-template-requirements) below for the patch
+and the pre-flight check before you configure anything else.
+
 ## Requirements 
 To enable full DBaaS functionality and seamless integration with CloudStack, CCX requires specific resources and access via the CloudStack API. Below are the detailed requirements for deploying and managing database services using CCX within a CloudStack environment.
 
@@ -346,6 +451,42 @@ The `network_id` and zone will act as the default values for regions, ensuring c
 
 - *Database Vendor Settings:*
 The `database_vendors` section defines the default rules required for CMON to connect to the database nodes. The cidr: x.x.x.x/32 in database_vendors represents the IP address of the CCX deployment within the Kubernetes cluster, or the NAT gateway IP. This is the source IP that connects to and manages the database nodes across different networks. This will create security rules for every node in the datastore. The x.x.x.x must be updated to reflect the actual IP address of the current deployment for proper connectivity.
+
+#### Which rules you need, and why
+
+`security_groups` is the **only** node access you control, and it is defined
+**per database vendor** — a vendor with no rules is a hard failure, not an open
+default:
+
+```
+no rules defined for database <vendor>
+```
+
+On top of whatever you list, CCX adds one rule per node allowing
+`TCP 1000-65535` from that node's own public `/32`.
+
+At minimum you need:
+
+| Source CIDR | Port | Why |
+|---|---|---|
+| Your end users' networks | The database port (e.g. `5432` for postgres) | End users connect to the datastore over its public IP |
+| The CCX control plane's egress | `22` | Host init, and cmon reaching the node |
+| The CCX control plane's egress | The database port | Monitoring |
+
+```yaml
+            database_vendors:
+              - name: postgres
+                security_groups:
+                  - { cidr: <end-user CIDR>,   ip_protocol: tcp, from_port: 5432, to_port: 5432 }
+                  - { cidr: <ccx egress CIDR>, ip_protocol: tcp, from_port: 22,   to_port: 22 }
+                  - { cidr: <ccx egress CIDR>, ip_protocol: tcp, from_port: 5432, to_port: 5432 }
+```
+
+:::note
+If you scrape metrics over a path that uses dedicated exporter ports, confirm
+which ports that path needs and add them — the list above covers database access
+and management, not every possible monitoring topology.
+:::
 
 ### Cloudstack credentials
 We store Cloudstack credentials in the Kubernetes secrets.
