@@ -14,11 +14,11 @@ OpenStack will be configured as the cloud provider.
 | Kubernetes                         | • Persistent Volume, Storage Class<br />• Nginx Ingress controller (The ingress controller must have an EXTERNAL-IP).<br />• External IP<br /><br />See [K8S requirements](Index.md#k8s-control-plane-requirements) for minimum size of cluster and K8S version, etc. |
 | Secrets Manager                    | K8S secrets                                                                                                    |
 | Openstack Credentials              | E.g an openstack RC file containing the auth urls, project id etc. |
-| Infrastructure Cloud               | • One "ccx-tenant" project<br />• VM flavors<br />• Attachable volumes<br />• Public Floating IPs (IPv4)<br />• Ubuntu 22.04 image |
+| Infrastructure Cloud               | • One "ccx-tenant" project<br />• VM flavors<br />• Attachable volumes<br />• Public Floating IPs (IPv4)<br />• Ubuntu 22.04 or 24.04 image (24.04 recommended) |
 | Space for PVCs                     | Make sure you ahve at least 500Gi ready for production environment. Initial setup will use less, but it's better to have it in case it's needed. Depending on how detailed monitoring soultion is needed, it might require more memory. |
 | S3 storage                         | For datastore backups and Operator DB backup                                                                   |
 | DNS Provider                       | DNS providers supported by [external-dns](Dynamic-DNS.md). In order to use dynamic dns config.                               |
-| Ubuntu 22.04LTS cloud image for VMs| Cloud image for VMs hosting database (i.e., db nodes/hosts)                                                    |
+| Ubuntu 22.04 or 24.04 LTS cloud image for VMs| Cloud image for VMs hosting database (i.e., db nodes/hosts). 24.04 is recommended for new deployments.        |
 | Root volume for VM                 | There must be at least a 40GB root volume on each VM                                                           |
 | Database volume on VM              | There must be at least 80GB data volume on each VM for database                                                |
 | Project for CCX datastores         | A global project for CCX datastores                                                                            |
@@ -511,7 +511,7 @@ At this stage, you must have the following information/resources created in your
 | `floating_network_id`| This is the public network. All instances must be assigned a public IP (read more below).                                                                    |
 | `network_id`         | This is the private network. You must create this in OpenStack.                                                                                               |
 | `project_id`         | The project ID where the resources will be deployed. This is your OpenStack project ID. All resources are deployed in the same OpenStack project.            |
-| `image_id`           | This image must be Ubuntu 22.04 of a recent patch level. Cloud-init will install the necessary tools on the image. Can be updated for new versions/patches.  |
+| `image_id`           | This image must be Ubuntu 22.04 or 24.04 of a recent patch level (24.04 recommended). Cloud-init will install the necessary tools on the image. Can be updated for new versions/patches.  |
 | `instance_type`      | Code for the instance type you will use, e.g., `x4.2c4m.100g`. Recommended: 2vCPU and 4GB minimum. Must match an existing OpenStack flavor.                   |
 | `volume_type`        | Code for the volume type you will use, e.g., `fastdisk`. Must match the OpenStack volume type name.                                                           |
 | `region`             | Name of the region, e.g., `nova` or `sto1`.                                                                                                                   |

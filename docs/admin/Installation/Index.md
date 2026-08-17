@@ -90,9 +90,18 @@ Please have a look at the helm values and minimal recommended values for CCX
 The control plane requires the following resources:
 
 - 3 worker nodes
+- `x86_64`/`amd64` CPU architecture on the worker nodes
 - 4vCPU Per node
 - 8GB of RAM Per Node
 - 60 GB of Disk (for PVCs)
+
+:::important
+The CCX container images are built for `linux/amd64` only. `arm64` worker nodes
+are not supported — on `arm64` the control plane runs under emulation, which is
+slow and unreliable. This applies to local installs too: if you are following
+[Install CCX on a laptop](CCX-Install-Laptop.md) on an Apple Silicon Mac, use an
+`amd64` VM or cluster rather than the host architecture.
+:::
 
 ### Kubernetes Cluster version
 
@@ -111,6 +120,23 @@ The source respository is located in [https://github.com/severalnines/helm-chart
 - ccx
 - ccxdeps
 - observability
+
+#### Chart versions
+
+These docs are written against **`ccx` 1.57.0** and **`ccxdeps` 0.6.22**.
+
+The `helm install` commands throughout these docs are unpinned, so they resolve
+to whatever is latest in the `s9s` repo at the time you run them. To install a
+known version instead, pass `--version`:
+
+```
+helm install ccx s9s/ccx --version 1.57.0 --debug --wait
+```
+
+Release candidates are not published to the public `s9s` repo, so the newest
+version available there normally lags the current internal release line. Run
+`helm repo update` before checking, and use `helm search repo s9s/ccx --versions`
+to list what is actually available to you.
 
 ### Prerequisite tool sets for CCX Installation
 
@@ -138,7 +164,7 @@ You can enable by setting it to true by using below command.
 
 ### Flavors/images for datastores
 
-CCX requires flavors built with Ubuntu 22.04 for the datastores. For a test/evaluation the following flavors are recommended:
+CCX requires flavors built with Ubuntu 22.04 or 24.04 for the datastores. Ubuntu 24.04 is recommended for new deployments. For a test/evaluation the following flavors are recommended:
 
 - 2vCPU, 4GB RAM, 80GB Disk
 - 4vCPU, 8GB RAM, 100GB Disk

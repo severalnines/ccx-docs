@@ -32,7 +32,7 @@ It requires the following things enabled on the GCP side:
 
  > This **Access key** and **Secret** pair will be used to create a Kubernetes secret that will be used for backups.
 
-- A valid image id must be provided. This is typically a public image id of ubuntu 22.04.
+- A valid image id must be provided. This is typically a public image id of Ubuntu 22.04 or 24.04 (24.04 recommended for new deployments).
 
 ## Configuration
 ### Deployer configuration

@@ -53,7 +53,7 @@ victoria-metrics                             16Gi       <your-storage-class>
 | OpenStack RC file | Auth URL, project ID, username, password, and user domain. |
 | Project for CCX datastores | A dedicated project (e.g. `ccx-tenant`) where database VMs are deployed. |
 | Project quota | Sufficient quota for VMs, volumes, and floating IPs. |
-| Ubuntu 22.04 LTS cloud image | Used for database node VMs. |
+| Ubuntu 22.04 or 24.04 LTS cloud image | Used for database node VMs. 24.04 is recommended for new deployments. |
 | VM root volume | Minimum 20GB per VM. |
 | VM data volume | Minimum 80GB per VM. |
 | VM flavors | Minimum 2 vCPU / 4GB RAM recommended. |
@@ -351,7 +351,7 @@ You will need the following IDs and codes from your OpenStack project:
 | `floating_network_id` | ID of the public network used for floating IPs. |
 | `network_id` | ID of the private/internal network used for VM-to-VM communication. |
 | `project_id` | OpenStack project ID where datastores will be deployed. |
-| `image_id` | ID of the Ubuntu 22.04 LTS cloud image. |
+| `image_id` | ID of the Ubuntu 22.04 or 24.04 LTS cloud image. |
 | `instance_type` | Flavor code, e.g. `x4.2c4m.100g` (2 vCPU, 4GB RAM minimum). |
 | `volume_type` | Volume type name, e.g. `fastdisk`. Must match exactly in OpenStack. |
 | `region` | Region name, e.g. `nova` or `sto1`. |
@@ -469,7 +469,7 @@ ccx:
             project_id: 5b8e951e41f34b5394bb7cf7992a95de                # Replace with your value
             regions:
               sto1:
-                image_id: 936c8ba7-343a-4172-8eab-86dda97f12c5          # Replace with your Ubuntu 22.04 image ID
+                image_id: 936c8ba7-343a-4172-8eab-86dda97f12c5          # Replace with your Ubuntu 22.04 or 24.04 image ID
                 secgrp_name: ccx-common
 ```
 
