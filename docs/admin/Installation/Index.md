@@ -269,6 +269,22 @@ CCX requires flavors built with Ubuntu 22.04 or 24.04 for the datastores. Ubuntu
 
 Also, the easiest if there is a default login account called 'ubuntu' on the image.
 
+:::danger
+**CloudStack only.** A *stock* Ubuntu 24.04 cloud image — including the 24.04
+recommended above — cannot deploy a datastore on CloudStack. cloud-init finishes
+`degraded`, `cloud-init status` exits `2`, and CCX refuses the node at host init on
+every attempt. The guest template needs a patched cloud-init first; once patched,
+24.04 works normally. Before deploying, verify the registered template with:
+
+```
+cloud-init status --long      # must show "status: done", never "degraded"
+cloud-init status; echo $?    # must be 0
+```
+
+See [Guest template requirements](Cloud-Providers/cloudstack.md#guest-template-requirements)
+for the patch and the template build procedure. AWS and OpenStack are unaffected.
+:::
+
 ### Floating IPs / Public IPs
 
 Create a pool of floating IPs (public IPs). Each VM requires a floating IP/public IP.

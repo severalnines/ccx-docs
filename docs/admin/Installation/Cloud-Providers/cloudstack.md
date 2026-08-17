@@ -32,6 +32,186 @@ CCX requires the ability to create and manage firewall rules for the VMs. This i
 CCX must be able to acquire and attach storage volumes to the VMs for database storage. Only volumes with configurable size are supported, allowing users to define storage capacity according to their specific database needs.
 The CCX requirements from Cloudstack:
 
+## Guest template requirements
+
+:::danger
+A stock Ubuntu 24.04 cloud image **cannot** deploy a CCX datastore on CloudStack.
+Every deploy fails at host init, and nothing in the CCX output explains why. The
+guest template needs a patched cloud-init before it will work.
+:::
+
+Affects Ubuntu 24.04 LTS with cloud-init `26.1-0ubuntu1~24.04.1` on Apache
+CloudStack 4.22.1. AWS and OpenStack are unaffected — their datasources reach
+metadata at the link-local address without a DHCP-lease probe.
+
+### Why a stock image fails
+
+cloud-init's `DataSourceCloudStackLocal` runs at `init-local`, obtains a DHCP
+lease, kills the `dhcpcd` daemon it started, and then re-queries that dead daemon
+for the lease. The resulting `NoDHCPLeaseError` escapes `get_vr_address()` past
+its own `get_default_gateway()` fallback, because only `FileNotFoundError` is
+suppressed there. One recoverable warning is logged, so the boot ends
+`degraded done` and `cloud-init status` exits `2` for the life of that boot.
+
+CCX then refuses the node. Exit 2 reports that warnings occurred but not which
+module logged them or what it skipped, so what actually got installed cannot be
+established — and a half-provisioned datastore is worse than a failed deploy.
+That refusal is deliberate.
+
+This is upstream cloud-init issue **#6653**. The proposed fix (PR **#6965**) was
+still an unmerged draft as of 2026-08-17, so moving to a newer image does not
+resolve it.
+
+### 1. Patch cloud-init in the guest image
+
+In `/usr/lib/python3/dist-packages/cloudinit/sources/DataSourceCloudStack.py`,
+function `get_vr_address()` (line 341 on cloud-init `26.1-0ubuntu1~24.04.1`):
+
+```diff
+-    with suppress(FileNotFoundError):
++    with suppress(FileNotFoundError, dhcp.NoDHCPLeaseError):
+         latest_lease = distro.dhcp_client.get_newest_lease(
+             distro.fallback_interface
+         )
+```
+
+That is the entire change. It restores the datasource's intended discovery chain
+(DNS → networkd lease → dhclient lease → dhcpcd lease → **default gateway**) and
+assumes nothing about the guest subnet. The identical call is already guarded
+this way in the domain-name lookup earlier in the same file, so this is a missing
+exception type rather than a design change.
+
+:::warning
+Do **not** work around this by making `data-server` resolvable via `/etc/hosts`.
+It works, but it hardcodes a per-network virtual-router address into a reusable
+image, so a second guest network with a different CIDR silently regresses.
+:::
+
+### 2. Verify the image boots clean
+
+```
+sudo cloud-init clean --logs && sudo reboot
+# once it is back:
+cloud-init status --long
+cloud-init status >/dev/null 2>&1; echo "exit=$?"
+```
+
+This must report `status: done`, must **not** say `degraded`, and must exit `0`.
+
+On a working image the log shows the fallback being taken, which is the positive
+signal to look for:
+
+```
+DNS Entry data-server not found
+dhcpcd exited with code: 1 'dhcpcd is not running'
+No DHCP found, using default gateway
+Found default route, gateway is 10.1.1.1
+init-local/search-CloudStackLocal: SUCCESS: found local data
+```
+
+### 3. Reset the image before capturing it
+
+**Required.** If you build the template by patching a running VM and capturing its
+volume, skipping this clones the machine-id, the SSH host keys, and **the
+authorized-keys of whatever account you used to patch it** into every datastore
+node CCX subsequently deploys.
+
+Run this immediately before capturing the volume. It truncates the
+authorized-keys of the account you are connected as, so it must be the last thing
+you do:
+
+```
+sudo rm -f /usr/lib/python3/dist-packages/cloudinit/sources/DataSourceCloudStack.py.orig
+sudo cloud-init clean --logs --seed --machine-id --configs all
+sudo rm -f /etc/ssh/ssh_host_*
+sudo rm -f /var/lib/dhcpcd/*.lease /var/lib/dhcp/*
+sudo truncate -s 0 /home/ubuntu/.ssh/authorized_keys
+sudo rm -f /root/.ssh/authorized_keys
+sudo find /var/log -type f -exec truncate -s 0 {} \;
+sync
+sudo poweroff
+```
+
+`cloud-init clean --configs all` covers ssh-config, network/netplan, datasource
+and fstab.
+
+### 4. Record the patch in the image
+
+The patched file is distro-managed, so write a provenance note into the image —
+`/etc/ccx-template-notes` — so whoever finds the image later knows what it carries
+and why:
+
+```
+CCX CloudStack guest template
+Base: Ubuntu 24.04 cloud image, cloud-init 26.1-0ubuntu1~24.04.1
+Carries a downstream patch for upstream cloud-init issue #6653 in
+/usr/lib/python3/dist-packages/cloudinit/sources/DataSourceCloudStack.py:
+  get_vr_address(): suppress(FileNotFoundError, dhcp.NoDHCPLeaseError)
+Without it, init-local's dhcpcd re-query raises NoDHCPLeaseError, skips the
+get_default_gateway() fallback, and every boot ends 'degraded done' with
+cloud-init status exiting 2 -- which fails CCX host init on every deploy.
+NOTE: upgrading the cloud-init package reverts this patch.
+```
+
+:::warning
+`apt upgrade cloud-init` inside a guest reverts the patch. Until the upstream fix
+ships, an upgraded node that reboots will boot degraded again and fail host init.
+:::
+
+### 5. Register the template with the right properties
+
+Do not accept `create template` defaults — mirror the source template's
+properties:
+
+```
+cmk list volumes virtualmachineid=<vm-id> type=ROOT      # get the ROOT volume id
+cmk create template \
+  name=ubuntu-24.04-ccx \
+  displaytext="Ubuntu 24.04 LTS (cloud image, cloud-init #6653 patched)" \
+  ostypeid=<same-as-source-template> \
+  volumeid=<root-volume-id> \
+  passwordenabled=false \
+  sshkeyenabled=true \
+  isdynamicallyscalable=true \
+  ispublic=false
+```
+
+`sshkeyenabled=true` matters in particular: CCX injects a per-cluster keypair, and
+getting this wrong presents as a host-init SSH failure rather than anything that
+points at the template.
+
+### 6. Point CCX at the template
+
+The template is set in the **deployer** config, not in the `clouds:` list:
+
+```yaml
+ccx:
+  services:
+    deployer:
+      config:
+        cloudstack_vendors:
+          mycloud:
+            template_id: "<template-id>"
+```
+
+Changing it requires a `helm upgrade`. Confirm the value actually landed by
+checking the rendered `ccx.yaml` in the `ccx-config-core` configmap before
+re-deploying:
+
+```
+kubectl get configmap ccx-config-core -n ccx -o jsonpath='{.data.ccx\.yaml}' | grep template_id
+```
+
+### Pre-flight check
+
+Before deploying a datastore, verify the **registered template** — not the VM you
+patched. Deploy a single VM from the registered template, on the target network,
+and re-run the step 2 checks.
+
+Verifying a hand-patched VM proves nothing about the artifact CCX will actually
+deploy from. This takes two minutes and replaces an otherwise completely opaque
+failure.
+
 ## Configuration
 ### CCX Cloudstack configuration
 To add a cloudstack providers we need to add new section under `clouds:` in the `ccx-values-config.yaml` config file.
