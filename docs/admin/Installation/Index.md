@@ -84,6 +84,32 @@ Please note that this will install CCX on `ccx.localhost`.
 
 ### Configuring your CCX installation
 
+#### Allowing datastore creation on a fresh install
+
+By default a user must have a verified email address and an active subscription
+before they can create a datastore. On a self-hosted install with no SMTP
+configured, neither can be satisfied, so the deploy wizard runs to the final step
+and then fails:
+
+```
+POST /api/prov/api/v2/cluster
+402 Payment Required
+{"err":"email verification required"}
+```
+
+Disable both checks — turning off only the first replaces this error with a
+subscription one:
+
+```yaml
+ccx:
+  env:
+    REQUIRE_EMAIL_VERIFICATION: "false"
+    REQUIRE_SUBSCRIPTION: "false"
+```
+
+See [Configuring the Helm install](Configuring-Helm-Install.md#common-configs)
+for the full list of these settings.
+
 #### Providing cloud credentials
 
 To be able to deploy datastores to a cloud provider (AWS by default) you need to provide cloud credentials.

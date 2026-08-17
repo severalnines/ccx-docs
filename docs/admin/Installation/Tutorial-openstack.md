@@ -495,6 +495,11 @@ Open `https://ccx.example.com/auth/register?from=ccx` in a browser and register 
 
 :::note
 Email notifications are not configured yet. After signing up, you can press **Back** to continue without email verification.
+
+Registering is only half of it: datastore creation is separately blocked until
+`REQUIRE_EMAIL_VERIFICATION` and `REQUIRE_SUBSCRIPTION` are disabled, otherwise
+the deploy wizard fails at the final step with `402 Payment Required`. See
+[Allowing datastore creation on a fresh install](Index.md#allowing-datastore-creation-on-a-fresh-install).
 :::
 
 Try deploying a test datastore. If it fails at approximately 8% or 16%, there is an infrastructure issue — see [Troubleshooting](#troubleshooting) below.
