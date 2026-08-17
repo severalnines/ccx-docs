@@ -108,7 +108,15 @@ catches the most.
   All offsets must be identical.
 - **MDX directives.** Must be lowercase - `:::note`, `:::important`,
   `:::warning`. `:::Note` builds fine but silently renders as plain text.
-- **Relative links** between docs pages still resolve.
+- **Relative links** between docs pages still resolve. **The build will not
+  catch this for you** - `docusaurus.config.ts` sets `onBrokenLinks: 'warn'`,
+  not `'throw'`, so a broken link produces a warning at most and still exits 0.
+  If you added or changed a link, verify the target exists in the build output:
+
+  ```bash
+  grep -oE 'href="[^"]*<target>[^"]*"' build/docs/<path>/index.html
+  ls build/docs/<path-to-target>/
+  ```
 - **Copy-pasteability.** If you changed an example, would pasting it still
   work? Placeholders should read as placeholders.
 
