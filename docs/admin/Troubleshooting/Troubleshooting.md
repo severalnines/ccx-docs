@@ -251,6 +251,52 @@ kubectl exec -it <mysql-pod-name> -- mysql -uroot -p -e \
 - Fix the root cause at the application/pooler level so connections get closed and reused properly.
 - If the load increase is legitimate and sustained, raise `max_connections` — this can be set dynamically without a restart (`SET GLOBAL max_connections = <value>;`), but to persist across pod restarts also add it to the `mysql-innodbcluster.serverConfig.mycnf` field on the Helm values (rendered into the InnoDB Cluster CR's `mycnf` field).
 
+## MySQL Down
+
+Fires when `mysql_up` is 0 for 5 minutes (alert: `MysqlDown`, severity critical). This means the `mysqld_exporter` can reach the host but MySQL itself is not responding — more severe than an exporter/scrape failure, since the database process itself appears to be down.
+
+### Diagnose the issue
+
+```bash
+kubectl exec -it <mysql-pod-name> -- mysqladmin ping -uroot -p
+```
+If this fails, check the container's own logs for the actual crash/failure:
+```bash
+kubectl logs <mysql-pod-name> --previous
+```
+
+### Common causes
+
+- The process crashed or was OOM-killed — see "Kubernetes Container OOM Killer" above.
+- The underlying host is down or unreachable — see the Host sections above.
+- A corrupted InnoDB redo log or data file is preventing MySQL from starting cleanly.
+
+### Resolving the issue
+
+- If it was OOM-killed, follow "Kubernetes Container OOM Killer" above rather than just restarting — an unresolved memory issue will recur.
+- If it's a clean crash with no resource pressure, check the error log for the specific startup failure before restarting.
+
+## MySQL Slave Replication Stopped
+
+Fires when the SQL replication thread is not running on a replica (alert: `MysqlSlaveReplicationStopped`, severity critical, metric: `mysql_slave_status_slave_sql_running`). Unlike "MySQL Slave Replication Lag" below, this means replication has fully halted — no new data is being applied at all, rather than merely falling behind.
+
+### Diagnose the issue
+
+```bash
+kubectl exec -it <mysql-pod-name> -- mysql -uroot -p -e "SHOW REPLICA STATUS\G"
+```
+Check `Last_SQL_Error`/`Last_IO_Error` for the specific error that halted replication.
+
+### Common causes
+
+- A specific replicated statement failed on the replica (e.g. a duplicate key or other data drift between source and replica).
+- Replication was stopped manually and not resumed.
+- Corruption or a schema mismatch between source and replica.
+
+### Resolving the issue
+
+- Resolve the underlying error (or, if safe, skip the offending statement) and resume with `START REPLICA;`. If data drift is significant, re-provisioning the replica from the source may be safer than skipping errors — see the same guidance under "MySQL Slave Replication Lag" below.
+
 ## MySQL Slave Replication Lag
 
 Fires when a replica's replication lag, minus any intentional `sql_delay`, has been above 30 seconds for more than a minute (alert: `MysqlSlaveReplicationLag`). This alert only evaluates on instances that are actually configured as an asynchronous replica of another server — it does not apply to the core members of an InnoDB Cluster's Group Replication group, which use a different replication mechanism; it's relevant when an InnoDB Cluster Read Replica is attached to the cluster.
@@ -413,6 +459,53 @@ The error text tells you which cause applies:
 - If constraint violations dominate, confirm with the application team whether this is expected validation traffic; if not, fix the application logic generating invalid input before it reaches the database.
 - If deadlocks or terminated connections dominate, follow the resolution steps in the linked sections above rather than treating this as a separate issue.
 
+## PostgreSQL Down
+
+Fires when `pg_up` is 0 for 5 minutes (alert: `PostgresqlDown`, severity critical). This means the `postgres_exporter` can reach the host but Postgres itself is not responding — more severe than an exporter/scrape failure, since the database process itself appears to be down.
+
+### Diagnose the issue
+
+```bash
+kubectl exec -it <postgres-pod-name> -- pg_isready
+```
+If this fails, check the container's own logs for the actual crash/failure:
+```bash
+kubectl logs <postgres-pod-name> --previous
+```
+
+### Common causes
+
+- The process crashed or was OOM-killed — see "Kubernetes Container OOM Killer" below.
+- The underlying host is down or unreachable — see the Host sections above.
+- The data directory is corrupted or the WAL is unreadable, preventing a clean start.
+
+### Resolving the issue
+
+- If it was OOM-killed, follow "Kubernetes Container OOM Killer" below rather than just restarting — an unresolved memory issue will recur.
+- If it's a clean crash with no resource pressure, check the Postgres log for the specific startup failure before restarting.
+
+## PostgreSQL Restarted
+
+Fires immediately when a Postgres instance's postmaster process has been running for less than 60 seconds (alert: `PostgresqlRestarted`, severity warning, metric: `pg_postmaster_start_time_seconds`). An unexpected restart can indicate a crash, OOM kill, or manual intervention.
+
+### Diagnose the issue
+
+Check the Postgres logs around the restart time to confirm the cause:
+```bash
+kubectl logs <postgres-pod-name> --previous
+```
+
+### Common causes
+
+- A crash or OOM kill — see "Kubernetes Container OOM Killer" below and "PostgreSQL Down" above.
+- A manual restart or a failover promoting a different node to primary (expected, not an incident).
+- A Kubernetes-initiated restart (node drain, rolling update).
+
+### Resolving the issue
+
+- If the logs show a crash or OOM kill, follow "Kubernetes Container OOM Killer" below.
+- If it was an expected restart (failover, planned maintenance, rollout), no action is needed — this alert is informational in that case.
+
 ## Kubernetes Container OOM Killer
 
 Fires when a container's restart count has increased in the last 10 minutes and its last termination reason was `OOMKilled` (alert: `KubernetesContainerOomKiller`). This means the container exceeded its own memory limit and the kernel killed it — distinct from the node running low on memory overall (see [Host Out Of Memory](#host-out-of-memory) below); a container can get OOM-killed on a machine with plenty of free memory if that container's individual limit is set too low.
@@ -460,6 +553,51 @@ kubectl logs <pod-name> -n <namespace> --previous
 ### Resolving the issue
 
 There's no generic fix here — the resolution depends entirely on what the logs from `--previous` show. If it's an OOM kill, follow the resolution steps in "Kubernetes Container OOM Killer" above rather than treating this as a separate issue.
+
+## Kubernetes Pod Not Healthy
+
+Fires when a pod has been stuck in a `Pending`, `Unknown`, or `Failed` phase for more than 15 minutes (alert: `KubernetesPodNotHealthy`). This is distinct from "Kubernetes Pod Crash Looping" above — it means the pod isn't reaching a running state at all, rather than repeatedly crashing once it does start.
+
+### Diagnose the issue
+
+```bash
+kubectl describe pod <pod-name> -n <namespace>
+```
+Check the `Events` section for the actual blocker — this phase is almost always explained there directly (a scheduling failure, an image pull error, or a stuck init container).
+
+### Common causes
+
+- A scheduling failure — insufficient node resources, or an unsatisfied node affinity/taint/toleration.
+- An image pull failure (bad tag, registry auth issue).
+- A failed or hanging init container, which blocks the pod from ever starting its main containers.
+
+### Resolving the issue
+
+- Fix whatever the pod's `Events` point to — scale/free up node resources, correct the image reference, or fix the init container.
+- Unlike crash-looping, this pod likely never ran, so `kubectl logs --previous` won't have anything useful — `Events` is the primary source of truth here.
+
+## Unready Endpoints
+
+Fires when a Service has one or more endpoint addresses that aren't ready for more than 15 minutes (alert: `UnreadyEndpoints`, metric: `kube_endpoint_address_not_ready`). This means traffic sent to the Service risks being routed to a backing pod that can't actually serve it yet — or, if every endpoint is unready, the Service has no working backend at all.
+
+### Diagnose the issue
+
+```bash
+kubectl get endpoints <service-name> -n <namespace>
+kubectl get pods -n <namespace> -l <service-selector-labels>
+```
+This shows which specific pods are behind the not-ready endpoints, so you can check their readiness state directly.
+
+### Common causes
+
+- Backing pods are failing readiness probes — see "Kubernetes Pod Crash Looping"/"Kubernetes Pod Not Healthy" above.
+- A pod just started and hasn't passed its readiness probe yet — transient and usually self-resolving.
+- A misconfigured readiness probe (wrong port/path) that never succeeds even though the application itself is healthy.
+
+### Resolving the issue
+
+- Follow whichever pod-health section above applies to the specific backing pods.
+- If the probe itself is misconfigured, fix the probe's port/path rather than the application — the app may already be healthy.
 
 ## PVC Volume Usage
 
@@ -760,6 +898,31 @@ This lists every cluster with its current state in one of the columns — look f
 - For `Cluster Failed`/`Cluster Degraded`, check node status (`s9s node --list --long --cluster-id=NNN`) to identify which node(s) are down, then follow the relevant datastore-type recovery steps elsewhere in this doc (e.g. "MySQL Operator Failover, Adding Nodes, and Scaling Mechanism" for InnoDB Cluster, or the Zalando Postgres operator sections for Postgres).
 - For `Cluster Failed to Init`, follow "Long-Running or Stuck Datastore" above to unstick or clean up the failed provisioning job.
 
+## New Coredump Detected
+
+Fires when a new coredump is detected on the `cmon-master` pod (alert: `NewCoredumpDetected`, severity critical, metric: `cmon_coredump_detected_total`). This means the cmon process itself crashed unexpectedly — distinct from a datastore-level failure, since cmon is CCX's own cluster-management engine.
+
+### Diagnose the issue
+
+Check `cmon-master`'s own logs immediately preceding the crash for what it was doing at the time:
+```bash
+kubectl logs cmon-0 -n <namespace> --previous
+```
+If a core file was captured, inspect it with `gdb` for a backtrace:
+```bash
+kubectl exec -it cmon-0 -n <namespace> -- gdb /usr/sbin/cmon <core-file-path> -ex bt -ex quit
+```
+
+### Common causes
+
+- An unhandled exception or assertion failure triggered by a specific job or RPC request.
+- Memory corruption, often only reproducible under a specific cluster state or job sequence.
+
+### Resolving the issue
+
+- Capture the backtrace and the preceding log lines, and file it against `clustercontrol-enterprise` so the crash can be reproduced and fixed at the source — this alert only tells you a crash happened, not why.
+- If it's reproducible, note the exact job/action that preceded it; that's usually the fastest path to a fix.
+
 ## New User And Datastore Created
 
 These fire as informational notifications, not incidents (alerts: `New User` when a new admin user signs up, `Datastore Created` when a new datastore is created). Both are severity `info` and need no action — they exist purely as an audit trail of account/datastore creation activity.
@@ -796,6 +959,108 @@ Look at each pod's `Events` section and last termination reason — the same cat
 
 - If it's a bad rollout, roll back to the previous working revision (`kubectl rollout undo`).
 - Otherwise, follow whichever specific cause the pod events/logs point to — this alert itself is a symptom, not a diagnosis; the fix lives in whichever underlying issue (crash loop, resourcing, image) is actually responsible.
+
+## Redis Down
+
+Fires when `redis_up` is 0 for 5 minutes (alert: `RedisDown`, severity critical, metric from the `redis_exporter` sidecar — used for both Redis and Valkey instances). This means the exporter can reach the host but the Redis/Valkey process itself is not responding, which is more severe than an exporter/scrape failure.
+
+### Diagnose the issue
+
+```bash
+kubectl exec -it <valkey-pod-name> -- redis-cli ping
+```
+If this doesn't return `PONG`, the process itself is down or unresponsive. Check the container's own logs for the actual failure:
+```bash
+kubectl logs <valkey-pod-name>
+```
+
+### Common causes
+
+- The process crashed or was OOM-killed — check for a recent restart (`kubectl get pod <valkey-pod-name>`) and correlate with "Host Out Of Memory"/"Kubernetes Container OOM Killer" above.
+- A persistence failure (RDB/AOF) caused the process to crash and fail to restart cleanly.
+- The underlying host is down or unreachable — check the Host sections above.
+
+### Resolving the issue
+
+- If the container was OOM-killed, follow the resolution steps in "Kubernetes Container OOM Killer" above rather than just restarting — an unresolved memory issue will recur.
+- If it's a clean crash with no resource pressure, restart the pod and inspect logs for the specific persistence/config error before it recurs.
+
+## Endpoint Down
+
+Fires when `probe_success{job="blackbox-exporter"}` is 0 for 10 minutes for a monitored external URL (alert: `EndpointDown`, severity critical). This means the blackbox exporter's HTTP probe against that URL has been failing continuously — distinct from a single flaky check.
+
+### Diagnose the issue
+
+Check the probe result and failure reason directly against the same URL the alert fired for:
+```bash
+curl -v <url>
+```
+Also check the blackbox exporter's own logs and config, since a probe can fail because of the exporter's own misconfiguration rather than the target itself:
+```bash
+kubectl logs -n victoriametrics deployment/ccx-monitoring-prometheus-blackbox-exporter
+```
+
+### Common causes
+
+- The target service is genuinely down or returning a non-2xx status.
+- DNS resolution for the URL is failing (see "DNS Records Are Not Updated/Synced" above if this is a CCX-managed hostname).
+- A TLS/certificate problem is causing the probe to fail before it can even check the HTTP response — see "SSL Cert Expiring Soon" below.
+- A network policy or firewall change is blocking the blackbox exporter from reaching the target.
+
+### Resolving the issue
+
+- Confirm the target service itself is healthy first — this alert is a symptom of whatever's actually wrong with the endpoint, not a standalone issue.
+- If DNS is the cause, follow "DNS Records Are Not Updated/Synced" above.
+- If it's a cert issue, follow "SSL Cert Expiring Soon" below.
+
+## SSL Cert Expiring Soon
+
+Fires when the earliest-expiring certificate in a monitored URL's chain expires in less than 10 days (alert: `SSLCertExpiringSoon`, severity critical, metric: `probe_ssl_earliest_cert_expiry`).
+
+### Diagnose the issue
+
+Check the certificate's actual expiry against the live endpoint:
+```bash
+echo | openssl s_client -connect <host>:443 -servername <host> 2>/dev/null | openssl x509 -noout -dates
+```
+
+### Common causes
+
+- `cert-manager` failed to renew the certificate (ACME challenge failure, rate limiting, or a misconfigured `ClusterIssuer`).
+- The certificate was issued/installed manually and isn't on any auto-renewal path.
+
+### Resolving the issue
+
+- If the certificate is `cert-manager`-issued, check its renewal status and events:
+  ```bash
+  kubectl get certificate -n <namespace>
+  kubectl describe certificate <name> -n <namespace>
+  ```
+  and check `cert-manager`'s own logs for ACME errors if the renewal is stuck.
+- If it's an externally/manually-managed certificate, renew and redeploy it before it expires.
+
+## Datastore DNS Unreachable
+
+Fires when `probe_success{job=~"datastore-dns-check-.*"}` is 0 for 5 minutes for a specific customer datastore (alert: `DatastoreDnsUnreachable`, severity critical). This means the datastore's main DNS record is not resolving or reachable on that environment — the alert's `DatastoreName`, `ClusterName`, `ClusterID`, and `environment` labels identify exactly which datastore.
+
+### Diagnose the issue
+
+```bash
+dig +short <datastore-dns-record>
+```
+Compare the result against the expected target — if it doesn't resolve at all, or resolves to something unexpected, check whether external-dns has synced the record correctly per "DNS Records Are Not Updated/Synced" above.
+
+### Common causes
+
+- external-dns failed to sync or update the record — see "DNS Records Are Not Updated/Synced" above.
+- The underlying host is down or unreachable — see the Host sections above.
+- A recent failover moved the datastore's primary/service endpoint faster than DNS propagated the change.
+
+### Resolving the issue
+
+- Check "DNS Records Are Not Updated/Synced" above first — this is the most common cause.
+- If a failover just occurred, confirm the new primary is healthy and give DNS propagation a few minutes before treating this as a standalone incident.
+- If the host itself is down, follow the relevant Host section above rather than treating this as a DNS-specific problem.
 
 ## Metrics Stack Self-Monitoring
 
