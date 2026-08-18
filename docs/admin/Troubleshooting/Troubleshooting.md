@@ -267,7 +267,7 @@ kubectl logs <mysql-pod-name> --previous
 
 ### Common causes
 
-- The process crashed or was OOM-killed — see "Kubernetes Container OOM Killer" above.
+- The process crashed or was OOM-killed — see "Kubernetes Container OOM Killer" below.
 - The underlying host is down or unreachable — see the Host sections above.
 - A corrupted InnoDB redo log or data file is preventing MySQL from starting cleanly.
 
@@ -900,7 +900,7 @@ This lists every cluster with its current state in one of the columns — look f
 
 ## New Coredump Detected
 
-Fires when a new coredump is detected on the `cmon-master` pod (alert: `NewCoredumpDetected`, severity critical, metric: `cmon_coredump_detected_total`). This means the cmon process itself crashed unexpectedly — distinct from a datastore-level failure, since cmon is CCX's own cluster-management engine.
+Fires when a new coredump is detected on the `cmon-0` pod (alert: `NewCoredumpDetected`, severity critical, metric: `cmon_coredump_detected_total`). This means the cmon process itself crashed unexpectedly — distinct from a datastore-level failure, since cmon is CCX's own cluster-management engine.
 
 ### Diagnose the issue
 
