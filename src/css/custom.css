@@ -40,3 +40,16 @@ a:hover {
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+/* Themed diagrams: two SVGs, one shown per colour mode.
+   An <img>-loaded SVG cannot see Docusaurus's data-theme attribute, so the
+   swap has to happen on the <img> elements themselves. */
+.themed-diagram {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+[data-theme='light'] .themed-diagram--dark,
+[data-theme='dark'] .themed-diagram--light {
+  display: none;
+}

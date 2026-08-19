@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900" width="100%" role="img" aria-labelledby="ccxArchTitle ccxArchDesc" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+<title id="ccxArchTitle">CCX architecture: control plane and data plane</title>
+<desc id="ccxArchDesc">The CCX control plane runs in Kubernetes and holds entry points, core services, metadata databases, platform services and observability. The data plane holds per-customer datastores of database nodes on cloud infrastructure. The control plane manages and monitors nodes over their public addresses, while nodes replicate to each other over their private addresses. Nodes ship backups to S3 and forward logs and metrics back to the control plane.</desc>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8b949e"/></marker><marker id="arCp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f472b6"/></marker><marker id="arDp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#22d3ee"/></marker></defs>
+<rect width="1400" height="900" fill="#0d1117"/>
+<text x="32" y="40" font-size="19" font-weight="700" fill="#e6edf3">CCX architecture</text>
+<text x="32" y="60" font-size="12" fill="#7d8899">Control plane runs in Kubernetes. Data plane is cloud infrastructure holding the end users’ datastores.</text>
+<rect x="32" y="82" width="636" height="782" rx="12" fill="#161b26" stroke="#30363d" stroke-width="1.5"/>
+<rect x="32" y="82" width="636" height="4" rx="2" fill="#f472b6"/>
+<text x="52" y="112" font-size="14.5" font-weight="700" fill="#f472b6">CCX CONTROL PLANE</text>
+<text x="52" y="130" font-size="11" font-weight="400" fill="#9aa7b8" text-anchor="start">Kubernetes cluster — x86_64/amd64 worker nodes</text>
+<text x="52" y="150" font-size="10.5" font-weight="700" fill="#7d8899" letter-spacing="1.1">ENTRY POINTS</text>
+<rect x="52.0" y="162" width="141.5" height="46" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="52.0" y="162" width="3.5" height="46" rx="1.75" fill="#f472b6"/>
+<text x="66.0" y="182.0" font-size="12" font-weight="600" fill="#e6edf3">CCX UI</text>
+<text x="66.0" y="198.0" font-size="10.5" fill="#7d8899">ccx-ui-app</text>
+<rect x="203.5" y="162" width="141.5" height="46" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="203.5" y="162" width="3.5" height="46" rx="1.75" fill="#f472b6"/>
+<text x="217.5" y="182.0" font-size="12" font-weight="600" fill="#e6edf3">Admin UI</text>
+<text x="217.5" y="198.0" font-size="10.5" fill="#7d8899">ccx-ui-admin</text>
+<rect x="355.0" y="162" width="141.5" height="46" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="355.0" y="162" width="3.5" height="46" rx="1.75" fill="#f472b6"/>
+<text x="369.0" y="182.0" font-size="12" font-weight="600" fill="#e6edf3">REST API</text>
+<text x="369.0" y="198.0" font-size="10.5" fill="#7d8899">public API</text>
+<rect x="506.5" y="162" width="141.5" height="46" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="506.5" y="162" width="3.5" height="46" rx="1.75" fill="#f472b6"/>
+<text x="520.5" y="182.0" font-size="12" font-weight="600" fill="#e6edf3">Terraform</text>
+<text x="520.5" y="198.0" font-size="10.5" fill="#7d8899">provider</text>
+<text x="52" y="224" font-size="10.5" font-weight="700" fill="#7d8899" letter-spacing="1.1">CORE SERVICES</text>
+<rect x="52.0" y="236" width="293.0" height="44" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="52.0" y="236" width="3.5" height="44" rx="1.75" fill="#f472b6"/>
+<text x="66.0" y="255.0" font-size="12" font-weight="600" fill="#e6edf3">cmon</text>
+<text x="66.0" y="271.0" font-size="10.5" fill="#7d8899">controller — clusters, backups, failover</text>
+<rect x="355.0" y="236" width="293.0" height="44" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="355.0" y="236" width="3.5" height="44" rx="1.75" fill="#f472b6"/>
+<text x="369.0" y="255.0" font-size="12" font-weight="600" fill="#e6edf3">ccx-runner-service</text>
+<text x="369.0" y="271.0" font-size="10.5" fill="#7d8899">job orchestration</text>
+<rect x="52.0" y="288" width="293.0" height="44" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="52.0" y="288" width="3.5" height="44" rx="1.75" fill="#f472b6"/>
+<text x="66.0" y="307.0" font-size="12" font-weight="600" fill="#e6edf3">ccx-deployer</text>
+<text x="66.0" y="323.0" font-size="10.5" fill="#7d8899">creates VMs, volumes, IPs, firewall rules</text>
+<rect x="355.0" y="288" width="293.0" height="44" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="355.0" y="288" width="3.5" height="44" rx="1.75" fill="#f472b6"/>
+<text x="369.0" y="307.0" font-size="12" font-weight="600" fill="#e6edf3">ccx-stores</text>
+<text x="369.0" y="323.0" font-size="10.5" fill="#7d8899">datastore state</text>
+<rect x="52.0" y="340" width="293.0" height="44" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="52.0" y="340" width="3.5" height="44" rx="1.75" fill="#f472b6"/>
+<text x="66.0" y="359.0" font-size="12" font-weight="600" fill="#e6edf3">ccx-auth-service</text>
+<text x="66.0" y="375.0" font-size="10.5" fill="#7d8899">authentication</text>
+<rect x="355.0" y="340" width="293.0" height="44" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="355.0" y="340" width="3.5" height="44" rx="1.75" fill="#f472b6"/>
+<text x="369.0" y="359.0" font-size="12" font-weight="600" fill="#e6edf3">ccx-ui-auth</text>
+<text x="369.0" y="375.0" font-size="10.5" fill="#7d8899">login flows</text>
+<text x="52" y="400" font-size="10.5" font-weight="700" fill="#7d8899" letter-spacing="1.1">METADATA</text>
+<text x="358.0" y="400" font-size="10.5" font-weight="700" fill="#7d8899" letter-spacing="1.1">PLATFORM</text>
+<rect x="52" y="412" width="290.0" height="44" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="52" y="412" width="3.5" height="44" rx="1.75" fill="#f472b6"/>
+<text x="66" y="431.0" font-size="12" font-weight="600" fill="#e6edf3">CMON DB</text>
+<text x="66" y="447.0" font-size="10.5" fill="#7d8899">MySQL — clusters, jobs</text>
+<rect x="358.0" y="412" width="290.0" height="44" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="358.0" y="412" width="3.5" height="44" rx="1.75" fill="#f472b6"/>
+<text x="372.0" y="431.0" font-size="12" font-weight="600" fill="#e6edf3">NATS</text>
+<text x="372.0" y="447.0" font-size="10.5" fill="#7d8899">messaging</text>
+<rect x="52" y="464" width="290.0" height="44" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="52" y="464" width="3.5" height="44" rx="1.75" fill="#f472b6"/>
+<text x="66" y="483.0" font-size="12" font-weight="600" fill="#e6edf3">CCX DB</text>
+<text x="66" y="499.0" font-size="10.5" fill="#7d8899">PostgreSQL — users, infra, datastores</text>
+<rect x="358.0" y="464" width="290.0" height="44" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="358.0" y="464" width="3.5" height="44" rx="1.75" fill="#f472b6"/>
+<text x="372.0" y="483.0" font-size="12" font-weight="600" fill="#e6edf3">ExternalDNS</text>
+<text x="372.0" y="499.0" font-size="10.5" fill="#7d8899">primary FQDNs</text>
+<text x="52" y="528" font-size="10.5" font-weight="700" fill="#7d8899" letter-spacing="1.1">OBSERVABILITY</text>
+<rect x="52.0" y="540" width="141.5" height="46" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="52.0" y="540" width="3.5" height="46" rx="1.75" fill="#f472b6"/>
+<text x="66.0" y="560.0" font-size="11.5" font-weight="600" fill="#e6edf3">VictoriaMetrics</text>
+<text x="66.0" y="576.0" font-size="10.5" fill="#7d8899">scrapes exporters</text>
+<rect x="203.5" y="540" width="141.5" height="46" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="203.5" y="540" width="3.5" height="46" rx="1.75" fill="#f472b6"/>
+<text x="217.5" y="560.0" font-size="11.5" font-weight="600" fill="#e6edf3">Loki</text>
+<text x="217.5" y="576.0" font-size="10.5" fill="#7d8899">log store</text>
+<rect x="355.0" y="540" width="141.5" height="46" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="355.0" y="540" width="3.5" height="46" rx="1.75" fill="#f472b6"/>
+<text x="369.0" y="560.0" font-size="11.5" font-weight="600" fill="#e6edf3">Grafana</text>
+<text x="369.0" y="576.0" font-size="10.5" fill="#7d8899">dashboards</text>
+<rect x="506.5" y="540" width="141.5" height="46" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="506.5" y="540" width="3.5" height="46" rx="1.75" fill="#f472b6"/>
+<text x="520.5" y="560.0" font-size="11.5" font-weight="600" fill="#e6edf3">Alertmanager</text>
+<text x="520.5" y="576.0" font-size="10.5" fill="#7d8899">alerts</text>
+<text x="52" y="602" font-size="10.5" font-weight="700" fill="#7d8899" letter-spacing="1.1">INGRESS &amp; TLS</text>
+<rect x="52" y="614" width="290.0" height="44" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="52" y="614" width="3.5" height="44" rx="1.75" fill="#f472b6"/>
+<text x="66" y="633.0" font-size="12" font-weight="600" fill="#e6edf3">nginx ingress</text>
+<text x="66" y="649.0" font-size="10.5" fill="#7d8899">external entry, needs an EXTERNAL-IP</text>
+<rect x="358.0" y="614" width="290.0" height="44" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="358.0" y="614" width="3.5" height="44" rx="1.75" fill="#f472b6"/>
+<text x="372.0" y="633.0" font-size="12" font-weight="600" fill="#e6edf3">cert-manager</text>
+<text x="372.0" y="649.0" font-size="10.5" fill="#7d8899">ClusterIssuer — TLS certificates</text>
+<text x="52" y="674" font-size="10.5" font-weight="700" fill="#7d8899" letter-spacing="1.1">NOTIFICATIONS</text>
+<rect x="52" y="686" width="596" height="40" rx="7" fill="#1c2230" stroke="#30363d"/>
+<text x="350.0" y="711" font-size="11.5" font-weight="600" fill="#9aa7b8" text-anchor="middle">Slack · PagerDuty · Email · Webhooks</text>
+<rect x="892" y="82" width="476" height="782" rx="12" fill="#161b26" stroke="#30363d" stroke-width="1.5"/>
+<rect x="892" y="82" width="476" height="4" rx="2" fill="#22d3ee"/>
+<text x="912" y="112" font-size="14.5" font-weight="700" fill="#22d3ee">DATA PLANE</text>
+<text x="912" y="130" font-size="11" font-weight="400" fill="#9aa7b8" text-anchor="start">Cloud infrastructure — one datastore per end user</text>
+<text x="912" y="150" font-size="10.5" font-weight="700" fill="#7d8899" letter-spacing="1.1">DATASTORE</text>
+<rect x="912" y="162" width="436" height="196" rx="9" fill="#1c2230" stroke="#30363d" stroke-dasharray="4 3"/>
+<rect x="924.0" y="178" width="133.33333333333334" height="66" rx="7" fill="#2a1b28" stroke="#9d4b7c"/>
+<text x="990.6666666666666" y="202" font-size="12" font-weight="700" fill="#e6edf3" text-anchor="middle">node 1</text>
+<text x="990.6666666666666" y="218" font-size="10.5" fill="#7d8899" text-anchor="middle">primary</text>
+<rect x="1063.3333333333333" y="178" width="133.33333333333334" height="66" rx="7" fill="#2a1b28" stroke="#9d4b7c"/>
+<text x="1130.0" y="202" font-size="12" font-weight="700" fill="#e6edf3" text-anchor="middle">node 2</text>
+<text x="1130.0" y="218" font-size="10.5" fill="#7d8899" text-anchor="middle">replica</text>
+<rect x="1202.6666666666667" y="178" width="133.33333333333334" height="66" rx="7" fill="#2a1b28" stroke="#9d4b7c"/>
+<text x="1269.3333333333335" y="202" font-size="12" font-weight="700" fill="#e6edf3" text-anchor="middle">node 3</text>
+<text x="1269.3333333333335" y="218" font-size="10.5" fill="#7d8899" text-anchor="middle">replica</text>
+<path d="M990.6666666666666,258 C990.6666666666666,274 1130.0,274 1130.0,258" fill="none" stroke="#22d3ee" stroke-width="1.6" marker-end="url(#arDp)"/>
+<path d="M1130.0,258 C1130.0,274 1269.3333333333335,274 1269.3333333333335,258" fill="none" stroke="#22d3ee" stroke-width="1.6" marker-end="url(#arDp)"/>
+<text x="1130.0" y="292" font-size="11" font-weight="600" fill="#22d3ee" text-anchor="middle">replication — over PRIVATE addresses</text>
+<text x="1130.0" y="308" font-size="10.5" fill="#7d8899" text-anchor="middle">node-to-node on the guest/tenant network</text>
+<rect x="912" y="372" width="436" height="86" rx="8" fill="#1c2230" stroke="#30363d"/>
+<rect x="912" y="372" width="3.5" height="86" rx="1.75" fill="#e3b341"/>
+<text x="926" y="393" font-size="12" font-weight="700" fill="#e6edf3">Every node has two addresses</text>
+<text x="926" y="412" font-size="11" font-weight="400" fill="#9aa7b8" text-anchor="start">Public  — floating IP / static NAT.  End users and</text>
+<text x="926" y="427" font-size="11" font-weight="400" fill="#9aa7b8" text-anchor="start">           the control plane reach the node here.</text>
+<text x="926" y="444" font-size="11" font-weight="400" fill="#9aa7b8" text-anchor="start">Private — guest network. Replication only.</text>
+<text x="912" y="472" font-size="10.5" font-weight="700" fill="#7d8899" letter-spacing="1.1">NODE RUNTIME</text>
+<rect x="912" y="484" width="436" height="40" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="912" y="484" width="3.5" height="40" rx="1.75" fill="#22d3ee"/>
+<text x="926" y="501.0" font-size="11.5" font-weight="600" fill="#e6edf3">cloud-init</text>
+<text x="926" y="517.0" font-size="10.5" fill="#7d8899">certificates + database packages at first boot</text>
+<rect x="912" y="530" width="436" height="40" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="912" y="530" width="3.5" height="40" rx="1.75" fill="#22d3ee"/>
+<text x="926" y="547.0" font-size="11.5" font-weight="600" fill="#e6edf3">database</text>
+<text x="926" y="563.0" font-size="10.5" fill="#7d8899">MySQL · MariaDB · PostgreSQL · Redis · MSSQL</text>
+<rect x="912" y="576" width="436" height="40" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="912" y="576" width="3.5" height="40" rx="1.75" fill="#22d3ee"/>
+<text x="926" y="593.0" font-size="11.5" font-weight="600" fill="#e6edf3">exporters</text>
+<text x="926" y="609.0" font-size="10.5" fill="#7d8899">node · process · database</text>
+<rect x="912" y="622" width="436" height="40" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="912" y="622" width="3.5" height="40" rx="1.75" fill="#22d3ee"/>
+<text x="926" y="639.0" font-size="11.5" font-weight="600" fill="#e6edf3">fluentbit</text>
+<text x="926" y="655.0" font-size="10.5" fill="#7d8899">forwards logs to Loki</text>
+<text x="912" y="676" font-size="10.5" font-weight="700" fill="#7d8899" letter-spacing="1.1">OBJECT STORAGE</text>
+<rect x="912" y="688" width="436" height="42" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
+<rect x="912" y="688" width="3.5" height="42" rx="1.75" fill="#22d3ee"/>
+<text x="926" y="706.0" font-size="12" font-weight="600" fill="#e6edf3">S3-compatible storage</text>
+<text x="926" y="722.0" font-size="10.5" fill="#7d8899">backups — any S3 API, or MinIO</text>
+<text x="912" y="744" font-size="10.5" font-weight="700" fill="#7d8899" letter-spacing="1.1">RUNS ON</text>
+<rect x="912" y="756" width="436" height="40" rx="7" fill="#1c2230" stroke="#30363d"/>
+<text x="1130.0" y="781" font-size="11.5" font-weight="600" fill="#9aa7b8" text-anchor="middle">AWS · OpenStack · CloudStack · GCP · VMware</text>
+<path d="M676,250 L884,250" fill="none" stroke="#f472b6" stroke-width="1.8" marker-end="url(#arCp)"/>
+<text x="780.0" y="220" font-size="11.5" font-weight="700" fill="#f472b6" text-anchor="middle">manage &amp; provision</text>
+<text x="780.0" y="234" font-size="10" fill="#7d8899" text-anchor="middle">SSH 22 + database port,</text>
+<text x="780.0" y="246" font-size="10" fill="#7d8899" text-anchor="middle">to the node’s PUBLIC address</text>
+<path d="M676,420 L884,420" fill="none" stroke="#f472b6" stroke-width="1.8" marker-end="url(#arCp)"/>
+<text x="780.0" y="390" font-size="11.5" font-weight="700" fill="#f472b6" text-anchor="middle">metrics</text>
+<text x="780.0" y="404" font-size="10" fill="#7d8899" text-anchor="middle">VictoriaMetrics scrapes</text>
+<text x="780.0" y="416" font-size="10" fill="#7d8899" text-anchor="middle">the node exporters</text>
+<path d="M884,560 L676,560" fill="none" stroke="#22d3ee" stroke-width="1.8" marker-end="url(#arDp)"/>
+<text x="780.0" y="530" font-size="11.5" font-weight="700" fill="#22d3ee" text-anchor="middle">logs</text>
+<text x="780.0" y="544" font-size="10" fill="#7d8899" text-anchor="middle">fluentbit pushes to Loki</text>
+<text x="780.0" y="556" font-size="10" fill="#7d8899" text-anchor="middle">— the node opens this</text>
+<path d="M676,700 L884,700" fill="none" stroke="#f472b6" stroke-width="1.8" marker-end="url(#arCp)"/>
+<text x="780.0" y="670" font-size="11.5" font-weight="700" fill="#f472b6" text-anchor="middle">backup jobs</text>
+<text x="780.0" y="684" font-size="10" fill="#7d8899" text-anchor="middle">cmon schedules them; data</text>
+<text x="780.0" y="696" font-size="10" fill="#7d8899" text-anchor="middle">goes node → S3, in-plane</text>
+</svg>

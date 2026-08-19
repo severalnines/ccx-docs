@@ -4,7 +4,8 @@ This document describes the architecture of the controlplane.
 The CCX controlplane runs fully in Kubernetes and is comprised of a number of services.
 The services are responsible for authentication, state handling, monitoring, jobs handling etc. so that the lifecycle of a datastore can be maintained; from inception to destruction.
 In this section we will cover the most core concepts in CCX.
-![CCX architecture](../images/ccx-architecture.png)
+<img src="/ccx-docs/img/ccx-architecture-light.svg" alt="CCX architecture: the control plane running in Kubernetes on the left, the data plane of cloud-hosted datastore nodes on the right, with the traffic between them labelled." class="themed-diagram themed-diagram--light" />
+<img src="/ccx-docs/img/ccx-architecture-dark.svg" alt="CCX architecture: the control plane running in Kubernetes on the left, the data plane of cloud-hosted datastore nodes on the right, with the traffic between them labelled." class="themed-diagram themed-diagram--dark" />
 
 ## Controlplane
 
