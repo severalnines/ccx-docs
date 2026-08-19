@@ -1,8 +1,12 @@
-# Installing CCX on OpenStack
+# Installing CCX supporting OpenStack
 
 *For laptop/desktop installation, see [Install CCX on a Laptop](CCX-Install-Laptop.md).*
 
-This tutorial walks you through installing CCX on OpenStack so it is accessible from a public domain. By the end, you will have a working CCX instance reachable at `ccx.example.com`, with ClusterControl available at `cc.example.com`.
+This tutorial walks you through installing CCX with OpenStack as its cloud
+provider, so it is accessible from a public domain. CCX itself runs in
+Kubernetes; OpenStack is where it provisions the database nodes. By the end you
+will have a working CCX instance reachable at `ccx.example.com`, with
+ClusterControl available at `cc.example.com`.
 
 :::note
 `cc.example.com` and `ccx.example.com` are placeholders. You can use any subdomain names you prefer — just replace every occurrence in the steps below.
@@ -26,6 +30,7 @@ Ensure your cluster meets these requirements before starting. See [K8S requireme
 | Requirement | Details |
 |---|---|
 | Subdomains | Two subdomains, e.g. `ccx.example.com` (end-user portal) and `cc.example.com` (admin portal). |
+| Worker node architecture | `x86_64`/`amd64`. The CCX container images are built for `linux/amd64` only; `arm64` nodes are not supported. |
 | Nginx Ingress Controller | Must have an `EXTERNAL-IP` assigned to its LoadBalancer service. |
 | Cert Manager | Must have a working `ClusterIssuer` (e.g. `letsencrypt-prod`). |
 | Persistent Volume / Storage Class | ~100Gi of storage for PVCs in this tutorial; more for production. |
@@ -338,6 +343,16 @@ kubectl get secrets -n ccx
 
 Confirm both `openstack` and `openstack-s3` secrets appear in the list.
 
+:::important
+Both secrets must exist **before** you install the `ccx` chart in Step 6. Every
+secret named in `ccx.cloudSecrets` is checked at render time, and a missing one
+fails the install rather than degrading it.
+:::
+
+For a per-key reference of what each secret holds, see
+[OpenStack Credentials](Cloud-Providers/openstack.md#openstack-credentials) and
+[S3 Backup Storage](Cloud-Providers/openstack.md#s3-backup-storage).
+
 ---
 
 ## Step 5 — Prepare the OpenStack Configuration
@@ -418,6 +433,10 @@ ccx:
     - openstack-s3
   env:
     DISABLE_ROLLBACK: "false"  # Set to "false" in production; "true" preserves failed deploys for debugging
+    # Datastore creation is blocked until both of these are disabled. Leave them
+    # enabled only if you have SMTP and billing configured.
+    REQUIRE_EMAIL_VERIFICATION: "false"
+    REQUIRE_SUBSCRIPTION: "false"
   ingress:
     ssl:
       clusterIssuer: letsencrypt-prod
@@ -499,8 +518,10 @@ Open `https://ccx.example.com/auth/register?from=ccx` in a browser and register 
 Email notifications are not configured yet. After signing up, you can press **Back** to continue without email verification.
 
 Registering is only half of it: datastore creation is separately blocked until
-`REQUIRE_EMAIL_VERIFICATION` and `REQUIRE_SUBSCRIPTION` are disabled, otherwise
-the deploy wizard fails at the final step with `402 Payment Required`. See
+`REQUIRE_EMAIL_VERIFICATION` and `REQUIRE_SUBSCRIPTION` are disabled — the values
+file in Step 5 already sets both to `"false"`. If you built your own values file
+instead, add them now and re-run the Step 6 upgrade, or the deploy wizard will
+fail at its final step with `402 Payment Required`. See
 [Allowing datastore creation on a fresh install](Index.md#allowing-datastore-creation-on-a-fresh-install).
 :::
 
