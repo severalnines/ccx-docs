@@ -5,13 +5,25 @@ CCX is a comprehensive data management and storage solution that offers a range 
 ## Architecture Overview Diagram 
 
 
-![CCX architecture](../images/ccx-architecture.png)
+<img src="/ccx-docs/img/ccx-architecture-light.svg" alt="CCX architecture: the control plane running in Kubernetes on the left, the data plane of cloud-hosted datastore nodes on the right, with the traffic between them labelled." class="themed-diagram themed-diagram--light" />
+<img src="/ccx-docs/img/ccx-architecture-dark.svg" alt="CCX architecture: the control plane running in Kubernetes on the left, the data plane of cloud-hosted datastore nodes on the right, with the traffic between them labelled." class="themed-diagram themed-diagram--dark" />
 
 For a more details please read the [architecture](architecture.md).
 
 ## Quickstart
 
-- For Openstack we recommend that you follow the [Openstack tutorial](Tutorial-openstack.md).
+This quickstart installs CCX with **AWS** as the cloud provider, which is the
+chart default and the shortest path to a working system.
+
+:::tip Installing for another cloud?
+- **OpenStack** — follow [Installing CCX supporting OpenStack](Tutorial-openstack.md) instead. It covers the OpenStack credentials, networks and values file end to end.
+- **CloudStack** — see [Cloudstack](Cloud-Providers/cloudstack.md), and note the [guest template requirement](Cloud-Providers/cloudstack.md#guest-template-requirements), which blocks every deploy until it is met.
+- **Other providers** — see [CCX Cloud Provider Configuration](Cloud-Providers/Cloud-Providers.md).
+
+The Kubernetes, chart and configuration sections further down this page apply to
+every provider; only the cloud credentials and the values file differ.
+:::
+
 - For laptop/desktop installation instructions please visit [Install CCX on a Laptop](CCX-Install-Laptop.md).
 
 
@@ -40,36 +52,21 @@ Emptying the list is not a way around this — the chart then fails with
 secret must exist before the first `helm install ccx`.
 :::
 
-Every secret named in `ccx.cloudSecrets` must exist before you install, and the
-names must match. Create the secrets in the same namespace you install the
-release into — if you install into a `ccx` namespace, add `-n ccx` to the
-commands below. Follow the path for your provider:
+Create the secret in the same namespace you install the release into — if you
+install into a `ccx` namespace, add `-n ccx` to the command below.
 
-**AWS.** One secret, and it matches the chart default, so no override is needed:
+For AWS this is a single secret named `aws`, which is what `ccx.cloudSecrets`
+already defaults to, so no override is needed later:
 
 ```
 # Create k8s secret from AWS credentials stored in ~/.aws/credentials
 kubectl create secret generic aws --from-literal=AWS_ACCESS_KEY_ID=$(awk 'tolower($0) ~ /aws_access_key_id/ {print $NF; exit}' ~/.aws/credentials) --from-literal=AWS_SECRET_ACCESS_KEY=$(awk 'tolower($0) ~ /aws_secret_access_key/ {print $NF; exit}' ~/.aws/credentials)
 ```
 
-**OpenStack.** Two secrets are required, and both are multi-key: `openstack` for
-the cloud credentials and `openstack-s3` for backup storage. See
-[OpenStack Credentials](Cloud-Providers/openstack.md#openstack-credentials) and
-[S3 Backup Storage](Cloud-Providers/openstack.md#s3-backup-storage) for the keys
-each one needs, or fill in
-[secrets-template-openstack.yaml](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template-openstack.yaml)
-and apply it. Name both in `ccx.cloudSecrets` at install time. The
-[OpenStack tutorial](Tutorial-openstack.md) walks through this end to end and is
-the recommended path for OpenStack.
-
-**CloudStack and other providers.** See
-[CCX Cloud Provider Configuration](Cloud-Providers/Cloud-Providers.md) for the
-secret each provider expects, and
-[secrets-template.yaml](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template.yaml)
-for the formats.
-
-On a non-AWS install there is no reason to hold AWS credentials, but the default
-list still names `aws` — so you must override `ccx.cloudSecrets`, as shown below.
+Other providers use different secrets — OpenStack needs two, for example — and
+must name them in `ccx.cloudSecrets` at install time. See
+[Installing CCX supporting OpenStack](Tutorial-openstack.md) or
+[CCX Cloud Provider Configuration](Cloud-Providers/Cloud-Providers.md).
 
 ### Installation
 
@@ -78,19 +75,18 @@ list still names `aws` — so you must override `ccx.cloudSecrets`, as shown bel
 helm install ccxdeps s9s/ccxdeps --debug --wait
 ```
 
-Then install CCX, naming the secrets you created. For AWS the default already
-matches, so no override is needed:
+Then install CCX. The `aws` secret you just created matches the chart default,
+so nothing needs overriding:
 
 ```
 helm install ccx s9s/ccx --debug --wait
 ```
 
-For any other provider, name every secret explicitly — for example OpenStack:
+On another cloud, name your secrets explicitly instead — every secret listed in
+`ccx.cloudSecrets` must already exist:
 
 ```
-helm install ccx s9s/ccx --debug --wait \
-  --set ccx.cloudSecrets[0]=openstack \
-  --set ccx.cloudSecrets[1]=openstack-s3
+helm install ccx s9s/ccx --debug --wait --set ccx.cloudSecrets[0]=<secret-name>
 ```
 
 If you do **NOT** have nginx ingress controller installed in your kubernetes cluster (very common in minikube or docker for desktop).You can install one that comes with `ccxdeps` chart like so:
@@ -224,20 +220,34 @@ The source respository is located in [https://github.com/severalnines/helm-chart
 
 #### Chart versions
 
-These docs are written against **`ccx` 1.57.0** and **`ccxdeps` 0.6.22**.
-
 The `helm install` commands throughout these docs are unpinned, so they resolve
-to whatever is latest in the `s9s` repo at the time you run them. To install a
-known version instead, pass `--version`:
+to whatever is newest in the `s9s` repo at the moment you run them. Two installs
+a month apart can therefore give you different versions.
+
+To see what is actually available to you:
 
 ```
-helm install ccx s9s/ccx --version 1.57.0 --debug --wait
+helm repo update
+helm search repo s9s/ccx --versions
+helm search repo s9s/ccxdeps --versions
 ```
 
-Release candidates are not published to the public `s9s` repo, so the newest
-version available there normally lags the current internal release line. Run
-`helm repo update` before checking, and use `helm search repo s9s/ccx --versions`
-to list what is actually available to you.
+To install a specific version rather than the newest, pass `--version`:
+
+```
+helm install ccx s9s/ccx --version <version> --debug --wait
+```
+
+Release candidates are **not** published to the public `s9s` repo, so the newest
+version listed there normally lags the current internal release line. If you
+were expecting a version that does not appear, that is usually why.
+
+:::note
+Last verified against `ccx` 1.57.0 and `ccxdeps` 0.6.22 — August 2026.
+
+Later versions are expected to work; the date is here so you can judge how stale
+this page is, not to discourage you from installing something newer.
+:::
 
 ### Prerequisite tool sets for CCX Installation
 
