@@ -599,12 +599,12 @@ A number of identifiers are case sensitive: `ccx.config.clouds[].regions[].code`
 
 ```yaml
 cc:
-  cidr: 0.0.0.0/0 #setup according to your network
+  cidr: 203.0.113.0/24 # ClusterControl admin portal — restrict to your admin network
 ccFQDN: cc.ccx.somedomain.com # dns name for ccx
 ccxFQDN: ccx.somedomain.com # dns name for cc
 ccx:
   cidr: 0.0.0.0/0 #setup according to your network
-  cloudSecrets: ccx # List of Kubernetes secrets containing cloud credentials.
+  cloudSecrets: # List of Kubernetes secrets containing cloud credentials.
   - openstack # This secret must exist in Kubernetes. See 'secrets-template.yaml' for reference.
   - openstack-s3
   - smtp #secret made from email step
@@ -794,7 +794,8 @@ ccx:
       replicas: 5 # Minimum is 3 that should be used in prduction. Prefferable is to have 5 or more
   userDomain: somedomain.com # domain used for databases. It has to match with ExternalDNS used one.
 cmon:
-  licence: xxx # insert licence here
+  license: xxx # Base64-encoded licence key. The chart key is spelled `license` —
+               # any other spelling is silently ignored and never applied.
 ```
 
 ## Install CCX
