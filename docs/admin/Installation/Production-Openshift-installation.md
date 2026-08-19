@@ -794,8 +794,8 @@ ccx:
       replicas: 5 # Minimum is 3 that should be used in prduction. Prefferable is to have 5 or more
   userDomain: somedomain.com # domain used for databases. It has to match with ExternalDNS used one.
 cmon:
-  license: xxx # Base64-encoded licence key. The chart key is spelled `license` —
-               # any other spelling is silently ignored and never applied.
+  license: xxx # Base64-encoded license key. Note the spelling: the chart reads
+               # `license`; `licence` is silently ignored and never applied.
 ```
 
 ## Install CCX

@@ -408,8 +408,8 @@ ccFQDN: cc.example.com
 cc:
   cidr: 203.0.113.0/24   # ClusterControl admin portal — restrict to your admin network
 cmon:
-  # Base64-encoded licence key. The chart key is spelled `license` — any other
-  # spelling is silently ignored and the licence is simply never applied.
+  # Base64-encoded license key. Note the spelling: the chart reads `license`.
+  # `licence` is silently ignored — no error, and the license is never applied.
   license:
 ccx:
   cidr: 0.0.0.0/0        # End-user portal — intended to be publicly reachable

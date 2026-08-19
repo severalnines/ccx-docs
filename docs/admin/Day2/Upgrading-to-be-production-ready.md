@@ -504,8 +504,8 @@ ccx:
         FE_NODE_ENV: "production"  
   userDomain: somedomain.com # domain used for databases. It has to match with ExternalDNS used one.
 cmon:
-  license: xxx # Base64-encoded licence key. The chart key is spelled `license` —
-               # any other spelling is silently ignored and never applied.
+  license: xxx # Base64-encoded license key. Note the spelling: the chart reads
+               # `license`; `licence` is silently ignored and never applied.
 ```
 
 There might be more things that needs to be added/changed, but that will depend on your infrastructure.
