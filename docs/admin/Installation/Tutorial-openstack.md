@@ -406,11 +406,13 @@ Below is a minimal working example. You can add more instance types, regions, an
 ccxFQDN: ccx.example.com
 ccFQDN: cc.example.com
 cc:
-  cidr: 0.0.0.0/0
+  cidr: 203.0.113.0/24   # ClusterControl admin portal — restrict to your admin network
 cmon:
-  licence:  # Insert your licence key here
+  # Base64-encoded licence key. The chart key is spelled `license` — any other
+  # spelling is silently ignored and the licence is simply never applied.
+  license:
 ccx:
-  cidr: 0.0.0.0/0
+  cidr: 0.0.0.0/0        # End-user portal — intended to be publicly reachable
   cloudSecrets:
     - openstack      # Must match the Kubernetes secret name from Step 4
     - openstack-s3
@@ -478,7 +480,7 @@ ccx:
 ## Step 6 — Install CCX
 
 ```bash
-helm upgrade --install ccx s9s/ccx --debug --wait -f minimal-openstack.yaml
+helm upgrade --install ccx s9s/ccx --debug --wait -n ccx -f minimal-openstack.yaml
 ```
 
 Wait for the command to complete, then verify all pods are running:
@@ -521,7 +523,7 @@ Datastore deployment typically fails due to:
 
 1. Check runner service logs:
    ```bash
-   kubectl logs ccx-runner-service-NNNN
+   kubectl logs -n ccx deploy/ccx-runner-service
    ```
 
 2. SSH into the deployed VM and inspect cloud-init logs:

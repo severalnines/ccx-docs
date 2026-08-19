@@ -52,10 +52,13 @@ commands below. Follow the path for your provider:
 kubectl create secret generic aws --from-literal=AWS_ACCESS_KEY_ID=$(awk 'tolower($0) ~ /aws_access_key_id/ {print $NF; exit}' ~/.aws/credentials) --from-literal=AWS_SECRET_ACCESS_KEY=$(awk 'tolower($0) ~ /aws_secret_access_key/ {print $NF; exit}' ~/.aws/credentials)
 ```
 
-**OpenStack.** Two secrets are required — `openstack` for the cloud credentials
-and `openstack-s3` for backup storage. Both are multi-key; fill in and apply
-[secrets-template-openstack.yaml](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template-openstack.yaml),
-then name both in `ccx.cloudSecrets` at install time. The
+**OpenStack.** Two secrets are required, and both are multi-key: `openstack` for
+the cloud credentials and `openstack-s3` for backup storage. See
+[OpenStack Credentials](Cloud-Providers/openstack.md#openstack-credentials) and
+[S3 Backup Storage](Cloud-Providers/openstack.md#s3-backup-storage) for the keys
+each one needs, or fill in
+[secrets-template-openstack.yaml](https://github.com/severalnines/helm-charts/blob/main/charts/ccx/secrets-template-openstack.yaml)
+and apply it. Name both in `ccx.cloudSecrets` at install time. The
 [OpenStack tutorial](Tutorial-openstack.md) walks through this end to end and is
 the recommended path for OpenStack.
 

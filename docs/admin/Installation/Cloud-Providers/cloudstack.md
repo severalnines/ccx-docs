@@ -56,13 +56,16 @@ same way.
 
 | | `USE_PUBLIC_IPS=true` | `USE_PUBLIC_IPS=false` |
 |---|---|---|
-| cmon `hostname` | node's **public** IP | node's **private** IP |
-| cmon `hostname_internal` | node's private IP | node's private IP |
+| Address CCX manages the node by | node's **public** IP | node's **private** IP |
+| Address nodes use to reach each other | node's private IP | node's private IP |
 | Control plane → node | Works, via static NAT | Only if the control plane can route to the guest network directly |
 | End users → database | Works, over the public IP | Only for users already on the guest network |
 | Replication (node → node) | Private address | Private address |
-| Monitoring / metric scraping | Works | **Fails** when the control plane is outside the zone — monitoring reads the same field |
+| Monitoring / metric scraping | Works | **Fails** when the control plane is outside the zone — monitoring uses the same address as management |
 | Deploy | Succeeds | **Fails at host init** when the control plane is outside the zone |
+
+Only the management address changes. The address nodes use to reach each other is
+always the private one, which is why replication works the same either way.
 
 :::important
 **`USE_PUBLIC_IPS=true` is required whenever the CCX control plane runs outside
