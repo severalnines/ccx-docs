@@ -110,7 +110,7 @@ The source respository is located in [https://github.com/severalnines/helm-chart
 
 - ccx
 - ccxdeps
-- observability
+- ccx-monitoring (the observability stack; source repo: [severalnines/observability](https://github.com/severalnines/observability)) — see the [Observability guide](Observability.md)
 
 ### Prerequisite tool sets for CCX Installation
 
