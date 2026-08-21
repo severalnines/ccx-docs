@@ -45,7 +45,7 @@ The first-boot volume setup script relies on standard tooling that is present in
 
 ## 6. Network access at first boot
 
-On first boot the node installs packages from external APT repositories (Severalnines, the database vendor, Fluent Bit, and the standard Ubuntu mirrors) and downloads the CCX agent. These endpoints must be reachable from the data plane, or mirrored internally. The full endpoint list and air-gap guidance is in [Firewall and Air-Gap](Firewall-and-Air-Gap.md).
+On first boot the node installs packages from external APT repositories (Severalnines, the database vendor, Fluent Bit, and the standard Ubuntu mirrors) and downloads the CCX agent. These endpoints must be reachable from the data plane, or mirrored internally. The full endpoint list and air-gapped deployment guidance are in [Firewall and Air-Gapped Deployment](Firewall-and-Air-Gap.md).
 
 Note that if APT mirrors are unreachable, cloud-init does not fail fast — it can keep retrying for hours while the deployment appears stuck.
 
@@ -64,5 +64,5 @@ These are requirements on the cloud rather than on the image itself, but they su
 - [ ] Generic/HWE kernel — `modprobe dm_crypt` succeeds
 - [ ] cloud-init installed, correct datasource, reaches `status: done`
 - [ ] Default `ubuntu` user with passwordless sudo
-- [ ] APT repositories and agent download reachable (or mirrored) — see [Firewall and Air-Gap](Firewall-and-Air-Gap.md)
+- [ ] APT repositories and agent download reachable (or mirrored) — see [Firewall and Air-Gapped Deployment](Firewall-and-Air-Gap.md)
 - [ ] Data volume attached before first boot; no extra volumes visible in the guest
