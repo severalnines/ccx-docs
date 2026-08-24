@@ -51,9 +51,9 @@ GRANT REPLICATION SLAVE ON *.* TO 'repluser'@'%';
 
 ### Prepare the replica to replicate from the source
 
-The replica must be instrucuted to replicate from the source.
+The replica must be instructed to replicate from the source.
 Make sure to change `<SOURCE_IP>`, `<SOURCE_PORT>`, and `<SECRET>`.
-Run the following on the *source*:
+Run the following on the *replica*:
 
 ```
 CHANGE MASTER TO MASTER_HOST=<SOURCE_IP>, MASTER_PORT=<SOURCE_PORT>, MASTER_USER='repluser', MASTER_PASSWORD='<SECRET>', MASTER_SSL=1;
@@ -70,7 +70,7 @@ The dump must not contains any mysql or other system databases.
 On the *source*, issue the following command. Change ADMIN, SECRET and DATABASES:
 
 ```bash
-mysqldump -uADMIN -p<SECRET>   --master-data --single-transaction --triggers --routines --events --databases DATABASES > dump.sql`
+mysqldump -uADMIN -p<SECRET> --master-data --single-transaction --triggers --routines --events --databases DATABASES > dump.sql`
 ```
 
 If your database dump contains SPROCs, triggers or events, then you must replace DEFINER. This may take a while:
@@ -87,10 +87,15 @@ cat dump.sql | mysql -uccxadmin -p -h<REPLICA_PRIMARY>
 
 ### Start the replica
 
+When starting the replica, set `gtid_strict_mode=0` on the datastore. This disables MariaDB's enforcement of identical GTIDs across all nodes participating in replication. Since the external replication in this setup doesn't use GTID, it's safe to keep this OFF for the duration of the replication.
+
+Once cutover is complete (i.e., this datastore becomes the new primary), set `gtid_strict_mode` back to ON to restore safer GTID-consistent replication across the database nodes going forward.
+
 On the replica do:
 
 ```
-START SLAVE
+SET GLOBAL gtid_strict_mode=0;
+START SLAVE;
 ```
 
 followed by
@@ -102,18 +107,23 @@ SHOW SLAVE STATUS;
 And verify that:
 
 ```
-             Slave_IO_State: Waiting for source to send event
-	     ..
-  	     Slave_IO_Running: Yes
-             Slave_SQL_Running: Yes
+              Slave_IO_State: Waiting for source to send event
+	         ...
+  	        Slave_IO_Running: Yes
+           Slave_SQL_Running: Yes
 ```	     
+
+Monitor the `Seconds_Behind_Master` value and confirm it eventually reaches 0, indicating the *replica* has caught up with the *source*.
 
 ### When the migration is ready
 
 ```
 STOP SLAVE;
 RESET SLAVE ALL;
+SET GLOBAL gtid_strict_mode=1;
 ```
+
+At this point, you may point the application to this datastore.
 
 ### Troubleshooting
 
