@@ -1,5 +1,9 @@
 # Deploying ccx and ccxdeps with ArgoCD
 
+:::warning
+This page requires **`helm-ccx` 1.58.0 or later**. The `argocd.enabled` value and its sync-wave annotations don't exist before that — on an older chart version, resources will apply in a single, unordered wave regardless of what you set in the `ApplicationSet`, and this guide's [Prerequisites](#prerequisites)/ordering guidance won't hold.
+:::
+
 :::note
 This page covers the GitOps deployment path (ArgoCD `ApplicationSet` + a values git repo). If you are managing an existing install directly with `helm upgrade --install`, see [Upgrading the Control Plane](Upgrading-the-Control-Plane.md) instead. The two approaches manage the same two Helm releases (`ccx` and `ccxdeps`) but are not meant to be mixed for the same tenant — pick one management path per tenant and stick to it, or ArgoCD's `selfHeal` will fight any manual `helm upgrade` you run against the same release.
 :::
@@ -94,7 +98,14 @@ spec:
             # requires live cluster access. ArgoCD's repo-server renders via
             # `helm template` (sandboxed, no cluster access), so `lookup` always
             # returns empty there even when the secret genuinely exists.
+            #
+            # argocd.enabled turns on sync-wave annotations across the chart's
+            # resources (RBAC and Secrets first, then core services, then
+            # ingresses/post-install jobs last) — without it every resource
+            # syncs in one wave and ordering isn't guaranteed.
             values: |
+              argocd:
+                enabled: true
               ccx:
                 skipCloudSecretValidation: true
 
@@ -183,6 +194,7 @@ A few things worth calling out about how these are put together:
 - **`goTemplateOptions: ["missingkey=error"]`** means a value referenced in the template (e.g. `.path.filename`) that doesn't resolve will fail the render loudly, rather than silently producing an empty string in a resource name. This is deliberate — a silently-wrong Application name is harder to notice than a failed sync.
 - **The `$values` source is never deployed on its own** — `ref: values` just makes its contents addressable by the other source via the `$values/...` prefix in `valueFiles`. It has no `path`/`helm` block of its own.
 - **`values: | ccx: skipCloudSecretValidation: true`** (inline, on the chart source) exists specifically to work around ArgoCD's sandboxed rendering — don't remove it thinking it's a leftover; without it, every sync will report a false-positive validation failure for cloud secrets that actually exist.
+- **`values: | argocd: enabled: true`** (same inline block) is required for `helm-ccx` specifically — it switches on `argocd.argoproj.io/sync-wave` annotations across the chart's resources, so RBAC and Secrets apply before core services, which apply before ingresses and post-install jobs. On a plain `helm upgrade --install` this value has no effect and defaults to `false`; ArgoCD deployments need it explicitly set, since without it ArgoCD applies everything in one wave with no ordering guarantee. `ccxdeps` has no equivalent value — only `helm-ccx` renders sync-wave annotations.
 - **`destination.namespace: 'ccx'` points every tenant at the same namespace** by default — fine for a single-tenant deployment. For genuine multi-tenant use, template this the same way the Application's own name is templated (e.g. derive the namespace from `.path.filename`) so each discovered file gets its own namespace instead of colliding in one.
 - **`ignoreDifferences` on Secrets (`/data`) and PVCs (`/spec/resources/requests/storage`)** stops ArgoCD from fighting things it shouldn't manage post-creation: Secret data that gets rotated out-of-band, and PVC sizes that get grown manually (Kubernetes doesn't allow shrinking a PVC back down, so a chart-declared size lower than the live, already-grown size would otherwise show as permanent drift).
 
@@ -201,3 +213,4 @@ A few things worth calling out about how these are put together:
 - **Sync succeeds but pods crash-loop on missing secrets.** Almost always a prerequisite secret that wasn't pre-created in the namespace before sync — see the per-tenant secrets list above.
 - **A tenant's chart version and running image drift out of sync after a manual hotfix.** If a tenant's `Application` is bumped to a newer app image without also bumping the chart version (or vice versa), you can end up with a values/template mismatch the chart maintainers never intended to be run together — for example, a chart still rendering an old container `command` that doesn't match a binary layout in a newer image. Always move chart version and image tag together, and treat any manual live-cluster patch as temporary — `selfHeal: true` means ArgoCD will silently revert it on the next reconcile unless the git source is also updated to match.
 - **Validation fails for a cloud secret you know exists.** Confirm the chart source still has `ccx.skipCloudSecretValidation: true` set — without it, ArgoCD's sandboxed `helm template` rendering can't see live secrets via `lookup` and will report a false failure.
+- **Ingress or a post-install job applies before its Secret/RBAC exists, and sync fails or has to retry.** Confirm the chart source has `argocd.enabled: true` set — without it, `helm-ccx` renders no sync-wave annotations at all, so ArgoCD has no ordering information and can apply everything in one wave.
