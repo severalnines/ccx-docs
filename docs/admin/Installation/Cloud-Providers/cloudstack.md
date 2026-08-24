@@ -93,10 +93,81 @@ your end users do too.
 So that nothing appears to happen by magic, per datastore CCX creates:
 
 - one keypair per cluster;
+- one host anti-affinity group per cluster, named `ccx-<cluster-uuid>`;
 - one VM plus a data volume per node;
 - one public IP with static NAT per node;
 - firewall rules from `security_groups`, plus one rule per node allowing
   `TCP 1000-65535` from that node's own public `/32`.
+
+### Node placement and anti-affinity
+
+CCX creates one **host anti-affinity group per cluster**, named
+`ccx-<cluster-uuid>`, and deploys every node of that cluster into it. The point
+is that a three-node HA datastore should not end up on a single hypervisor,
+where one host failure takes out all three replicas.
+
+There is nothing to configure. The group is created before the first node,
+every node joins it at deploy time, and it is removed when the datastore is
+deleted.
+
+#### It is non-strict, and that is deliberate
+
+CloudStack offers both a strict `host anti-affinity` type and a
+`non-strict host anti-affinity` type. CCX uses the **non-strict** one.
+
+The difference only shows up when the cloud cannot honour the request:
+
+| Hosts available | Cluster size | Strict | Non-strict (what CCX uses) |
+|---|---|---|---|
+| 3 or more | 3 | spread across hosts | spread across hosts |
+| 2 | 3 | **deploy fails** | spread as far as possible, deploy succeeds |
+| 1 | 2 | **deploy fails** | both on that host, deploy succeeds |
+
+Strict would give a hard guarantee at the cost of refusing to deploy on any
+install with fewer hosts than the datastore has nodes. CCX prefers the deploy to
+succeed with reduced spreading over failing outright, so a small or temporarily
+degraded cloud stays usable.
+
+The practical consequence: **anti-affinity only does something if you have more
+than one host.** On a single-host install the group is still created and the
+nodes still join it, but they will all land on that host and nothing warns you —
+there is no other host to use. If you are relying on CCX for HA, size the cluster
+for at least as many hypervisors as you want replicas separated.
+
+#### Older CloudStack
+
+The non-strict type is newer than the oldest CloudStack releases CCX supports. If
+your install does not offer it, CCX logs a warning of the form
+
+```
+cloudstack does not support non-strict host anti-affinity; deploying without it,
+so this cluster's nodes may share a hypervisor
+```
+
+and deploys without a group. Deploys keep working; you simply do not get the
+spreading. CCX deliberately does **not** fall back to the strict type, because
+that would start failing deploys on exactly the installs least able to satisfy it.
+
+To check what your install offers:
+
+```bash
+cmk list affinitygrouptypes
+```
+
+#### Zones and existing datastores
+
+Affinity groups in CloudStack are **account-scoped, not zone-scoped**, so one
+group per cluster is correct even in a multi-zone region where a cluster's nodes
+are spread across availability zones.
+
+Datastores created before this feature existed have no group. They are not
+migrated; the group is created the next time a node is added to them, so newly
+added nodes get anti-affinity while the original nodes keep whatever placement
+they already had.
+
+Changing the group type for an existing datastore is not something CCX does. The
+group is matched by name, so an existing `ccx-<cluster-uuid>` is reused as-is
+regardless of its type.
 
 ### Public IP capacity
 
