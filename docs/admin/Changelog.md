@@ -11,6 +11,24 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.57.1
+CMON version: 2.4.0-23184
+
+### Improvements
+- cmon `--pool` mode is now optional and disabled by default; unless explicitly enabled, the backend resolves the controller via `cmon-master` / a configured default controller instead of the dynamic pool
+- Increased default cmon resource requests (100m/1Gi → 1 CPU/2Gi) to better match observed load
+- Added a `cmon.extraConfig` Helm value for appending custom parameters to `cmon.cnf`
+- `store-internal-metrics-sd` now has access to the `USER_DOMAIN` setting, for correct DNS-based service discovery
+
+### Bugs
+- Fixed cmon instability and configuration/data loss caused by 1.57.0 removing PVC-backed storage for cmon (see upgrade notes above)
+- `destroy_cluster` no longer silently skips cmon cleanup when the cluster's cmon mapping is missing; a warning is now logged so the condition is visible instead of leaving the cluster orphaned in cmon
+- The cluster-to-cmon mapping is now recorded immediately after deployment completes, closing a race where destroying a cluster shortly after creation could fail to clean it up in cmon
+- Fixed parsing of cmon fields that return string-typed booleans (e.g. `"true"`/`"false"`) instead of native booleans
+- Adding a payment card no longer fails for cards requiring 3-D Secure/SCA authentication; the setup flow now completes the 3DS challenge instead of erroring with "setup action required"
+- `backup_id` is now handled as a UUID string instead of a number, fixing create-datastore-from-backup requests that were silently missing `backup_id`
+- Fixed users being re-prompted for a credit card on the last step of datastore creation after already providing one
+
 ## Release Notes - CCX - v1.57.0
 
 :::note
