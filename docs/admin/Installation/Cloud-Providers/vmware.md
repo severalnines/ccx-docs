@@ -10,8 +10,8 @@ CCX requires the following things enabled on the ESXi side
 - IP addresses must be assigned automatically for the VM and must not change.
 - We are installing the operating system using Ubuntu ISO image. The image needs to install:
 
-    - We require Ubuntu 22.04 with automated installation. After the successfully installation we will inject our cloud-init data via userdata.
-    - We can provide Ubuntu 22.04 ISO if needed.
+    - We require Ubuntu 22.04 or 24.04 with automated installation (24.04 recommended for new deployments). After the successful installation, we will inject our cloud-init data via user-data.
+    - We can provide the Ubuntu ISO if needed.
     
 - The CCX uses flavors/instance types so that the user can choose the number of CPUs and Memory the database nodes will have. VMware does not have a concept of flavors/instance types, but we can define one in the CCX configuration file. In the `instances_types` for other cloud vendors we are also defining CPU and RAM but they are only to inform the user about the flavor/instance type. In case of VMWare this will actually define the resources for the new Virtual Machines.
 

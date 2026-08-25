@@ -162,7 +162,7 @@ Below deployer config is by default in helm-ccx values. You don't need to add th
         aws_vendor:
           regions:
             eu-north-1: # specify aws region name
-              image_id: ami-05baaef454dd96656 # image id of ubuntu 22.04
+              image_id: ami-05baaef454dd96656 # image id of Ubuntu 22.04; 24.04 is also supported and recommended for new deployments
           database_vendors:
             - name: mariadb
               security_groups:

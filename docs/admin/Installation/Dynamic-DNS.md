@@ -1,4 +1,4 @@
-# DynamicDNS a.k.a Access to Services a.k.a friendly endpoint
+# Dynamic DNS
 
 ## Overview
 

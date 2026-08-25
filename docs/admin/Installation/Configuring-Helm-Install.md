@@ -15,6 +15,26 @@ Configuring OpenStack, available services, availability zones or other Helm valu
     - `DISABLE_ROLLBACK` - setting it to `"true"` will prevent automatic deletion of cloud resources (VMs, volumes and
       such) on failure. Useful for debugging. Remember to remove it when debugging is done.
     - `MAX_DATASTORES_PER_USER` - limit the maximum datastores per user, new datastore deployments will fail after reaching this limit. Not limited by default.
+    - `REQUIRE_EMAIL_VERIFICATION` - defaults to `"true"`. While enabled, a user who has not confirmed their
+      email address cannot create a datastore: the deploy wizard completes and then the final request fails with
+      `402 Payment Required` and `{"err":"email verification required"}`. Set to `"false"` on installations with no
+      SMTP configured.
+    - `REQUIRE_SUBSCRIPTION` - defaults to `"true"`. Blocks datastore creation for users without an active
+      subscription, with the same `402` status. Set to `"false"` for self-hosted installations that do not use
+      billing.
+
+  :::important
+  These two flags are checked together. Disabling only `REQUIRE_EMAIL_VERIFICATION` moves the failure from an email
+  `402` to a subscription `402`, so a self-hosted evaluation install needs both:
+
+  ```yaml
+  ccx:
+    env:
+      REQUIRE_EMAIL_VERIFICATION: "false"
+      REQUIRE_SUBSCRIPTION: "false"
+  ```
+  :::
+
   - `config`
     - `clouds` - cloud config per provider
       - `code` - cloud provider identifier

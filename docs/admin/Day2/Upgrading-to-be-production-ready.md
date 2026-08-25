@@ -282,7 +282,7 @@ At this point, ccx should be deployed with minimal values yaml. The following va
 
 ```yaml
 cc:
-  cidr: 0.0.0.0/0 #setup according to your network
+  cidr: 203.0.113.0/24 # ClusterControl admin portal — restrict to your admin network
 ccFQDN: cc.ccx.somedomain.com # dns name for ccx
 ccxFQDN: ccx.somedomain.com # dns name for cc
 ccx:
@@ -504,7 +504,8 @@ ccx:
         FE_NODE_ENV: "production"  
   userDomain: somedomain.com # domain used for databases. It has to match with ExternalDNS used one.
 cmon:
-  licence: xxx # insert licence here
+  license: xxx # Base64-encoded license key. Note the spelling: the chart reads
+               # `license`; `licence` is silently ignored and never applied.
 ```
 
 There might be more things that needs to be added/changed, but that will depend on your infrastructure.

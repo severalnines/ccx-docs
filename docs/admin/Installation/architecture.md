@@ -4,7 +4,8 @@ This document describes the architecture of the controlplane.
 The CCX controlplane runs fully in Kubernetes and is comprised of a number of services.
 The services are responsible for authentication, state handling, monitoring, jobs handling etc. so that the lifecycle of a datastore can be maintained; from inception to destruction.
 In this section we will cover the most core concepts in CCX.
-![CCX architecture](../images/ccx-architecture.png)
+<img src="/ccx-docs/img/ccx-architecture-light.svg" alt="CCX architecture: the control plane running in Kubernetes on the left, the data plane of cloud-hosted datastore nodes on the right, with the traffic between them labelled." class="themed-diagram themed-diagram--light" />
+<img src="/ccx-docs/img/ccx-architecture-dark.svg" alt="CCX architecture: the control plane running in Kubernetes on the left, the data plane of cloud-hosted datastore nodes on the right, with the traffic between them labelled." class="themed-diagram themed-diagram--dark" />
 
 ## Controlplane
 
@@ -125,6 +126,69 @@ There is [Swagger](https://ccx.s9s-dev.net/api/docs/current/index.html) document
 #### Terraform Provider
 
 Datastores can be created and scaled using the [Terraform provider](https://github.com/severalnines/terraform-provider-ccx). 
+
+## Service reference
+
+The controlplane runs as a set of small services. You do not need to know all of
+them to operate CCX, but knowing which one owns a given behaviour turns "the
+deploy failed" into a specific pod to read logs from.
+
+Most services run several replicas; the counts below are not fixed.
+
+### Provisioning and state
+
+| Service | What it does | Look here when |
+|---|---|---|
+| `cmon` | The controller. Creates the datastore, configures replication, runs backups and restores, performs failover, reports status. Runs as a StatefulSet. | A datastore deploys but never becomes healthy, backups fail, failover misbehaves |
+| `ccx-runner-service` | Orchestrates jobs. Some CCX jobs map onto a cmon job; if that fails, this service decides whether to retry. | A deploy, scale or restore is stuck or silently retried |
+| `ccx-deployer` | Creates and destroys the cloud infrastructure — VMs, volumes, public IPs, firewall rules. | A deploy fails early, before any database is installed |
+| `ccx-stores-service` | The datastore and infrastructure state API. | Datastore state looks wrong in the UI or API |
+| `ccx-stores-listener` | Reacts to state change events. | State changes are not propagating |
+| `ccx-state-worker` | Background reconciliation of stored state. | Stored state drifts from reality |
+
+### APIs, authentication and frontends
+
+| Service | What it does | Look here when |
+|---|---|---|
+| `ccx-rest-user-service` | The end-user REST API. This is what the CCX UI and the Terraform provider call. | API calls fail, or the UI errors on an action |
+| `ccx-rest-admin-service` | The admin REST API, behind the admin UI. | Admin operations fail |
+| `ccx-auth-service` | Authentication — username/password, OAuth2, JWT. | Login fails or tokens are rejected |
+| `ccx-user` | User management. | User creation or lookup fails |
+| `ccx-ui-app` | The end-user portal. | The portal will not load |
+| `ccx-ui-admin` | The admin portal. | The admin portal will not load |
+| `ccx-ui-auth` | The login and registration flows. | Sign-up or sign-in pages misbehave |
+
+### Monitoring and notifications
+
+| Service | What it does | Look here when |
+|---|---|---|
+| `ccx-monitor-service` | Monitoring of datastores. | Health or status is not updating |
+| `store-metrics-sd` | Service discovery — tells VictoriaMetrics which datastore nodes to scrape. | Metrics stop appearing for new nodes |
+| `store-internal-metrics-sd` | The same, for CCX's own internal metrics. | Controlplane metrics are missing |
+| `ccx-notify-worker` | Sends notifications to Slack, PagerDuty, email and webhooks. | Alerts fire but nobody is told |
+| `ccx-hook-service` | Handles webhooks. | Webhook integrations do not trigger |
+
+### Billing
+
+| Service | What it does | Look here when |
+|---|---|---|
+| `ccx-billing-service` | Billing API. | Subscription or billing lookups fail |
+| `ccx-billing-updater` | Hourly CronJob that updates billing records. | Usage or charges look stale |
+
+### Maintenance
+
+`ccx-clean-up-k8s` is a daily CronJob that removes leftover Kubernetes
+resources. A handful of one-shot Jobs also run at install and upgrade time —
+`ccx-migrate` and `ccx-stores-migrate` apply database schema migrations,
+`ccx-migrate-cloud-credentials` moves credentials to their current format, and
+`ccx-check-certificate-authority` validates the CA. Seeing these in
+`Completed` state is normal; seeing one in `Error` after an upgrade is not.
+
+:::note
+Pods in your namespace that do not appear above are usually from the `ccxdeps`
+chart — PostgreSQL (`acid-ccx-*`), NATS, Loki, Keycloak — or are specific to
+your environment rather than part of a standard CCX install.
+:::
 
 ## Dataplane
 

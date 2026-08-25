@@ -1,8 +1,12 @@
-# Installing CCX on OpenStack
+# Installing CCX supporting OpenStack
 
 *For laptop/desktop installation, see [Install CCX on a Laptop](CCX-Install-Laptop.md).*
 
-This tutorial walks you through installing CCX on OpenStack so it is accessible from a public domain. By the end, you will have a working CCX instance reachable at `ccx.example.com`, with ClusterControl available at `cc.example.com`.
+This tutorial walks you through installing CCX with OpenStack as its cloud
+provider, so it is accessible from a public domain. CCX itself runs in
+Kubernetes; OpenStack is where it provisions the database nodes. By the end you
+will have a working CCX instance reachable at `ccx.example.com`, with
+ClusterControl available at `cc.example.com`.
 
 :::note
 `cc.example.com` and `ccx.example.com` are placeholders. You can use any subdomain names you prefer — just replace every occurrence in the steps below.
@@ -26,6 +30,7 @@ Ensure your cluster meets these requirements before starting. See [K8S requireme
 | Requirement | Details |
 |---|---|
 | Subdomains | Two subdomains, e.g. `ccx.example.com` (end-user portal) and `cc.example.com` (admin portal). |
+| Worker node architecture | `x86_64`/`amd64`. The CCX container images are built for `linux/amd64` only; `arm64` nodes are not supported. |
 | Nginx Ingress Controller | Must have an `EXTERNAL-IP` assigned to its LoadBalancer service. |
 | Cert Manager | Must have a working `ClusterIssuer` (e.g. `letsencrypt-prod`). |
 | Persistent Volume / Storage Class | ~100Gi of storage for PVCs in this tutorial; more for production. |
@@ -53,7 +58,7 @@ victoria-metrics                             16Gi       <your-storage-class>
 | OpenStack RC file | Auth URL, project ID, username, password, and user domain. |
 | Project for CCX datastores | A dedicated project (e.g. `ccx-tenant`) where database VMs are deployed. |
 | Project quota | Sufficient quota for VMs, volumes, and floating IPs. |
-| Ubuntu 22.04 LTS cloud image | Used for database node VMs. |
+| Ubuntu 22.04 or 24.04 LTS cloud image | Used for database node VMs. 24.04 is recommended for new deployments. |
 | VM root volume | Minimum 20GB per VM. |
 | VM data volume | Minimum 80GB per VM. |
 | VM flavors | Minimum 2 vCPU / 4GB RAM recommended. |
@@ -88,7 +93,7 @@ kubectl get svc -n ingress-nginx
 
 ```
 NAME                       TYPE           CLUSTER-IP     EXTERNAL-IP       PORT(S)
-ingress-nginx-controller   LoadBalancer   10.108.22.0    146.190.177.145   80:31096/TCP,443:31148/TCP
+ingress-nginx-controller   LoadBalancer   10.108.22.0    203.0.113.10      80:31096/TCP,443:31148/TCP
 ```
 
 :::important
@@ -169,8 +174,8 @@ The `READY` column must show `True`.
 Create two DNS `A` records pointing to your ingress `EXTERNAL-IP`:
 
 ```
-A  146.190.177.145  ccx.example.com
-A  146.190.177.145  cc.example.com
+A  203.0.113.10  ccx.example.com
+A  203.0.113.10  cc.example.com
 ```
 
 - `ccx.example.com` — end-user portal
@@ -338,6 +343,16 @@ kubectl get secrets -n ccx
 
 Confirm both `openstack` and `openstack-s3` secrets appear in the list.
 
+:::important
+Both secrets must exist **before** you install the `ccx` chart in Step 6. Every
+secret named in `ccx.cloudSecrets` is checked at render time, and a missing one
+fails the install rather than degrading it.
+:::
+
+For a per-key reference of what each secret holds, see
+[OpenStack Credentials](Cloud-Providers/openstack.md#openstack-credentials) and
+[S3 Backup Storage](Cloud-Providers/openstack.md#s3-backup-storage).
+
 ---
 
 ## Step 5 — Prepare the OpenStack Configuration
@@ -351,7 +366,7 @@ You will need the following IDs and codes from your OpenStack project:
 | `floating_network_id` | ID of the public network used for floating IPs. |
 | `network_id` | ID of the private/internal network used for VM-to-VM communication. |
 | `project_id` | OpenStack project ID where datastores will be deployed. |
-| `image_id` | ID of the Ubuntu 22.04 LTS cloud image. |
+| `image_id` | ID of the Ubuntu 22.04 or 24.04 LTS cloud image. |
 | `instance_type` | Flavor code, e.g. `x4.2c4m.100g` (2 vCPU, 4GB RAM minimum). |
 | `volume_type` | Volume type name, e.g. `fastdisk`. Must match exactly in OpenStack. |
 | `region` | Region name, e.g. `nova` or `sto1`. |
@@ -406,16 +421,22 @@ Below is a minimal working example. You can add more instance types, regions, an
 ccxFQDN: ccx.example.com
 ccFQDN: cc.example.com
 cc:
-  cidr: 0.0.0.0/0
+  cidr: 203.0.113.0/24   # ClusterControl admin portal — restrict to your admin network
 cmon:
-  licence:  # Insert your licence key here
+  # Base64-encoded license key. Note the spelling: the chart reads `license`.
+  # `licence` is silently ignored — no error, and the license is never applied.
+  license:
 ccx:
-  cidr: 0.0.0.0/0
+  cidr: 0.0.0.0/0        # End-user portal — intended to be publicly reachable
   cloudSecrets:
     - openstack      # Must match the Kubernetes secret name from Step 4
     - openstack-s3
   env:
     DISABLE_ROLLBACK: "false"  # Set to "false" in production; "true" preserves failed deploys for debugging
+    # Datastore creation is blocked until both of these are disabled. Leave them
+    # enabled only if you have SMTP and billing configured.
+    REQUIRE_EMAIL_VERIFICATION: "false"
+    REQUIRE_SUBSCRIPTION: "false"
   ingress:
     ssl:
       clusterIssuer: letsencrypt-prod
@@ -469,7 +490,7 @@ ccx:
             project_id: 5b8e951e41f34b5394bb7cf7992a95de                # Replace with your value
             regions:
               sto1:
-                image_id: 936c8ba7-343a-4172-8eab-86dda97f12c5          # Replace with your Ubuntu 22.04 image ID
+                image_id: 936c8ba7-343a-4172-8eab-86dda97f12c5          # Replace with your Ubuntu 22.04 or 24.04 image ID
                 secgrp_name: ccx-common
 ```
 
@@ -478,7 +499,7 @@ ccx:
 ## Step 6 — Install CCX
 
 ```bash
-helm upgrade --install ccx s9s/ccx --debug --wait -f minimal-openstack.yaml
+helm upgrade --install ccx s9s/ccx --debug --wait -n ccx -f minimal-openstack.yaml
 ```
 
 Wait for the command to complete, then verify all pods are running:
@@ -495,6 +516,13 @@ Open `https://ccx.example.com/auth/register?from=ccx` in a browser and register 
 
 :::note
 Email notifications are not configured yet. After signing up, you can press **Back** to continue without email verification.
+
+Registering is only half of it: datastore creation is separately blocked until
+`REQUIRE_EMAIL_VERIFICATION` and `REQUIRE_SUBSCRIPTION` are disabled — the values
+file in Step 5 already sets both to `"false"`. If you built your own values file
+instead, add them now and re-run the Step 6 upgrade, or the deploy wizard will
+fail at its final step with `402 Payment Required`. See
+[Allowing datastore creation on a fresh install](Index.md#allowing-datastore-creation-on-a-fresh-install).
 :::
 
 Try deploying a test datastore. If it fails at approximately 8% or 16%, there is an infrastructure issue — see [Troubleshooting](#troubleshooting) below.
@@ -516,7 +544,7 @@ Datastore deployment typically fails due to:
 
 1. Check runner service logs:
    ```bash
-   kubectl logs ccx-runner-service-NNNN
+   kubectl logs -n ccx deploy/ccx-runner-service
    ```
 
 2. SSH into the deployed VM and inspect cloud-init logs:

@@ -14,11 +14,11 @@ OpenStack will be configured as the cloud provider.
 | Kubernetes                         | • Persistent Volume, Storage Class<br />• Nginx Ingress controller (The ingress controller must have an EXTERNAL-IP).<br />• External IP<br /><br />See [K8S requirements](Index.md#k8s-control-plane-requirements) for minimum size of cluster and K8S version, etc. |
 | Secrets Manager                    | K8S secrets                                                                                                    |
 | Openstack Credentials              | E.g an openstack RC file containing the auth urls, project id etc. |
-| Infrastructure Cloud               | • One "ccx-tenant" project<br />• VM flavors<br />• Attachable volumes<br />• Public Floating IPs (IPv4)<br />• Ubuntu 22.04 image |
+| Infrastructure Cloud               | • One "ccx-tenant" project<br />• VM flavors<br />• Attachable volumes<br />• Public Floating IPs (IPv4)<br />• Ubuntu 22.04 or 24.04 image (24.04 recommended) |
 | Space for PVCs                     | Make sure you ahve at least 500Gi ready for production environment. Initial setup will use less, but it's better to have it in case it's needed. Depending on how detailed monitoring soultion is needed, it might require more memory. |
 | S3 storage                         | For datastore backups and Operator DB backup                                                                   |
 | DNS Provider                       | DNS providers supported by [external-dns](Dynamic-DNS.md). In order to use dynamic dns config.                               |
-| Ubuntu 22.04LTS cloud image for VMs| Cloud image for VMs hosting database (i.e., db nodes/hosts)                                                    |
+| Ubuntu 22.04 or 24.04 LTS cloud image for VMs| Cloud image for VMs hosting database (i.e., db nodes/hosts). 24.04 is recommended for new deployments.        |
 | Root volume for VM                 | There must be at least a 40GB root volume on each VM                                                           |
 | Database volume on VM              | There must be at least 80GB data volume on each VM for database                                                |
 | Project for CCX datastores         | A global project for CCX datastores                                                                            |
@@ -74,7 +74,7 @@ The output should look like:
 
 ```
 NAME                                 TYPE           CLUSTER-IP      EXTERNAL-IP                                 PORT(S)                      AGE
-ingress-nginx-controller             LoadBalancer   10.108.22.0     146.190.177.145,2a03:b0c0:3:f0::9cb5:3000   80:31096/TCP,443:31148/TCP   5h40m
+ingress-nginx-controller             LoadBalancer   10.108.22.0     203.0.113.10,2001:db8:3:f0::9cb5:3000       80:31096/TCP,443:31148/TCP   5h40m
 ingress-nginx-controller-admission   ClusterIP      10.108.28.137   <none>                                      443/TCP                      5h40m
 ingress-nginx-controller-metrics     ClusterIP      10.108.13.85    <none>                                      9090/TCP                     5h40m
 ```
@@ -156,7 +156,7 @@ helm repo add jetstack https://charts.jetstack.io --force-update
 helm install cert-manager --namespace cert-manager --version xxx jetstack/cert-manager --set crds.enabled=true #switch xxx for the version you wish to install, making sure it's not lower than 1.18.0
 
 ```
-:::Note
+:::note
 When setting up production version of cert-manager, there are a few configuration parameter that needs to be addressed:
 `replicaCount` - by default it's set to 1. To make sure it's production ready, make sure it has 2 or 3 replicas to provide high availability.
 `podDisruptionBudget.enabled` - by default this is set to `false`. Make sure to change it to `true` if you changed `replicaCount` to be different than 1. 
@@ -227,11 +227,11 @@ If you get any errors in this process, go to the [Troubleshoting](./Production-O
 ### Setup DNS
 Ensure you have a DNS A record set up, pointing the EXTERNAL_IP to the domain you wish to install CCX on, e.g., `ccx.example.com` (this is the endpoint the end-users will access):
 
-`A 146.190.177.145  ccx.example.com`
+`A 203.0.113.10  ccx.example.com`
 
 Then also create a record for:
 
-`A 146.190.177.145  cc.example.com`
+`A 203.0.113.10  cc.example.com`
 
 `cc.example.com` will be the endpoint of ClusterControl where administrators will have detailed control and information about your datastores. We do no recommend that this endpoint it open directly to the public. 
 
@@ -511,7 +511,7 @@ At this stage, you must have the following information/resources created in your
 | `floating_network_id`| This is the public network. All instances must be assigned a public IP (read more below).                                                                    |
 | `network_id`         | This is the private network. You must create this in OpenStack.                                                                                               |
 | `project_id`         | The project ID where the resources will be deployed. This is your OpenStack project ID. All resources are deployed in the same OpenStack project.            |
-| `image_id`           | This image must be Ubuntu 22.04 of a recent patch level. Cloud-init will install the necessary tools on the image. Can be updated for new versions/patches.  |
+| `image_id`           | This image must be Ubuntu 22.04 or 24.04 of a recent patch level (24.04 recommended). Cloud-init will install the necessary tools on the image. Can be updated for new versions/patches.  |
 | `instance_type`      | Code for the instance type you will use, e.g., `x4.2c4m.100g`. Recommended: 2vCPU and 4GB minimum. Must match an existing OpenStack flavor.                   |
 | `volume_type`        | Code for the volume type you will use, e.g., `fastdisk`. Must match the OpenStack volume type name.                                                           |
 | `region`             | Name of the region, e.g., `nova` or `sto1`.                                                                                                                   |
@@ -599,12 +599,12 @@ A number of identifiers are case sensitive: `ccx.config.clouds[].regions[].code`
 
 ```yaml
 cc:
-  cidr: 0.0.0.0/0 #setup according to your network
+  cidr: 203.0.113.0/24 # ClusterControl admin portal — restrict to your admin network
 ccFQDN: cc.ccx.somedomain.com # dns name for ccx
 ccxFQDN: ccx.somedomain.com # dns name for cc
 ccx:
   cidr: 0.0.0.0/0 #setup according to your network
-  cloudSecrets: ccx # List of Kubernetes secrets containing cloud credentials.
+  cloudSecrets: # List of Kubernetes secrets containing cloud credentials.
   - openstack # This secret must exist in Kubernetes. See 'secrets-template.yaml' for reference.
   - openstack-s3
   - smtp #secret made from email step
@@ -794,7 +794,8 @@ ccx:
       replicas: 5 # Minimum is 3 that should be used in prduction. Prefferable is to have 5 or more
   userDomain: somedomain.com # domain used for databases. It has to match with ExternalDNS used one.
 cmon:
-  licence: xxx # insert licence here
+  license: xxx # Base64-encoded license key. Note the spelling: the chart reads
+               # `license`; `licence` is silently ignored and never applied.
 ```
 
 ## Install CCX

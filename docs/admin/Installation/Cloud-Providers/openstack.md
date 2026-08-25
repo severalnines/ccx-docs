@@ -14,7 +14,7 @@ To ensure full DBaaS functionality and seamless integration with OpenStack, CCX 
 
 #### Flavors/images for datastores
 
-CCX requires flavors built with Ubuntu 22.04 for the datastores.
+CCX requires flavors built with Ubuntu 22.04 or 24.04 for the datastores. Ubuntu 24.04 is recommended for new deployments.
 
 For a test/evaluation the following flavors are recommended:
 
@@ -167,7 +167,7 @@ openstack_vendors:
            from_port: 22
            ip_protocol: tcp
            to_port: 22
-         - cidr: 37.30.16.41/32
+         - cidr: x.x.x.x/32
            from_port: 1000
            ip_protocol: tcp
            to_port: 65535
