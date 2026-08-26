@@ -15,7 +15,7 @@ Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Contro
 CMON version: 2.4.0-23184
 
 ### Improvements
-- cmon `--pool` mode is now optional and disabled by default; unless explicitly enabled, the backend resolves the controller via `cmon-master` / a configured default controller instead of the dynamic pool
+- cmon `--pool` mode is now optional and disabled by default; unless explicitly enabled, the backend routes to a single controller (`DEFAULT_CONTROLLER_ID`, defaulting to `cmon-0.cmon-pool:9501`) instead of the dynamic pool
 - Increased default cmon resource requests (100m/1Gi → 1 CPU/2Gi) to better match observed load
 - Added a `cmon.extraConfig` Helm value for appending custom parameters to `cmon.cnf`
 - `store-internal-metrics-sd` now has access to the `USER_DOMAIN` setting, for correct DNS-based service discovery
