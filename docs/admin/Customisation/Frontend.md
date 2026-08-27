@@ -5,6 +5,10 @@ Integration with JWT can be used if you are white-labeling the UI and wish to in
 JWT allows a way to authenticate users from your service panel in CCX.
 Read more in the [JWT Authentication guide](JWT.md).
 
+## Theming and white-labeling
+Colours, the logo and the favicon can be changed without modifying the application.
+Read more in the [Theming and white-labeling guide](Theming.md).
+
 ## Environment Variables
 
 A number of variables is used to control the frontend. The enviroment variables are set under `ccx.services.uiapp` in the `values.yaml` for ccx.
@@ -54,7 +58,7 @@ A number of variables is used to control the frontend. The enviroment variables 
 - name: FE_AUTH_UI_APP_DISABLED
   value: "true" # set it to true if you don't want to use the built-in `ccx-ui-auth` app. FE_AUTH_APP_URL *must* be set for this in order to work.
 - name: FE_EXTERNAL_CSS_URL
-  value: "https://example.com/my.css" # CSS file URL that will be loaded and applied to the CCX UI, might be useful for theming/visual customisatons. Could also break the layout if not used with caution.
+  value: "https://example.com/my.css" # stylesheet loaded at runtime to re-brand the UI. See the Theming and white-labeling guide for the supported theme tokens.
 ```
 
 ### Example
