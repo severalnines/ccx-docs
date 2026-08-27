@@ -54,6 +54,7 @@ nav:
           - Index: admin/Installation/Index.md
           - Secrets: admin/Installation/Secrets.md
           - Cloud Providers: admin/Installation/Cloud-Providers.md
+          - OS Image Requirements: admin/Installation/OS-Image-Requirements.md
           - Configuring Helm Install: admin/Installation/Configuring-Helm-Install.md
           - Dynamic Dns: admin/Installation/Dynamic-DNS.md
           - Mysql Operator Installation: admin/Installation/Mysql-Operator-Installation.md
