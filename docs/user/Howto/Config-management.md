@@ -43,14 +43,6 @@ This is an example, and is subject to change and depends on the configuration of
    - **Description**: Defines the number of seconds the server waits for activity on a non-interactive connection before closing it.
    - **Max**: 28800 | **Min**: 3000 | **Default**: 28800
 
-## How to Change Parameters
-
-1. Navigate to the **DB Parameters** tab within the **Settings** section.
-2. Review the list of available parameters and their current values.
-3. Click on the **Edit Parameters** button in the upper-right corner.
-4. Adjust the values as necessary within the defined minimum and maximum limits.
-5. Once you’ve made the required changes, save the new configuration.
-
 :::note
 The latest saved settings are applied when adding a node (either as part of Scaling, during Lifecycle management, or during automatic repair).
 :::

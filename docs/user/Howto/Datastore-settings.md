@@ -1,8 +1,8 @@
 # Datastore Settings 
 
-In the **Settings** section of CCX, there are two primary configuration options: **General** and **DB Parameters**.
+In the settings section of your datastore, there are two primary configuration options: **General** and **DB Parameters**.
 
-The **General** settings section allows you to configure high-level settings for your datastore. This may include basic configurations such as system name, storage options, and general system behavior.
+The **General** settings section allows you to configure high-level settings for your datastore. This may include basic configurations such as **Datastore Name**, storage options, and general system behavior.
 
 The **DB Parameters** section is used for fine-tuning your database. Here, you can adjust specific database settings such as memory allocation, query behavior, or performance-related parameters. These settings allow for a deeper level of control and optimization of the datastore for your specific workload.
 
@@ -41,10 +41,10 @@ CCX provides a convenient **Auto Scaling Storage Size** feature that ensures you
 
 ![img](../images/autoscale_storage.png)
 
-When **Auto Scale** is turned **ON**, the system will automatically increase the storage size by **20%** when the used space exceeds **85%** of the allocated storage. This proactive scaling ensures that your system maintains sufficient space for operations, preventing service interruptions due to storage constraints.
+When **Auto Scale** is turned **ON**, the system will automatically increase the storage size by **20%** when the used space exceeds **75%** of the allocated storage. This proactive scaling ensures that your system maintains sufficient space for operations, preventing service interruptions due to storage constraints.
 
 ### Key Benefits:
-- **Automatic scaling** by 20% when usage exceeds 85%.
+- **Automatic scaling** by 20% when usage exceeds 75%.
 - Ensures consistent performance and reliability.
 - Eliminates the need for manual storage interventions.
 

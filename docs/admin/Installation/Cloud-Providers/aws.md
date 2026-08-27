@@ -251,4 +251,4 @@ These secrets must be included in the ccx-values file under the `ccx.cloudSecret
 Backups are automatically stored in s3 buckets 
 
 
-These setup allows CCX to fully integrate with AWS, offering automated provisioning, management, and backup of database instances using AWS's powerful cloud services.
+This setup allows CCX to fully integrate with AWS, offering automated provisioning, management, and backup of database instances using AWS's powerful cloud services.

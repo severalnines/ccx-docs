@@ -131,7 +131,7 @@
 <rect x="912" y="530" width="436" height="40" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
 <rect x="912" y="530" width="3.5" height="40" rx="1.75" fill="#22d3ee"/>
 <text x="926" y="547.0" font-size="11.5" font-weight="600" fill="#e6edf3">database</text>
-<text x="926" y="563.0" font-size="10.5" fill="#7d8899">MySQL · MariaDB · PostgreSQL · Redis · MSSQL</text>
+<text x="926" y="563.0" font-size="10.5" fill="#7d8899">MySQL · MariaDB · PostgreSQL · Valkey · MSSQL</text>
 <rect x="912" y="576" width="436" height="40" rx="7" fill="#1c2230" stroke="#30363d" stroke-width="1"/>
 <rect x="912" y="576" width="3.5" height="40" rx="1.75" fill="#22d3ee"/>
 <text x="926" y="593.0" font-size="11.5" font-weight="600" fill="#e6edf3">exporters</text>

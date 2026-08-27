@@ -219,7 +219,6 @@ CCX requires the ability to create and manage firewall rules for the VMs. This i
 
 #### Volume Management:
 CCX must be able to acquire and attach storage volumes to the VMs for database storage. Only volumes with configurable size are supported, allowing users to define storage capacity according to their specific database needs.
-The CCX requirements from Cloudstack:
 
 ## Guest template requirements
 
@@ -465,7 +464,7 @@ At present, CCX supports a single zone per region, ensuring streamlined resource
 CCX supports only disks with configurable, custom sizes. This flexibility allows users to specify disk capacities according to the specific needs of their database workloads, ensuring efficient storage allocation and scaling based on demand.
 
 ### Deployer configuration file ccx-values-deployer
-The cloudstack provides has to defined under the `cloudstack_vendors`, here is an example
+The cloudstack provider has to be defined under `cloudstack_vendors`, here is an example
 ```yaml
         cloudstack_vendors:
           mycloud:
@@ -576,7 +575,7 @@ and management, not every possible monitoring topology.
 We store Cloudstack credentials in the Kubernetes secrets.
 In the Kubernetes secret we will have two values for API_KEY and API_SECRET_KEY
 
-The name of this variables should as follows &lt;name_of_the_cloudstack_vendor&gt;_CLOUDSTACK_API_KEY and &lt;name_of_the_cloudstack_vendor&gt;_CLOUDSTACK_API_SECRET_KEY.
+The name of this variables should be as follows &lt;name_of_the_cloudstack_vendor&gt;_CLOUDSTACK_API_KEY and &lt;name_of_the_cloudstack_vendor&gt;_CLOUDSTACK_API_SECRET_KEY.
 
 In our case the cloudstack vendor is called `mycloud` so we need to create secret named `mycloud`
 ```yaml

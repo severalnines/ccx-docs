@@ -156,7 +156,7 @@ For example
 
 Above is an example of a VMware config.
 
-The one difference between the OpenStack and AWS ones is that here, we specify the CPU (number of CPUs) and memory (in GiB), for instance, types. They are purely artificial. VMware does not have a concept of instance types.
+The one difference between the VMware config and the OpenStack/AWS ones is that here, we specify the CPU (number of CPUs) and memory (in GiB) for instance types. They are purely artificial. VMware does not have a concept of instance types.
 
 ## VMWare custom values
 
@@ -247,7 +247,7 @@ This will create a 1 node postgres cluster which will be attached to network pub
 
 Apart from vmware deployer configuration options we can provide two additional ones `cpu` and `memory`.
 
-This options will provide custom values for compute resources.
+These options will provide custom values for compute resources.
 
 Below is the full list of the fields that we can put inside `custom_values`
 

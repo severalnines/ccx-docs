@@ -4,7 +4,7 @@ The **Backup and Restore** feature provides users with the ability to create, vi
 
 ## Backup List View
 
-In the **Backup** tab, users can view all the backups that have been created. The table provides essential information about each backup, such as:
+In the **All Backups** tab, users can view all the backups that have been created. The table provides essential information about each backup, such as:
 
 - **Method**: The tool or service used to perform the backup (e.g., `mariabackup`).
 - **Type**: The type of backup (e.g., full backup).
@@ -31,7 +31,7 @@ The schedule table shows the details of each scheduled backup, including:
 - **Method**: The tool or service used to perform the backup (e.g., `mariabackup`).
 - **Type**: The type of backup, such as `incremental` or `full`.
 - **Status**: The current state of the scheduled backup (e.g., `Active`).
-- **Created**: The date and time when the backup schedule was created.
+- **Host**: The host that the backup schedule runs against.
 - **Recurrence**: The schedule's frequency, showing the cron expression used for the schedule (e.g., `TZ=UTC 5 * * *`).
 - **Action**: Options to manage the schedule, such as **Pause** or **Edit**.
 
@@ -69,7 +69,7 @@ Editing or pausing a schedule will not affect the current backups already create
 
 ## Restore Backup
 
-To restore a backup, navigate to the **Backup** tab, find the desired backup, and select the **Restore** action from the **Actions** menu. This opens the restore dialog, where the following information is displayed:
+To restore a backup, navigate to the **All Backups** tab, find the desired backup, and select the **Restore** action from the **Actions** menu. This opens the restore dialog, where the following information is displayed:
 
 - **Backup ID**: The unique identifier of the backup.
 - **Type**: The type of backup (e.g., full backup).

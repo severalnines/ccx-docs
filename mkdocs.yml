@@ -101,7 +101,7 @@ nav:
           - Database User Management: user/Howto/Database-User-management.md
           - Database Db Management: user/Howto/Database-Db-management.md
           - Firewall: user/Howto/Firewall.md
-          - Event Viewer: user/Howto/Event-viewer.md
+          - Events & Logs: user/Howto/Event-viewer.md
           - Terraform Provider: user/Howto/Terraform-provider.md
       - Reference:
           - Datastore Statuses: user/Reference/Datastore-Statuses.md

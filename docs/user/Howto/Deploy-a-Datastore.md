@@ -4,9 +4,8 @@
 
 ## MySQL or MariaDB
 
-MySQL 8.4 is recommended if you are migrating from an existing MySQL system.
+MySQL 8.0 is recommended if you are migrating from an existing MySQL system.
 MariaDB 11.4 is recommended if you are migrating from an existing MariaDB system.
-MySQL 8.4 offers a more sophisticated privilege system which makes database administration easier, wheres
 
 ### High-availability
 
@@ -35,20 +34,6 @@ High-availability is facilitated with PostgreSQL streaming replication
 ### Scaling
 
 PostgreSQL can be created with one node (no high-availability) but can later be scaled with read-replicas.
-
-## Cache22 (aka Redis)
-
-_deprecated_
-
-Cache22 is an in-memory data structure store.
-
-### High-availability
-
-High-availability is facilitated with Redis replication and Redis Sentinels.
-
-### Scaling
-
-Redis can be created with one node (no high-availability) but can later be scaled with read-replicas.
 
 ## Valkey
 
