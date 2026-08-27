@@ -2,7 +2,7 @@
 
 CCX will keep your system updated with the latest security patches for both the operating system and the database software.
 
-You will be informed when there is a pending update and you have two options:
+There is no dedicated lifecycle management view to navigate to. Instead, you will be informed directly in the UI, via a notification on the datastore, when there is a pending update, and you have two options:
 
 - Apply the update now
 - Schedule a time for the update

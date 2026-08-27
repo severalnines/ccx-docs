@@ -128,7 +128,7 @@ A parameter group cannot be deleted if it is assigned to a datastore.
 
 ### 6. Synchronization
 
-Once a parameter group is assigned to a datastore, the parameters are automatically synchronized. The status of synchronization (e.g., Pending or Synced) is visible in the **DB Parameters** tab of the datastore, and also in the Event Viewer.
+Once a parameter group is assigned to a datastore, the parameters are automatically synchronized. The status of synchronization (e.g., Pending or Synced) is visible in the **DB Parameters** tab of the datastore, and also in **Events & Logs**.
 
 ![sync parameter groups](../images/pg_showing_sync_in_progress_pending.png)
 

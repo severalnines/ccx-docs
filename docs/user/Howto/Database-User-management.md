@@ -5,7 +5,6 @@ Privileges and implementation is specific to the type of database. Admin users c
 * MySQL
 * MariaDb
 * Valkey
-* Cache 22 
 * Microsoft SQL Server
 
 
