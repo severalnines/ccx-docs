@@ -18,7 +18,7 @@ For simplicity, AWS will be configured as the cloud provider.
 ### Ingress Controller
 You must have a working and correctly setup ingress controller. 
 
-Make sure that you have ingress controller in your cluster and you are able to setup externally facing load balancers and that either your domain na    me points to the ingress IP or you have external DNS configured in your cluster.
+Make sure that you have ingress controller in your cluster and you are able to setup externally facing load balancers and that either your domain name points to the ingress IP or you have external DNS configured in your cluster.
 
 By default CCX is configured to use `nginx` as the ingress controller  (`ingressClassName: nginx`).
 

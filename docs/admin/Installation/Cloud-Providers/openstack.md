@@ -23,7 +23,7 @@ For a test/evaluation the following flavors are recommended:
 
 #### Floating IPs
 
-To Create a pool of floating IPs. Each VM requires a floating IP. CCX must be able to allocate and manage public IP addresses for database instances, ensuring network connectivity.
+CCX requires a pool of floating IPs to be created. Each VM requires a floating IP. CCX must be able to allocate and manage public IP addresses for database instances, ensuring network connectivity.
 
 #### Storage Volumes
 
@@ -185,15 +185,16 @@ openstack_vendors:
 
 ## OpenStack Credentials
 
-The credentials required for OpenStack API access should be stored in Kubernetes secrets. The required values are
+The credentials required for OpenStack API access should be stored in Kubernetes secrets. The required values are:
 
-> MYCLOUD_USERNAME,
-
-    MYCLOUD_PASSWORD,
-    MYCLOUD_PROJECT_ID,
-    MYCLOUD_AUTH_URL,
-    MYCLOUD_USER_DOMAIN
-    MYCLOUD_USER_DOMAIN_NAME
+```
+MYCLOUD_USERNAME
+MYCLOUD_PASSWORD
+MYCLOUD_PROJECT_ID
+MYCLOUD_AUTH_URL
+MYCLOUD_USER_DOMAIN
+MYCLOUD_USER_DOMAIN_NAME
+```
 
 Here is an example of how to store OpenStack credentials in Kubernetes:
 

@@ -46,7 +46,7 @@ Runs in a pod called `cmon`.
 The controller is responsible for:
 
 - creating the datastore by setting up according to the configuration, e.g ensuring that replication links are created, backup schedules are configured.
-. maintains the status of the datastore.
+- maintains the status of the datastore.
 - applying configuration changes on the datastore, such as database parameter changes issues by the end-user.
 - creating backups.
 - executing restore.

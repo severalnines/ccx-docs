@@ -260,7 +260,7 @@ The following prerequisites are needed:
 - PostgresSQL Database, aka CCX DB, is used to store CCX (Control Plane) metadata. See [Postgres Operator installation guide](Postgres-Operator-Installation.md).
 - Prometheus compatible monitoring server. If you don't have one, please visit the [Observability installation guide](Observability.md).
 
-This prequisite can be installed using ccxdeps. Dependencies required for CCX are created as child charts inside ccxdeps.
+This prerequisite can be installed using ccxdeps. Dependencies required for CCX are created as child charts inside ccxdeps.
 By default only the ingress-nginx controller and the external-dns is not enabled in ccxdeps.
 
 You can enable by setting it to true by using below command.
