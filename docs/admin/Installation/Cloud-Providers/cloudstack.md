@@ -599,8 +599,27 @@ The secret has to be included in the ccx-values under the cloudSecrets.
 ```
 
 ### S3 backup storage
-For the Cloudstack S3 backup, we need to create a Kubernetes secret with S3 storage informations and credentials.
-`CLOUDSTACK_S3_INSECURE_SSL` can be set to true if you don't have a valid TLS cert for your s3 endpoint.
+
+CCX requires S3-compatible object storage for CloudStack datastores. It is used
+for the per-datastore backup bucket, for the backups ClusterControl uploads, and
+— for PostgreSQL datastores running wal-g — for continuous WAL archiving.
+
+CCX talks to it over the S3 API and is not tied to any particular
+implementation. Common choices are:
+
+* A cloud provider's object storage, such as AWS S3.
+* A hosted S3-compatible service, for example OpenStack Swift with its S3 API
+  enabled.
+* Self-hosted object storage, such as MinIO, SeaweedFS or Ceph RADOS Gateway.
+
+Any of these works provided it meets the endpoint and certificate requirements
+below. MinIO is used as the worked example in
+[How to set up MinIO](#how-to-set-up-minio), but nothing in CCX is
+MinIO-specific.
+
+#### Configuring the credentials
+
+Create a Kubernetes secret with the S3 storage information and credentials.
 
 ```yaml
 apiVersion: v1
@@ -616,13 +635,196 @@ metadata:
 type: Opaque
 ```
 
-:::note
-  For the key MYCLOUD_S3_ENDPOINT: base64_endpoint, if you are using an AWS S3 bucket, the endpoint should be provided without the https details.
-:::
-
 The secret has to be included in the ccx-values under the cloudSecrets.
 
 ```yaml
   cloudSecrets:
     - cloudstack-s3
 ```
+
+#### Endpoint requirements
+
+These apply to every S3-compatible endpoint, not just to MinIO.
+
+:::note Endpoint format
+`MYCLOUD_S3_ENDPOINT` must be a bare `host[:port]` — **without a scheme**. An
+endpoint containing `http://` or `https://` is rejected outright
+(`Endpoint url cannot have fully qualified paths`), and CCX always connects to
+it over **HTTPS**. A plain-HTTP S3 endpoint is not supported: bucket creation
+fails at deploy time.
+:::
+
+For PostgreSQL datastores there is one further requirement: the endpoint must
+present a certificate that the **datastore nodes** trust — one chaining to a
+root in the stock Ubuntu CA bundle. See
+[Certificate requirements](#certificate-requirements-for-postgresql-datastores).
+
+This is why AWS S3 and hosted S3-compatible services work with no extra
+configuration: their certificates are publicly trusted. Self-hosted storage
+needs the same property.
+
+#### `S3_INSECURE_SSL` and what it does not cover
+
+Set `MYCLOUD_S3_INSECURE_SSL` to `true` when your S3 endpoint serves a
+certificate that does not chain to a publicly trusted root — a self-signed
+certificate, or one signed by your own internal CA. This is common with
+self-hosted object storage.
+
+The flag is honoured by:
+
+* CCX's own bucket management (creating and deleting the per-datastore bucket).
+* The cloud credentials CCX registers with ClusterControl, which cover
+  ClusterControl's S3 client and pgBackRest.
+
+The flag is **not** honoured by **wal-g**, which PostgreSQL datastores use for
+WAL archiving and for `walgfull` / `walgincr` backups when `USE_WALG=true`.
+wal-g runs on the datastore node and uploads to S3 directly, verifying the
+endpoint certificate against the node's system trust store. wal-g has no
+option to skip certificate verification, so there is nothing for CCX to
+forward to it.
+
+If this affects you, the symptoms are:
+
+* Backup jobs fail on the first part upload with
+  `tls: failed to verify certificate: x509: certificate signed by unknown authority`.
+* WAL archiving silently never succeeds. On the primary,
+  `select archived_count, failed_count from pg_stat_archiver` shows
+  `archived_count` stuck at 0 with `failed_count` climbing, and `pg_wal` grows
+  without bound because PostgreSQL will not recycle unarchived segments.
+
+#### Certificate requirements for PostgreSQL datastores
+
+Because wal-g cannot be told to skip verification, the S3 endpoint must present
+a certificate that the datastore nodes already trust. A self-signed certificate
+plus `S3_INSECURE_SSL=true` is **not** sufficient for PostgreSQL datastores.
+
+For a self-hosted endpoint you do **not** need it to be reachable from the
+internet. An ACME `DNS-01` challenge validates by publishing a DNS TXT record,
+so a certificate can be issued for a name whose A record points at a private
+address.
+
+**Prerequisites**
+
+* A DNS name on a domain you control, e.g. `s3.internal.example.com`. A bare IP
+  address will not work — no public CA issues certificates for IP addresses in
+  private ranges.
+* The datastore nodes must be able to resolve that name. They use the resolvers
+  configured on the guest network, so a public record is normally enough.
+* An ACME client with the DNS plugin for your DNS provider.
+
+Verify from a datastore node, not from your workstation — your workstation may
+trust things the node does not:
+
+```bash
+openssl s_client -connect <endpoint> </dev/null 2>/dev/null | grep "Verify return code"
+# Verify return code: 0 (ok)
+```
+
+Then confirm the archiver on the primary is healthy:
+
+```sql
+select archived_count, failed_count, last_archived_wal from pg_stat_archiver;
+```
+
+`archived_count` should be climbing and `failed_count` static.
+
+:::warning Self-signed certificates are not supported for PostgreSQL
+If you cannot obtain a publicly trusted certificate, PostgreSQL datastores
+backed by wal-g will not work against that endpoint. Installing your CA into
+each datastore node's trust store is a manual workaround only: it does not
+survive node replacement and is not applied to nodes added by scaling. The
+supported configuration is a certificate that the nodes trust out of the box.
+:::
+
+#### How to set up MinIO
+
+This section shows how to configure MinIO as the S3 storage for CCX. MinIO is
+one option among several — the endpoint and certificate requirements above
+apply to any S3-compatible endpoint, and the steps below are simply their MinIO
+equivalents.
+
+**1. Publish the DNS record**
+
+Point the name at MinIO's address. A private address in a public zone is fine:
+
+```
+s3.internal.example.com.  A  10.0.0.13
+```
+
+**2. Issue the certificate with a DNS-01 challenge**
+
+With certbot and, for example, the Cloudflare plugin:
+
+```bash
+certbot certonly \
+  --dns-cloudflare \
+  --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
+  -d s3.internal.example.com
+```
+
+Use the plugin matching your provider (`--dns-route53`, `--dns-google`, and so
+on), or `acme.sh` with the equivalent DNS API. The result lands in
+`/etc/letsencrypt/live/s3.internal.example.com/`.
+
+**3. Install the certificate into MinIO**
+
+MinIO reads `public.crt` and `private.key` from its certificate directory. That
+directory is `${HOME}/.minio/certs` by default, or whatever `--certs-dir` is set
+to in `MINIO_OPTS` — check the unit before copying:
+
+```bash
+systemctl cat minio | grep -E 'ExecStart|EnvironmentFile'
+```
+
+Copy **`fullchain.pem`**, not `cert.pem`:
+
+```bash
+install -o minio-user -g minio-user -m 0644 \
+  /etc/letsencrypt/live/s3.internal.example.com/fullchain.pem \
+  /etc/minio/certs/public.crt
+install -o minio-user -g minio-user -m 0600 \
+  /etc/letsencrypt/live/s3.internal.example.com/privkey.pem \
+  /etc/minio/certs/private.key
+systemctl restart minio
+```
+
+:::important Use the full chain
+`cert.pem` contains only the leaf. MinIO serves exactly the chain you give it, so
+a missing intermediate produces a certificate that verifies from your workstation
+— which may have the intermediate cached — while failing on a freshly deployed
+datastore node. `fullchain.pem` avoids this.
+:::
+
+**4. Automate renewal**
+
+ACME certificates are short-lived, so renewal must be automated. Restart MinIO as
+part of the renewal so the new certificate is definitely picked up, and attach a
+deploy hook so this is not a manual step:
+
+```bash
+certbot renew --deploy-hook '/usr/local/sbin/minio-install-cert'
+```
+
+where that script performs the two `install` commands and the `systemctl restart`
+from step 3. Without this, backups and WAL archiving break silently the day the
+certificate expires.
+
+**5. Point CCX at the name**
+
+Update the S3 secret to use the DNS name — still bare `host[:port]`, no scheme —
+and drop the insecure flag:
+
+```yaml
+  MYCLOUD_S3_ENDPOINT: <base64 of "s3.internal.example.com:9000">
+  MYCLOUD_S3_INSECURE_SSL: <base64 of "false">
+```
+
+Existing datastores keep the old endpoint in their on-node wal-g configuration
+and in the credentials registered with ClusterControl. Changing the endpoint
+affects newly deployed datastores; existing ones must be updated or redeployed.
+
+**6. Verify**
+
+Run the two checks from
+[Certificate requirements](#certificate-requirements-for-postgresql-datastores)
+from a datastore node.
