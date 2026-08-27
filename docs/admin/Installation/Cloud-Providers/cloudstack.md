@@ -599,7 +599,27 @@ The secret has to be included in the ccx-values under the cloudSecrets.
 ```
 
 ### S3 backup storage
-For the Cloudstack S3 backup, we need to create a Kubernetes secret with S3 storage informations and credentials.
+
+CCX requires S3-compatible object storage for CloudStack datastores. It is used
+for the per-datastore backup bucket, for the backups ClusterControl uploads, and
+— for PostgreSQL datastores running wal-g — for continuous WAL archiving.
+
+CCX talks to it over the S3 API and is not tied to any particular
+implementation. Common choices are:
+
+* A cloud provider's object storage, such as AWS S3.
+* A hosted S3-compatible service, for example OpenStack Swift with its S3 API
+  enabled.
+* Self-hosted object storage, such as MinIO, SeaweedFS or Ceph RADOS Gateway.
+
+Any of these works provided it meets the endpoint and certificate requirements
+below. MinIO is used as the worked example in
+[How to set up MinIO](#how-to-set-up-minio), but nothing in CCX is
+MinIO-specific.
+
+#### Configuring the credentials
+
+Create a Kubernetes secret with the S3 storage information and credentials.
 
 ```yaml
 apiVersion: v1
@@ -622,6 +642,10 @@ The secret has to be included in the ccx-values under the cloudSecrets.
     - cloudstack-s3
 ```
 
+#### Endpoint requirements
+
+These apply to every S3-compatible endpoint, not just to MinIO.
+
 :::note Endpoint format
 `MYCLOUD_S3_ENDPOINT` must be a bare `host[:port]` — **without a scheme**. An
 endpoint containing `http://` or `https://` is rejected outright
@@ -630,12 +654,21 @@ it over **HTTPS**. A plain-HTTP S3 endpoint is not supported: bucket creation
 fails at deploy time.
 :::
 
+For PostgreSQL datastores there is one further requirement: the endpoint must
+present a certificate that the **datastore nodes** trust — one chaining to a
+root in the stock Ubuntu CA bundle. See
+[Certificate requirements](#certificate-requirements-for-postgresql-datastores).
+
+This is why AWS S3 and hosted S3-compatible services work with no extra
+configuration: their certificates are publicly trusted. Self-hosted storage
+needs the same property.
+
 #### `S3_INSECURE_SSL` and what it does not cover
 
 Set `MYCLOUD_S3_INSECURE_SSL` to `true` when your S3 endpoint serves a
 certificate that does not chain to a publicly trusted root — a self-signed
 certificate, or one signed by your own internal CA. This is common with
-self-hosted MinIO.
+self-hosted object storage.
 
 The flag is honoured by:
 
@@ -659,20 +692,16 @@ If this affects you, the symptoms are:
   `archived_count` stuck at 0 with `failed_count` climbing, and `pg_wal` grows
   without bound because PostgreSQL will not recycle unarchived segments.
 
-#### Configuring MinIO for PostgreSQL datastores
+#### Certificate requirements for PostgreSQL datastores
 
-Because wal-g cannot be told to skip verification, the S3 endpoint must present a
-certificate that the **datastore nodes** already trust — one chaining to a root in
-the stock Ubuntu CA bundle. A self-signed certificate plus `S3_INSECURE_SSL=true`
-is **not** sufficient for PostgreSQL datastores.
+Because wal-g cannot be told to skip verification, the S3 endpoint must present
+a certificate that the datastore nodes already trust. A self-signed certificate
+plus `S3_INSECURE_SSL=true` is **not** sufficient for PostgreSQL datastores.
 
-This is why AWS S3 and hosted S3-compatible providers work with no extra
-configuration: their certificates are publicly trusted. A self-hosted MinIO needs
-the same property, which you get from a normal ACME certificate.
-
-You do **not** need MinIO to be reachable from the internet. An ACME **DNS-01**
-challenge validates by publishing a DNS TXT record, so the certificate can be
-issued for a name whose A record points at a private address.
+For a self-hosted endpoint you do **not** need it to be reachable from the
+internet. An ACME `DNS-01` challenge validates by publishing a DNS TXT record,
+so a certificate can be issued for a name whose A record points at a private
+address.
 
 **Prerequisites**
 
@@ -682,6 +711,37 @@ issued for a name whose A record points at a private address.
 * The datastore nodes must be able to resolve that name. They use the resolvers
   configured on the guest network, so a public record is normally enough.
 * An ACME client with the DNS plugin for your DNS provider.
+
+Verify from a datastore node, not from your workstation — your workstation may
+trust things the node does not:
+
+```bash
+openssl s_client -connect <endpoint> </dev/null 2>/dev/null | grep "Verify return code"
+# Verify return code: 0 (ok)
+```
+
+Then confirm the archiver on the primary is healthy:
+
+```sql
+select archived_count, failed_count, last_archived_wal from pg_stat_archiver;
+```
+
+`archived_count` should be climbing and `failed_count` static.
+
+:::warning Self-signed certificates are not supported for PostgreSQL
+If you cannot obtain a publicly trusted certificate, PostgreSQL datastores
+backed by wal-g will not work against that endpoint. Installing your CA into
+each datastore node's trust store is a manual workaround only: it does not
+survive node replacement and is not applied to nodes added by scaling. The
+supported configuration is a certificate that the nodes trust out of the box.
+:::
+
+#### How to set up MinIO
+
+This section shows how to configure MinIO as the S3 storage for CCX. MinIO is
+one option among several — the endpoint and certificate requirements above
+apply to any S3-compatible endpoint, and the steps below are simply their MinIO
+equivalents.
 
 **1. Publish the DNS record**
 
@@ -763,29 +823,8 @@ Existing datastores keep the old endpoint in their on-node wal-g configuration
 and in the credentials registered with ClusterControl. Changing the endpoint
 affects newly deployed datastores; existing ones must be updated or redeployed.
 
-**6. Verify from a datastore node**
+**6. Verify**
 
-Verify on a node, not on your workstation — your workstation may trust things the
-node does not:
-
-```bash
-openssl s_client -connect s3.internal.example.com:9000 </dev/null 2>/dev/null \
-  | grep "Verify return code"
-# Verify return code: 0 (ok)
-```
-
-Then confirm the archiver on the primary is healthy:
-
-```sql
-select archived_count, failed_count, last_archived_wal from pg_stat_archiver;
-```
-
-`archived_count` should be climbing and `failed_count` static.
-
-:::warning Self-signed certificates are not supported for PostgreSQL
-If you cannot obtain a publicly trusted certificate, PostgreSQL datastores backed
-by wal-g will not work against that endpoint. Installing your CA into each
-datastore node's trust store is a manual workaround only: it does not survive
-node replacement and is not applied to nodes added by scaling. The supported
-configuration is a certificate that the nodes trust out of the box.
-:::
+Run the two checks from
+[Certificate requirements](#certificate-requirements-for-postgresql-datastores)
+from a datastore node.
