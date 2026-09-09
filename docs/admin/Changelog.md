@@ -11,7 +11,14 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.57.2
+Release date: 28-08-2026
+
+### Improvements
+- Added a pre-upgrade job that labels existing cmon config secrets (`com.severalnines.cmon.etc.cmon.d.cmon-*`) with `com.severalnines.cmon=true` so they can be reliably identified in the cluster
+
 ## Release Notes - CCX - v1.57.1
+Release date: 25-08-2026
 CMON version: 2.4.0-23184
 
 ### Improvements
@@ -34,6 +41,7 @@ CMON version: 2.4.0-23184
 :::note
 There are changes to the ccx UI in this version. In order for everything to be operational, `ingress contriller (nginx)` needs to have `X-Frame-Options: SAMEORIGIN` header set. If it's not set, there is a possibility that some of the new frontend components will not function properly.
 :::
+Release date: 27-04-2026
 
 ### New Features
 - Email address verification flow
@@ -79,16 +87,19 @@ There are changes to the ccx UI in this version. In order for everything to be o
 - Security fixes: unsanitized database input (SNYK), backup ID exposed in API, datastore logs publicly accessible, hidden configuration file written to root directory
 
 ## Release Notes - CCX - v1.56.8
+Release date: 26-06-2026
 
 ### Bugs
 - Deleted datastores could remain in the admin billing usage report with an empty "Deleted At" (`deleted_at = null`) and keep being billed after removal. Datastore deletion now reliably finalizes billing — it sets `deleted_at` and stops counting instance and storage usage at the moment of removal — even when a later best-effort cleanup step (such as deleting backups or DNS records) fails. Usage rows left behind by datastores that were already removed are no longer reported as active.
 
 ## Release Notes - CCX - v1.56.7
+Release date: 18-06-2026
 
 ### Improvements
 - Admin billing usage report (`GET /admin/datastores/billing/usage/{type}`) now exposes a new `customer_reference` field (CSV column "Customer Reference") containing the partner-side user identifier (the JWT `sub` claim) alongside the existing `customer_id`. The field is populated for JWT-authenticated users and omitted for users without an external ID; `customer_id` is unchanged.
 
 ## Release Notes - CCX - v1.56.5
+Release date: 03-04-2026
 CMON version: 2.3.4-18413
 
 ### Bugs
@@ -101,6 +112,7 @@ done
 
 
 ## Release Notes - CCX - v1.56.4
+Release date: 24-03-2026
 CMON version: 2.3.4-18168
 
 ### Pre-requisites
