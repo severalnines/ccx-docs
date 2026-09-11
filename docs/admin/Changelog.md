@@ -11,6 +11,12 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.57.3
+Release date: 11-09-2026
+
+### Improvements
+- Added a `ccx.services.stores_service.extraVolumes` Helm value for mounting existing Secrets or ConfigMaps as extra volumes on the ccx-stores pod
+
 ## Release Notes - CCX - v1.57.2
 Release date: 28-08-2026
 
