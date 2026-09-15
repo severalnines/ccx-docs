@@ -78,19 +78,19 @@ Help me get a **quick-start CCX install** running on Kubernetes, with **Apache C
 - `availability_zones[].code` is the CloudStack **zone UUID** and `network_id` is the guest network UUID. CCX supports one zone per region.
 - `instance_types[].type` is a **service offering UUID**. Take `cpu` from the offering. `ram` is in GB, while CloudStack reports `memory` in MiB, so divide by 1024 (4096 → 4).
 - `volume_types[].code` is a **disk offering UUID with `iscustomized=true`**.
-- `database_vendors[].name` must match exactly: `mariadb`, `percona`, `postgres`, `redis`, `microsoft`, `valkey_sentinel`. A database with no entry fails with `no rules defined for database <name>`.
+- **Every database enabled in `ccx.config.databases` needs a `database_vendors` entry with the same name.** Deploying a database without one fails with `no rules defined for database <name>`. The chart enables `mariadb`, `percona`, `postgres`, `valkey_sentinel` and `microsoft` by default. To offer fewer, copy the chart's full `databases` list into the values file (Helm replaces lists) and set `enabled: false` on the rest.
 - Keep `ccx.env.USE_PUBLIC_IPS: "true"`, and keep the image tags from the tarball.
 
 ## Phase 0: Questions
 
 Ask a few at a time:
 
-- `ccxFQDN` (e.g. `ccx.example.com`), `ccFQDN` (e.g. `cc.example.com`), and optionally `ccx.userDomain` plus an external-dns provider for datastore endpoints.
+- `ccxFQDN` (e.g. `ccx.example.com`) and `ccFQDN` (e.g. `cc.example.com`). DNS names for datastores (`ccx.userDomain`) are optional: only use them if external-dns is already running, or if I name an existing Kubernetes secret (or workload identity) for its DNS provider. Otherwise skip them for the quick start.
 - TLS: a cert-manager ClusterIssuer (`ccx.ingress.ssl.clusterIssuer`), or existing certificates. With existing certificates, `ccxFQDN` uses the secret in `ccx.ingress.ssl.secretName`, and the admin portal uses a secret named exactly `<ccFQDN>`.
 - Admin portal allowlist (`ccx.ingress.whitelist`, empty = public), and the admin email (`ccx.admin.email`). The password comes from `CCX_ADMIN_PASSWORD` or is generated.
 - Kubernetes context, namespace (default `ccx`), storage class.
 - CloudStack API URL, `verify_ssl`, cloud code and name, region (code, name, city, country, continent).
-- Databases to offer, and the end-user CIDRs allowed to reach them.
+- Databases to offer (from the chart's `ccx.config.databases`), and the end-user CIDRs allowed to reach them.
 - S3 for backups: endpoint `host[:port]`, bucket, and whether its TLS certificate is valid.
 - Paths to the chart tarball and the service account key.
 
@@ -100,7 +100,7 @@ Ask a few at a time:
 - `kubectl get storageclass`: if there is no default class, or I picked a different one, find the storage class keys in both charts and set them in Phases 4 and 6.
 - Note which of ingress-nginx, cert-manager and external-dns are missing.
 - **Namespace:** check `kubectl get namespace <ns>`. If it's missing, create it after I confirm. Every later step needs it.
-- **Outbound IP:** with my OK, run a short-lived pod on **each node** (`nodeName` override) that runs `curl -s ifconfig.me`. The firewall rules need every distinct IP.
+- **Source IP as CloudStack sees it:** the firewall rules must allow the address the cluster's traffic appears from **on the path to the CloudStack public range**. With my OK, run a short-lived pod on **each node** (`nodeName` override). If the public range is routed privately (e.g. a static route), use the `src` from `ip route get <an IP in the public range>`. Otherwise use `curl -s ifconfig.me`. Record every distinct IP.
 
 ## Phase 2: CloudStack (read-only)
 
@@ -119,7 +119,7 @@ A stock Ubuntu 24.04 image fails on CloudStack. Follow the docs' **Guest templat
 
 - Unpack the tarball. `ccx.imagePullSecret` is used by the chart templates even if `values.yaml` doesn't list it. Check with `grep -rn imagePullSecret`.
 - With a small script, write a `0600` `.dockerconfigjson` for `eu.gcr.io` (username `_json_key`, password = the key file's contents). Then run `kubectl create secret generic gcr-pull -n <ns> --type=kubernetes.io/dockerconfigjson --from-file=.dockerconfigjson=<file>`, and delete the file.
-- Install `ccxdeps` from the tarball. Add `ingressController.enabled=true` or `cert-manager.enabled=true` only for what's missing, plus external-dns if I asked for it. Wait for all pods.
+- Install `ccxdeps` from the tarball. Add `ingressController.enabled=true` or `cert-manager.enabled=true` only for what's missing, plus external-dns only if I gave its provider credentials secret (and set its provider values). Wait for all pods.
 - If the ClusterIssuer I named doesn't exist, create it as the OpenStack tutorial shows. For existing certificates, both TLS secrets must exist in `<ns>`: the one in `ccx.ingress.ssl.secretName` (covering `ccxFQDN`) and one named `<ccFQDN>`.
 - Show the A records for both FQDNs pointing at the ingress `EXTERNAL-IP`, and wait until they resolve.
 
@@ -151,10 +151,10 @@ Check it with `kubectl get secret mycloud -n <ns> -o json | jq '.data | map_valu
 Write `ccx-cloudstack-values.yaml`:
 
 - `ccxFQDN`, `ccFQDN`, TLS, `ccx.ingress.whitelist`, `ccx.admin.email`, storage class if needed. No secrets go in this file.
-- `ccx.cloudSecrets: [mycloud]`, `ccx.imagePullSecret: gcr-pull`, `ccx.userDomain`.
+- `ccx.cloudSecrets: [mycloud]`, `ccx.imagePullSecret: gcr-pull`, `ccx.userDomain` if used, and `ccx.config.databases` if I'm not offering all the defaults.
 - `ccx.env`: `USE_PUBLIC_IPS: "true"`, `REQUIRE_EMAIL_VERIFICATION: "false"`, `REQUIRE_SUBSCRIPTION: "false"`.
 - `ccx.config.clouds`: one `type: cloudstack` cloud with instance types, volume types, network type `public` (`in_vpc: false`), and a region with one AZ (zone UUID + `network_id`).
-- `ccx.services.deployer.config.cloudstack_vendors.mycloud`: `url`, `verify_ssl`, `no_expunge: false`, `template_id`, `zone`, `network_id`, and one `database_vendors` entry per database:
+- `ccx.services.deployer.config.cloudstack_vendors.mycloud`: `url`, `verify_ssl`, `no_expunge: false`, `template_id`, `zone`, `network_id`, and one `database_vendors` entry per **enabled** database:
 
 ```
 security_groups:
@@ -162,7 +162,7 @@ security_groups:
   - { cidr: <end-user CIDR>,          ip_protocol: tcp, from_port: 5432, to_port: 5432 }   # the database port only
 ```
 
-Ports: 3306 for MariaDB and Percona, 5432 for PostgreSQL, 6379 for Redis and Valkey, 1433 for MSSQL. Never open `1-65535` to end users.
+Ports: 3306 for MariaDB and Percona, 5432 for PostgreSQL, 6379 for Valkey, 1433 for MSSQL. Never open `1-65535` to end users.
 
 The chart only accepts the license and admin password as values. Generate `ccx-secrets.values.yaml` (`0600`, never shown) from `CMON_LICENSE` and `CCX_ADMIN_PASSWORD` with a script, containing `cmon.license` and `ccx.admin.password`. Tell me to keep it private and out of git, because upgrades need it again.
 
@@ -176,7 +176,7 @@ Then:
 
 ## Phase 7: Smoke test
 
-Register at `https://<ccxFQDN>/auth/register?from=ccx` and deploy a 3-node PostgreSQL datastore while watching `kubectl logs -f -n <ns> deploy/ccx-runner-service`. Check the datastore reaches Available. Then delete it and confirm its VMs, IPs and volumes are gone.
+Register at `https://<ccxFQDN>/auth/register?from=ccx` and deploy a 3-node datastore of one of the enabled databases (PostgreSQL if it's enabled) while watching `kubectl logs -f -n <ns> deploy/ccx-runner-service`. Check the datastore reaches Available. Then delete it and confirm its VMs, IPs and volumes are gone.
 
 If something fails:
 
