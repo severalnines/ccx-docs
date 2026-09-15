@@ -53,3 +53,17 @@ a:hover {
 [data-theme='dark'] .themed-diagram--light {
   display: none;
 }
+
+/* "Beta" badge after a sidebar entry: add "className": "sidebar-badge-beta"
+   to the category's _category_.json. Matches Infima's badge--warning. */
+.sidebar-badge-beta > .menu__list-item-collapsible > .menu__link::after {
+  content: 'Beta';
+  margin-left: 0.5rem;
+  padding: 0 0.4rem;
+  border-radius: var(--ifm-badge-border-radius);
+  background-color: var(--ifm-color-warning);
+  color: var(--ifm-color-white);
+  font-size: 0.7rem;
+  font-weight: var(--ifm-font-weight-bold);
+  line-height: 1.4rem;
+}

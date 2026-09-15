@@ -1,3 +1,4 @@
 {
-  "label": "Cloudstack"
+  "label": "Cloudstack",
+  "className": "sidebar-badge-beta"
 }

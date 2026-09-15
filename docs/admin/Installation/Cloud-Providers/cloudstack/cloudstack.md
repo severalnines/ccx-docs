@@ -1,5 +1,8 @@
+---
+title: Cloudstack (Beta)
+---
 
-# Cloudstack
+# Cloudstack <span className="badge badge--warning">Beta</span>
 
 :::tip
 
