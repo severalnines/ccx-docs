@@ -88,7 +88,7 @@ Help me get a **quick-start CCX install** running on Kubernetes, with **Apache C
 Ask a few at a time:
 
 - `ccxFQDN` (e.g. `ccx.example.com`) and `ccFQDN` (e.g. `cc.example.com`). DNS names for datastores (`ccx.userDomain`) are optional: only use them if external-dns is already running, or if I name an existing Kubernetes secret (or workload identity) for its DNS provider. Otherwise skip them for the quick start.
-- TLS: a cert-manager ClusterIssuer (`ccx.ingress.ssl.clusterIssuer`), or existing certificates. With existing certificates, `ccxFQDN` uses the secret in `ccx.ingress.ssl.secretName`, and the admin portal uses a secret named exactly `<ccFQDN>`.
+- TLS: a cert-manager ClusterIssuer (`ccx.ingress.ssl.clusterIssuer`), or existing certificates. Also ask whether the domains are public and reachable from the internet. With existing certificates, `ccxFQDN` uses the secret in `ccx.ingress.ssl.secretName`, and the admin portal uses a secret named exactly `<ccFQDN>`.
 - Admin portal allowlist (`ccx.ingress.whitelist`, empty = public), and the admin email (`ccx.admin.email`). The password comes from `CCX_ADMIN_PASSWORD` or is generated.
 - Kubernetes context, namespace (default `ccx`), storage class.
 - CloudStack API URL, `verify_ssl`, cloud code and name, region (code, name, city, country, continent).
@@ -122,7 +122,7 @@ A stock Ubuntu 24.04 image fails on CloudStack. Follow the docs' **Guest templat
 - Unpack the tarball. `ccx.imagePullSecret` is used by the chart templates even if `values.yaml` doesn't list it. Check with `grep -rn imagePullSecret`.
 - With a small script, write a `0600` `.dockerconfigjson` for `eu.gcr.io` (username `_json_key`, password = the key file's contents). Then run `kubectl create secret generic gcr-pull -n <ns> --type=kubernetes.io/dockerconfigjson --from-file=.dockerconfigjson=<file>`, and delete the file.
 - Install `ccxdeps` from the tarball. Add `ingressController.enabled=true` or `cert-manager.enabled=true` only for what's missing, plus external-dns only if I gave its provider credentials secret (and set its provider values). Wait for all pods.
-- If the ClusterIssuer I named doesn't exist, create it as the OpenStack tutorial shows. For existing certificates, both TLS secrets must exist in `<ns>`: the one in `ccx.ingress.ssl.secretName` (covering `ccxFQDN`) and one named `<ccFQDN>`.
+- If the ClusterIssuer I named doesn't exist, create it after I confirm. For public domains, use Let's Encrypt as the OpenStack tutorial shows. For private domains (e.g. `.local`, or a lab behind NAT), Let's Encrypt can't issue, so use a self-signed ClusterIssuer (`spec.selfSigned: {}`) or a CA ClusterIssuer from my own CA secret, and tell me browsers will warn until that CA is trusted. For existing certificates, both TLS secrets must exist in `<ns>`: the one in `ccx.ingress.ssl.secretName` (covering `ccxFQDN`) and one named `<ccFQDN>`.
 - Show the A records for both FQDNs pointing at the ingress `EXTERNAL-IP`, and wait until they resolve.
 
 ## Phase 5: Cloud secret
