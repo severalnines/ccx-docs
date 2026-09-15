@@ -1,5 +1,12 @@
 
 # Cloudstack
+
+:::tip
+
+Prefer a guided install? Use the [Claude prompt](claude-prompt.md) to have Claude Code walk you through this page step by step.
+
+:::
+
 ##  Overview
 By supporting CloudStack cloud providers, CCX provides a robust platform to facilitate the deployment and management of database instances as part of DBaaS offerings. 
 This integration leverages CloudStack's infrastructure management capabilities, enabling users to automate database provisioning, scaling, and maintenance, all while 
@@ -219,6 +226,23 @@ CCX requires the ability to create and manage firewall rules for the VMs. This i
 
 #### Volume Management:
 CCX must be able to acquire and attach storage volumes to the VMs for database storage. Only volumes with configurable size are supported, allowing users to define storage capacity according to their specific database needs.
+
+#### Root Disk:
+We recommend a root disk of at least **20 GB** for every datastore node. Database data lives on the separate data volume, but the root disk holds the OS, packages, logs and tooling.
+
+CCX requests a 20 GB root disk when it deploys a node, but the service offering decides the size:
+
+- If the service offering sets `rootdisksize`, **the offering's value wins**. On Apache CloudStack 4.22.1, an offering with `rootdisksize=20` gave a 20 GB root disk for a 30 GB request.
+- If the offering leaves `rootdisksize` unset, the node gets the size CCX requests.
+- The resulting root disk must be at least as large as the template's root disk.
+
+Before adding a service offering to `instance_types`, check its root disk size:
+
+```
+cmk list serviceofferings filter=name,id,cpunumber,memory,rootdisksize
+```
+
+Use offerings whose effective root disk (their `rootdisksize`, or 20 GB when empty) is 20 GB or more.
 
 ## Guest template requirements
 

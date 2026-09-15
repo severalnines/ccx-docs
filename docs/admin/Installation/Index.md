@@ -17,7 +17,7 @@ chart default and the shortest path to a working system.
 
 :::tip Installing for another cloud?
 - **OpenStack** — follow [Installing CCX supporting OpenStack](Tutorial-openstack.md) instead. It covers the OpenStack credentials, networks and values file end to end.
-- **CloudStack** — see [Cloudstack](Cloud-Providers/cloudstack.md), and note the [guest template requirement](Cloud-Providers/cloudstack.md#guest-template-requirements), which blocks every deploy until it is met.
+- **CloudStack** — see [Cloudstack](Cloud-Providers/cloudstack/cloudstack.md), and note the [guest template requirement](Cloud-Providers/cloudstack/cloudstack.md#guest-template-requirements), which blocks every deploy until it is met.
 - **Other providers** — see [CCX Cloud Provider Configuration](Cloud-Providers/Cloud-Providers.md).
 
 The Kubernetes, chart and configuration sections further down this page apply to
@@ -294,7 +294,7 @@ cloud-init status --long      # must show "status: done", never "degraded"
 cloud-init status; echo $?    # must be 0
 ```
 
-See [Guest template requirements](Cloud-Providers/cloudstack.md#guest-template-requirements)
+See [Guest template requirements](Cloud-Providers/cloudstack/cloudstack.md#guest-template-requirements)
 for the patch and the template build procedure. AWS and OpenStack are unaffected.
 :::
 

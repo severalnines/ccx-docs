@@ -53,7 +53,15 @@ nav:
       - Installation:
           - Index: admin/Installation/Index.md
           - Secrets: admin/Installation/Secrets.md
-          - Cloud Providers: admin/Installation/Cloud-Providers.md
+          - Cloud Providers:
+              - Overview: admin/Installation/Cloud-Providers/Cloud-Providers.md
+              - Aws: admin/Installation/Cloud-Providers/aws.md
+              - Openstack: admin/Installation/Cloud-Providers/openstack.md
+              - Cloudstack:
+                  - Cloudstack: admin/Installation/Cloud-Providers/cloudstack/cloudstack.md
+                  - Claude Prompt: admin/Installation/Cloud-Providers/cloudstack/claude-prompt.md
+              - Vmware: admin/Installation/Cloud-Providers/vmware.md
+              - Gcp: admin/Installation/Cloud-Providers/gcp.md
           - OS Image Requirements: admin/Installation/OS-Image-Requirements.md
           - Configuring Helm Install: admin/Installation/Configuring-Helm-Install.md
           - Dynamic Dns: admin/Installation/Dynamic-DNS.md

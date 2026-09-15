@@ -15,7 +15,7 @@ We support integration with several leading Cloud Service Providers (CSPs), incl
 
 - [Amazon Web Services (AWS)](Installation/Cloud-Providers/aws.md)
 - [OpenStack](Installation/Cloud-Providers/openstack.md)
-- [CloudStack](Installation/Cloud-Providers/cloudstack.md)
+- [CloudStack](Installation/Cloud-Providers/cloudstack/cloudstack.md)
 - [VMWare](Installation/Cloud-Providers/vmware.md)
 - [Google Cloud (GCP)](Installation/Cloud-Providers/gcp.md)
 ### Database Support
