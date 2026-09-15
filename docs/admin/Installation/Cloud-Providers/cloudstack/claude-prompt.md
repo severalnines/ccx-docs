@@ -1,10 +1,10 @@
 ---
-title: Install CCX on CloudStack with Claude (Beta)
+title: Install CCX supporting CloudStack with Claude (Beta)
 sidebar_label: Claude prompt
 sidebar_class_name: sidebar-badge-beta
 ---
 
-# Install CCX on CloudStack with Claude <span className="badge badge--warning">Beta</span>
+# Install CCX supporting CloudStack with Claude <span className="badge badge--warning">Beta</span>
 
 This page contains a ready-made prompt for [Claude Code](https://claude.com/claude-code) that gets a quick-start CCX install running with CloudStack as the cloud provider. It follows the [CloudStack guide](cloudstack.md), asks for your domains, networks and instance types, reads credentials from environment variables, looks up the CloudStack IDs with `cmk`, and waits for your approval before changing anything.
 
