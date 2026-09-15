@@ -55,8 +55,10 @@ a:hover {
 }
 
 /* "Beta" badge after a sidebar entry: add "className": "sidebar-badge-beta"
-   to the category's _category_.json. Matches Infima's badge--warning. */
-.sidebar-badge-beta > .menu__list-item-collapsible > .menu__link::after {
+   to a category's _category_.json, or sidebar_class_name: sidebar-badge-beta
+   to a doc's front matter. Matches Infima's badge--warning. */
+.sidebar-badge-beta > .menu__list-item-collapsible > .menu__link::after,
+.sidebar-badge-beta > .menu__link:not(.menu__link--sublist)::after {
   content: 'Beta';
   margin-left: 0.5rem;
   padding: 0 0.4rem;
