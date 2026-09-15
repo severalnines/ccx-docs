@@ -11,6 +11,29 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.57.4
+Release date: 15-09-2026
+CMON version: 2.4.0-23957
+
+### Bugs
+- Fixed cmon failover hanging indefinitely, or promoting a replica that had not applied its relay log, when GTID waits ran with no timeout and ambiguous wait results were misread as "caught up";
+- Fixed a race in `getCurrentMaster` during cluster restore-and-recovery
+- A running mysqld recovery abort during replication recovery is now correctly reported as a failure instead of succeeding silently
+- A connection failure is now logged once per error instead of once per retry attempt, reducing log spam
+- Hosts whose `server_node` update failed are now re-queued instead of being dropped
+- Controller health ping now reflects cmon database connectivity instead of only HA state
+- Reboots are now verified using a boot marker instead of SSH reachability
+- Fixed automatic seeding failing in Availability Groups with "Request Denied"
+- MSSQL: the grants string now reports account rights, database size is now reported from the data files instead of the log, and databases can now be refreshed/dropped
+- Various DB growth job scheduling and logging fixes
+- `ssh_acquire_tty` setting is now effective and inheritable
+- Cluster info cache auto-adjust is now logged at INFO instead of WARNING
+- The `disable_readonly` job no longer loops indefinitely re-sending itself when nothing is writable for a reason other than a flagged primary (e.g. the primary is down)
+- Fixed a datastore billing close-out being re-applied on every retry, which could massively over-bill compute and storage usage after a failed cluster removal
+- Reduced the apt retry budget in cloud-init so a node fails fast against a slow/unresponsive package mirror instead of stalling boot for up to ~30 minutes per repository
+- Backups are now paused during node reboot, add-node, and restore operations
+- Fixed the volume type selector not rendering in the datastore creation wizard when restoring a backup onto a different cloud provider that offers different storage types
+
 ## Release Notes - CCX - v1.57.3
 Release date: 11-09-2026
 
