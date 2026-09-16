@@ -85,11 +85,15 @@ export CCX_ADMIN_PASSWORD=...    # optional, generated if unset
 # matching questions; leave them unset and it asks instead.
 export CLOUDSTACK_API_URL=http://cloudstack.example.com:8080/client/api
 export S3_ENDPOINT=minio.example.com:9000   # host[:port], no http:// prefix
-export S3_BUCKET=ccx-backups
 export S3_INSECURE=false                    # true only for a self-signed cert - see the caution below
 ```
 
 The `CLOUDSTACK_*` names are the ones the [Apache CloudStack Terraform provider](https://github.com/apache/cloudstack-terraform-provider) uses, so an existing environment usually works unchanged. The prompt also accepts `CS_URL`, `CS_APIKEY` and `CS_SECRET` as aliases.
+
+There is deliberately no bucket variable. CCX creates one bucket per datastore,
+named `ccx-<datastore uuid>`, so there is nothing for you to name or pre-create.
+`MYCLOUD_S3_BUCKETNAME` exists in the cloud secret but is read only when deleting
+a datastore, to decide where to look for its backups.
 
 To keep them out of your shell history, put the lines in a `0600` file and `source` it.
 
@@ -169,7 +173,6 @@ Help me get a **quick-start CCX install** running on Kubernetes, with **Apache C
 - **Endpoints, optionally exported** in the same shell. These are **not** secrets, so read them, show me the value, and ask me to confirm rather than asking me to type it again. If one is unset, ask for it in Phase 0:
   - `CLOUDSTACK_API_URL` (alias: `CS_URL`) - full URL ending in `/client/api`.
   - `S3_ENDPOINT` - `host[:port]` with **no scheme**. If it starts with `http://` or `https://`, strip that, use the rest, and tell me you did. CCX always reaches S3 over **HTTPS**, so the scheme carries no information and a plain-HTTP endpoint will not work.
-  - `S3_BUCKET` - the bucket name.
   - `S3_INSECURE` - `true` when the S3 certificate is self-signed or invalid. It maps **directly** to `MYCLOUD_S3_INSECURE_SSL`; do not invert it.
 
 ## Rules
@@ -206,14 +209,14 @@ Ask a few at a time:
 - Kubernetes context, namespace (default `ccx`), storage class.
 - CloudStack API URL (skip if `CLOUDSTACK_API_URL` is set - show it and confirm), `verify_ssl`, cloud code and name, region (code, name, city, country, continent).
 - Databases to offer (from the chart's `ccx.config.databases`), and the end-user CIDRs allowed to reach them.
-- S3 for backups: endpoint `host[:port]`, bucket, and whether its TLS certificate is valid. Skip whichever of these `S3_ENDPOINT`, `S3_BUCKET` and `S3_INSECURE` already answer - show the values and confirm them in one go. If I have no S3-compatible storage yet, say that MinIO is the usual choice for a lab and point me at the **S3 backup storage** section of the CloudStack guide.
+- S3 for backups: endpoint `host[:port]` and whether its TLS certificate is valid. Skip whichever of these `S3_ENDPOINT` and `S3_INSECURE` already answer - show the values and confirm them in one go. Do not ask me for a bucket name; see below. If I have no S3-compatible storage yet, say that MinIO is the usual choice for a lab and point me at the **S3 backup storage** section of the CloudStack guide.
 
   Then check the endpoint before we build anything on it, because both failures below surface much later as broken backups:
 
   - `curl -sSI --max-time 10 https://<endpoint>` - it must answer over **HTTPS**. If only plain HTTP answers, stop and tell me: CCX always connects over HTTPS and bucket creation will fail at deploy time.
   - If the host part is a **bare IP address**, warn me that no public CA issues certificates for private IPs, so PostgreSQL datastores cannot work against it.
   - Confirm the credentials actually work before building on them, with a signed request (AWS SigV4) rather than an unauthenticated one: `curl -sk --aws-sigv4 "aws:amz:us-east-1:s3" -u <key>:<secret> https://<endpoint>/`. A `200` means valid. Do this even when a key looks implausibly short - length proves nothing either way.
-  - The bucket named in `S3_BUCKET` does **not** need to exist. CCX creates one bucket per datastore, named `ccx-<datastore uuid>`, and `MYCLOUD_S3_BUCKETNAME` is only consulted when cleaning backups up at delete time. Do not pre-create it or treat a `404` on it as an error.
+  - **Do not ask me for a bucket, and do not create one.** CCX creates one bucket per datastore, named `ccx-<datastore uuid>`, and cmon creates it on first upload. `MYCLOUD_S3_BUCKETNAME` is read only at delete time, to decide where to look for a datastore's backups, and nothing validates it - so leave it out of the secret unless I ask for it. A `404` on any bucket is not an error.
 - The chart tarball path (ask for this first) and, only if the tarball has no `gcr.yaml`, the service account key path.
 
 ## Phase 1: Kubernetes
@@ -285,7 +288,6 @@ stringData:
   MYCLOUD_S3_ENDPOINT: <$S3_ENDPOINT, scheme stripped, or the host[:port] I gave you>
   MYCLOUD_S3_ACCESSKEY: $S3_ACCESS_KEY
   MYCLOUD_S3_SECRETKEY: $S3_SECRET_KEY
-  MYCLOUD_S3_BUCKETNAME: <$S3_BUCKET, or the bucket I gave you>
   MYCLOUD_S3_INSECURE_SSL: <$S3_INSECURE, or "true" if the S3 certificate is self-signed or invalid, else "false">
 ```
 
