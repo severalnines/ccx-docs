@@ -35,7 +35,7 @@ export CCX_ADMIN_PASSWORD=...    # optional, generated if unset
 export CLOUDSTACK_API_URL=http://cloudstack.example.com:8080/client/api
 export S3_ENDPOINT=minio.example.com:9000   # host[:port], no http:// prefix
 export S3_BUCKET=ccx-backups
-export S3_INSECURE=false                    # true only for a self-signed cert - see the caution below
+export S3_INSECURE=false                    # true for a self-signed or invalid S3 certificate
 ```
 
 The `CLOUDSTACK_*` names are the ones the [Apache CloudStack Terraform provider](https://github.com/apache/cloudstack-terraform-provider) uses, so an existing environment usually works unchanged. The prompt also accepts `CS_URL`, `CS_APIKEY` and `CS_SECRET` as aliases.
@@ -49,22 +49,6 @@ setup mistake. `CLOUDSTACK_API_URL` is a full URL ending in `/client/api`, while
 `S3_ENDPOINT` is a bare `host[:port]` with no scheme, because that is what CCX
 writes into `MYCLOUD_S3_ENDPOINT`. The prompt strips a leading `http://` or
 `https://` from `S3_ENDPOINT` for you and tells you it did.
-
-:::
-
-:::caution PostgreSQL needs a trusted S3 certificate
-
-CCX always reaches S3 over HTTPS, so a plain-HTTP endpoint does not work. Beyond
-that, `S3_INSECURE=true` covers CCX's own bucket management and the credentials
-it registers with ClusterControl, but **not wal-g**, which PostgreSQL datastores
-use for WAL archiving. A self-signed certificate, or a bare IP address that no
-public CA will issue for, leaves PostgreSQL backups failing with
-`x509: certificate signed by unknown authority` while `pg_wal` grows unchecked.
-
-The prompt checks for this in Phase 0 and tells you before you build on it. For
-the fix - a DNS name plus a DNS-01 issued certificate, which works even for a
-private address - see
-[S3 backup storage](cloudstack.md#s3-backup-storage) in the CloudStack guide.
 
 :::
 
@@ -145,11 +129,10 @@ Ask a few at a time:
 - Databases to offer (from the chart's `ccx.config.databases`), and the end-user CIDRs allowed to reach them.
 - S3 for backups: endpoint `host[:port]`, bucket, and whether its TLS certificate is valid. Skip whichever of these `S3_ENDPOINT`, `S3_BUCKET` and `S3_INSECURE` already answer - show the values and confirm them in one go. If I have no S3-compatible storage yet, say that MinIO is the usual choice for a lab and point me at the **S3 backup storage** section of the CloudStack guide.
 
-  Then check the endpoint before we build anything on it, because both failures below surface much later as broken backups:
+  Then check the endpoint before we build anything on it, because these surface much later as broken backups:
 
   - `curl -sSI --max-time 10 https://<endpoint>` - it must answer over **HTTPS**. If only plain HTTP answers, stop and tell me: CCX always connects over HTTPS and bucket creation will fail at deploy time.
-  - If the host part is a **bare IP address**, warn me that no public CA issues certificates for private IPs, so PostgreSQL datastores cannot work against it.
-  - If `S3_INSECURE` is `true` and PostgreSQL is one of the databases I am enabling, warn me that **wal-g does not honour that flag**. WAL archiving then fails silently with `x509: certificate signed by unknown authority` and `pg_wal` grows without bound. The fix is a DNS name with a publicly trusted certificate, as the CloudStack guide's S3 section describes. Ask whether I want to fix S3 first or smoke-test with a non-PostgreSQL database.
+  - If the host part is a **bare IP address**, warn me that no public CA issues certificates for private IPs, so the endpoint needs `S3_INSECURE=true` or a DNS name.
 - Paths to the chart tarball and the service account key.
 
 ## Phase 1: Kubernetes
@@ -237,7 +220,7 @@ Then:
 
 ## Phase 7: Smoke test
 
-Register at `https://<ccxFQDN>/auth/register?from=ccx` and deploy a 3-node datastore of one of the enabled databases while watching `kubectl logs -f -n <ns> deploy/ccx-runner-service`. Prefer PostgreSQL, unless the Phase 0 S3 check warned that wal-g cannot verify the endpoint's certificate - then pick another enabled database and tell me why. Check the datastore reaches Available. Then delete it and confirm its VMs, IPs and volumes are gone.
+Register at `https://<ccxFQDN>/auth/register?from=ccx` and deploy a 3-node datastore of one of the enabled databases while watching `kubectl logs -f -n <ns> deploy/ccx-runner-service`. Prefer PostgreSQL. Check the datastore reaches Available. Then delete it and confirm its VMs, IPs and volumes are gone.
 
 If something fails:
 
@@ -249,7 +232,6 @@ If something fails:
 - `ImagePullBackOff` → there's a problem with `gcr-pull`.
 - `Missing secret ... cloudSecrets` → the secret isn't in `<ns>`.
 - `Endpoint url cannot have fully qualified paths` → a scheme leaked into `MYCLOUD_S3_ENDPOINT`.
-- `x509: certificate signed by unknown authority` on a backup → wal-g doesn't honour `S3_INSECURE_SSL`; the endpoint needs a trusted certificate.
 
 Finish with the URLs, where the admin login is (the `admin-users` secret), the IDs used, and a reminder that **`apt upgrade cloud-init` on a node reverts the template patch.**
 ````
