@@ -35,7 +35,7 @@ the non-strict anti-affinity type.
 | A **public IP range** with headroom: one address per node plus the virtual router, console proxy and secondary storage VM. | `cmk list publicipaddresses zoneid=<zone> state=Free listall=true` counts the free addresses | [Public IP capacity](#public-ip-capacity) |
 | A **route from the CCX control plane** to that public range, and a known egress address for the control plane. The control plane reaches nodes only through static NAT, and its egress CIDR goes into every vendor's `security_groups`. | From a Kubernetes node: `ip route get <an address in the public range>`; for the egress address ask your network team or check what a test VM sees connecting in | [Which rules you need](#which-rules-you-need-and-why) |
 | An **account with API keys** that owns the guest network. CCX deploys VMs, acquires IPs, sets static NAT, creates firewall rules, volumes, tags, SSH keypairs and affinity groups as that account. | `cmk list accounts name=<account>`; generate keys under the account's user | [Credentials](#cloudstack-credentials) |
-| One **service offering per instance type** you want to sell, with an effective root disk of at least 20 GB. Its `cpunumber` and `memory` must match the display values in `instance_types`; CCX does not check. If it sets `rootdisksize`, that wins over the size CCX requests. | `cmk list serviceofferings filter=name,id,cpunumber,memory,rootdisksize` | [Root disk](#root-disk) |
+| One **service offering per instance type** you want to sell, with an effective root disk of at least 20 GB. Its `cpunumber` and `memory` must match the display values in `instance_types`; CCX does not check. Watch the unit: CloudStack reports `memory` in **MiB** while `instance_types[].ram` is in **GB**, so a 4096 MiB offering is `ram: 4`. If it sets `rootdisksize`, that wins over the size CCX requests. | `cmk list serviceofferings filter=name,id,cpunumber,memory,rootdisksize` | [Root disk](#root-disk) |
 | A **custom-size disk offering** for data volumes. Fixed-size offerings are not supported. Its id becomes `volume_types[].code`. | `cmk list diskofferings` shows `iscustomized: true` | [Configuration](#ccx-cloudstack-configuration) |
 | A **guest template** built from Ubuntu 24.04 with the cloud-init patch, registered with `sshkeyenabled: true` and `passwordenabled: false`. A stock cloud image fails every deploy. | `cmk list templates templatefilter=executable id=<template_id>` shows `isready: true`, `sshkeyenabled: true` | [Guest template requirements](#guest-template-requirements) |
 | The **`non-strict host anti-affinity`** group type, if you want the nodes of a datastore spread across hypervisors. Without it CCX deploys with a warning and no spreading. | `cmk list affinitygrouptypes` | [Node placement](#node-placement-and-anti-affinity) |
@@ -277,6 +277,14 @@ Configure a DNS domain for the zone. Without one, `host_fqdn` and
 user's connection string breaks whenever a node is replaced. With a domain, users
 get stable names — the same way OpenStack deployments are run.
 
+Check the zone itself, not the guest network. A zone with no domain configured
+omits the `domain` key from `cmk list zones` entirely rather than showing it
+empty, which is easy to read as "fine". The guest network's own
+`networkdomain` — `cs2cloud.internal` on a default isolated network — is a
+CloudStack default and does **not** satisfy this. Datastores still deploy and
+reach `STARTED` without a zone domain; the symptom is that `database_endpoint`
+comes back empty for every one of them.
+
 ### Guest template
 
 The one genuinely CloudStack-specific prerequisite: a stock Ubuntu cloud image
@@ -477,12 +485,12 @@ To add a cloudstack providers we need to add new section under `clouds:` in the 
         instance_types:
           - type: 00000000-0000-0000-0000-000000000000 # The uuid of the service offering
             cpu: 2 # This value will be displayed to inform user about the CPU, it has to match the service offering
-            ram: 2 # This value will be displayed to inform user about the CPU, it has to match the service offering
+            ram: 2 # GB, shown to the user; must match the offering's memory / 1024 (2048 MiB -> 2)
             disk_size: 0
             name: Small
           - type: 00000000-0000-0000-0000-000000000000 # The uuid of the service offering 
             cpu: 16 # This value will be displayed to inform user about the CPU, it has to match the service offering
-            ram: 16 # This value will be displayed to inform user about the CPU, it has to match the service offering
+            ram: 16 # GB, shown to the user; must match the offering's memory / 1024 (16384 MiB -> 16)
             disk_size: 0
             name: Big
         volume_types:

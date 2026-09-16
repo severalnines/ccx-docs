@@ -81,6 +81,9 @@ export S3_SECRET_KEY=...
 export CMON_LICENSE=...          # base64-encoded license
 export CCX_ADMIN_PASSWORD=...    # optional, generated if unset
 
+# Identity - optional, not secret
+export CCX_ADMIN_EMAIL=you@example.com   # admin portal login; the prompt asks if unset
+
 # Endpoints - optional, and not secret. Set them and the prompt skips the
 # matching questions; leave them unset and it asks instead.
 export CLOUDSTACK_API_URL=http://cloudstack.example.com:8080/client/api
@@ -96,6 +99,15 @@ named `ccx-<datastore uuid>`, so there is nothing for you to name or pre-create.
 a datastore, to decide where to look for its backups.
 
 To keep them out of your shell history, put the lines in a `0600` file and `source` it.
+
+:::warning
+
+Revoke these access keys when the install is finished. They stay valid after the
+run, and anything that can read the shell they were exported from - including
+Claude Code - can reach your CloudStack account and your object storage with
+them. Rotate the CloudStack API key pair and the S3 credentials once CCX is up.
+
+:::
 
 :::note
 
@@ -182,9 +194,9 @@ Help me get a **quick-start CCX install** running on Kubernetes, with **Apache C
 3. **Ask before changing anything**: `kubectl apply/create/run/delete/patch/replace/edit`, `helm install/upgrade/uninstall/rollback`, `cmk create/deploy/delete/update`. Read-only commands are fine.
 4. **Never delete a cluster-scoped object.** CRDs, ClusterIssuers, ClusterRoles and their bindings, webhook configurations, PersistentVolumes, StorageClasses, namespaces. Deleting a CRD cascades to every custom resource of that type **cluster-wide**, so it can destroy databases that have nothing to do with CCX. If one is in the way, show me what it is, what it holds and what owns it, and stop. I will remove it myself.
 5. **Never modify an object this install did not create.** Before touching anything that already exists, check `meta.helm.sh/release-name` and `app.kubernetes.io/managed-by`. If it belongs to another release, or to nothing, say so and stop rather than adopting or overwriting it. That includes a ClusterIssuer or a Secret whose name you were about to reuse: pick a different name or ask.
-6. **Secrets only come from the environment variables above** and go into Kubernetes secrets or a `0600` values file. Never print them or ask me for them, and keep them out of command arguments: pipe generated manifests into `kubectl apply -f -`. Only show key names or lengths.
+6. **Secrets only come from the environment variables above** and go into Kubernetes secrets or a `0600` values file. Never print them or ask me for them, and keep them out of command arguments: pipe generated manifests into `kubectl apply --server-side --force-conflicts -f -`. Only show key names or lengths. **`--server-side` is not optional**: a plain `kubectl apply` stores the whole submitted manifest, plaintext values and all, in the `kubectl.kubernetes.io/last-applied-configuration` annotation. For the same reason, never print a Secret's `.metadata.annotations` - checking ownership means selecting the one key you need, not dumping the map.
 7. Use `-n <ns>` on every `kubectl` and `helm` command.
-8. **Prove a check works before trusting it.** Any test that can fail for an uninteresting reason - a registry probe, a readiness check, a credential test - must be run against a case you know passes, so a broken method cannot read as a real result.
+8. **Prove a check works before trusting it.** Any test that can fail for an uninteresting reason - a registry probe, a readiness check, a credential test - must be run against a case you know passes, so a broken method cannot read as a real result. Pair it with a case you know fails, too. The CCX UI makes this concrete: the SPA answers **`200` with `index.html` for every path it does not recognise**, so a `200` from something like `/swagger/index.html` proves nothing at all. Only `/api/*` status codes mean anything, and you can confirm that by checking a deliberately bogus `/api/...` path returns `404`.
 9. **A pod is not ready because it is Running.** Judge readiness per container (`.status.containerStatuses[].ready`), never on `.status.phase`. A crashlooping container sits in `Running` between restarts.
 
 ## Must match
@@ -205,7 +217,7 @@ Ask a few at a time:
 
 - `ccxFQDN` (e.g. `ccx.example.com`) and `ccFQDN` (e.g. `cc.example.com`). DNS names for datastores (`ccx.userDomain`) are optional: only use them if external-dns is already running, or if I name an existing Kubernetes secret (or workload identity) for its DNS provider. Otherwise skip them for the quick start.
 - TLS: a cert-manager ClusterIssuer (`ccx.ingress.ssl.clusterIssuer`), or existing certificates. Also ask whether the domains are public and reachable from the internet. With existing certificates, `ccxFQDN` uses the secret in `ccx.ingress.ssl.secretName`, and the admin portal uses a secret named exactly `<ccFQDN>`.
-- Admin portal allowlist (`ccx.ingress.whitelist`, empty = public), and the admin email (`ccx.admin.email`). The password comes from `CCX_ADMIN_PASSWORD` or is generated.
+- Admin portal allowlist (`ccx.ingress.whitelist`, empty = public), and the admin email (`ccx.admin.email`) - skip this if `CCX_ADMIN_EMAIL` is set; show it and confirm. The password comes from `CCX_ADMIN_PASSWORD` or is generated.
 - Kubernetes context, namespace (default `ccx`), storage class.
 - CloudStack API URL (skip if `CLOUDSTACK_API_URL` is set - show it and confirm), `verify_ssl`, cloud code and name, region (code, name, city, country, continent).
 - Databases to offer (from the chart's `ccx.config.databases`), and the end-user CIDRs allowed to reach them.
@@ -223,6 +235,22 @@ Ask a few at a time:
 
 - `kubectl get nodes -L kubernetes.io/arch` must show `amd64` everywhere. Docs sizing: 3 × 4 vCPU / 8 GB and about 60 GB of PVCs. If the cluster is smaller or single-node, say so and what it costs (no HA, no headroom), then carry on if I accept.
 - `kubectl get storageclass`: if there is no default class, or I picked a different one, find the storage class keys in both charts and set them in Phases 4 and 6.
+- **Is there a LoadBalancer implementation?** `kubectl get svc -A | grep LoadBalancer` and `kubectl get ds -A`. Nothing in `ccxdeps` provides one, so on a cluster without it the ingress Service never gets an `EXTERNAL-IP` and every later check that depends on the FQDNs silently waits forever. k3s started with `--disable=servicelb,traefik` is the common case: no daemonsets at all and no `IngressClass`. On a single node, bind the ports on the host instead, and tell me the FQDNs must point at the node's own IP:
+
+  ```yaml
+  ingress-nginx:
+    controller:
+      hostPort:
+        enabled: true
+      service:
+        type: ClusterIP
+        externalTrafficPolicy: null   # invalid on ClusterIP; the apply is rejected if left set
+      publishService:
+        enabled: false                # there is no external IP to publish
+      reportNodeInternalIp: true
+  ```
+
+  On a multi-node cluster, say that MetalLB (or the provider's own controller) is the real answer and let me decide.
 - **What already runs on this cluster.** `ccxdeps` bundles ingress-nginx, cert-manager, nats, victoria-metrics, loki, a postgres-operator and a mysql-operator, and its defaults install the operators whether or not the cluster has them. Installing a second copy of an operator is not a duplicate - the two fight over the same cluster-scoped CRDs, and the damage lands on whatever the existing one manages.
 
   Check for each before installing anything: `kubectl get deploy -A | grep -Ei 'ingress-nginx|cert-manager|external-dns|nats|victoria|loki|postgres-operator|mysql-operator'`, and `kubectl get crd` for the operator CRDs.
@@ -242,7 +270,7 @@ Ask a few at a time:
 ## Phase 2: CloudStack (read-only)
 
 - If `cmk` isn't configured, either set it up from `CLOUDSTACK_API_URL`, `CLOUDSTACK_API_KEY` and `CLOUDSTACK_SECRET_KEY` without printing the keys, or skip it and sign the API calls yourself - installing `cmk` is not worth a detour. When signing: sort parameters by lowercased key, join as `k=v`, lowercase the whole string, HMAC-SHA1 with the secret, base64. Percent-encode with `%20` for spaces, **not** `+`, or every call with a space in a value returns 401.
-- `CS_ZONE`, `CS_NETWORK`, `CS_OFFERING` and `CS_DISK` may be set. Treat them as **hints, not answers**: mark the matching row in each table below as pre-selected, run every check on it as if I had picked it, and say so. A hint that fails its check is reported and dropped, never used.
+- `CS_ZONE`, `CS_NETWORK`, `CS_OFFERING` and `CS_DISK` may be set. Treat them as **hints, not answers**: mark the matching row in each table below as pre-selected, run every check on it as if I had picked it, and say so. A hint that fails its check is reported and dropped, never used. Expect them to be **stale rather than merely unverified** - a hint that names an object which no longer exists usually means the lab was rebuilt under a shell that was never re-exported. Say so in the final summary so I fix my shell, instead of silently working around it.
 - Zone (`cmk list zones`): it must have a DNS domain set. Network (`cmk list networks zoneid=<id>`): an isolated guest network.
 - Service offerings (`cmk list serviceofferings filter=name,id,cpunumber,memory,rootdisksize`): we recommend **at least 20 GB of root disk**. A `rootdisksize` on the offering overrides the 20 GB CCX asks for. Offer only those whose effective root size is at least 20 GB and at least the template's size.
 - Disk offerings with `iscustomized=true`: ask for default, minimum and maximum GiB.
@@ -327,7 +355,26 @@ Then:
 
 ## Phase 7: Smoke test
 
-Register at `https://<ccxFQDN>/auth/register?from=ccx` and deploy a 3-node datastore of one of the enabled databases while watching `kubectl logs -f -n <ns> deploy/ccx-runner-service`. PostgreSQL is a good default: with `USE_WALG: "false"` its backups go through `pg_basebackup`, which honours `S3_INSECURE_SSL`. Check the datastore reaches Available. Then delete it **through CCX** and confirm its VMs, public IPs, volumes and its `ccx-<uuid>` bucket are gone.
+Register at `https://<ccxFQDN>/auth/register?from=ccx` and deploy a 3-node datastore of one of the enabled databases while watching `kubectl logs -f -n <ns> deploy/ccx-runner-service`. PostgreSQL is a good default: with `USE_WALG: "false"` its backups go through `pg_basebackup`, which honours `S3_INSECURE_SSL`, so it exercises the one setting in the values file that is easy to get wrong.
+
+**If TLS is self-signed, do this through the API, not a browser.** Chrome's certificate interstitial will not let browser automation attach to the page at all, and trusting a lab CA system-wide is not worth it. The calls the UI makes:
+
+```
+POST   /api/auth/register              {login, password, firstName, lastName, termsAccepted, allowNewsletters, origin}
+POST   /api/auth/login                 {login, password}          # the field is "login", NOT "email"
+GET    /api/content/api/v1/deploy-wizard                          # confirms the cloud config surfaced
+POST   /api/prov/api/v2/cluster        {general{...}, cloud{...}, instance{...}, network{...}}
+GET    /api/deployment/v3/data-stores                             # progress and end state
+DELETE /api/prov/api/v2/cluster/<uuid>
+```
+
+Keep the session cookie from the login and send it with the rest.
+
+**The end state is `cluster_status: STARTED`, not "Available".** There is no such value as Available; a watcher waiting for one waits forever. A finished datastore reports `cluster_status: STARTED`, `deploy_progress: 100`, `is_deploying: false`, `operable: true`, and `cluster_status_text` reading "There are no failed nodes, there are started nodes". Check the node roles too: one `master` and two `replica`, each with a public IP.
+
+Then delete it **through CCX** and confirm its VMs, public IPs, volumes and firewall rules are gone - compare against the baseline counts recorded in Phase 2. Note that the datastore disappears from the UI and from `GET /api/deployment/v3/data-stores` well before CloudStack has finished releasing anything, so the UI is not evidence.
+
+The `ccx-<uuid>` bucket is a **known exception**: it is currently left behind (see CCX-6236). Report it as an expected leftover rather than a failure, and tell me to remove it by hand.
 
 Tell me to always delete datastores through CCX before uninstalling the chart. Uninstalling first orphans their VMs, IPs and buckets, and they then have to be cleaned up by hand.
 
@@ -345,6 +392,7 @@ If something fails:
 - Release stuck at `pending-install` with cmon restarting, `Malformatted JSon request` in its events → `cmon.license` needs the extra base64 layer. cmon's `startupProbe` is the command that installs the licence, so a wrong encoding means it never becomes ready and `--wait` hangs with nothing mentioning a licence. Confirm with `kubectl logs -n <ns> cmon-0 -c cmon | grep -i licen`: it must say **enterprise**, not community.
 - Admin portal 503 while the main UI is fine → `ccx.ingress.whitelist` was passed as a list instead of a comma-separated string. Confirm with `AnnotationParsingFailed` in the ingress controller log.
 - `helm install` fails on a CRD `conflict ... .spec.versions` → CRDs left behind by a previous install.
+- Ingress Service stuck at `<pending>` with no `EXTERNAL-IP`, and both FQDNs unreachable → the cluster has no LoadBalancer implementation; see Phase 1.
 - `unknown cloudstack vendor`, or the deployer crashing on startup → the `cloudstack_vendors` key doesn't match `clouds[].code`.
 
 Finish with the URLs, where the admin login is (the `admin-users` secret), the IDs used, and a reminder that **`apt upgrade cloud-init` on a node reverts the template patch.**
