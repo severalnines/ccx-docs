@@ -8,6 +8,24 @@ sidebar_class_name: sidebar-badge-beta
 
 This page contains a ready-made prompt for [Claude Code](https://claude.com/claude-code) that gets a quick-start CCX install running with CloudStack as the cloud provider. It follows the [CloudStack guide](cloudstack.md), asks for your domains, networks and instance types, reads credentials from environment variables, looks up the CloudStack IDs from the CloudStack API, and waits for your approval before changing anything.
 
+:::danger Use a cluster dedicated to CCX
+
+This prompt assumes the Kubernetes cluster is **for CCX and nothing else**. It
+installs cluster-scoped things - CRDs, operators, cert-manager, a ClusterIssuer -
+and on a cluster that already runs workloads those can collide with what is
+there. Two collisions are damaging rather than merely annoying:
+
+- A second `postgres-operator` or `mysql-operator` fighting the existing one over
+  the same cluster-scoped CRDs.
+- Deleting a CRD, which cascades to **every** custom resource of that type in the
+  cluster. Removing `postgresqls.acid.zalan.do` deletes every Postgres cluster
+  the Zalando operator manages, not just CCX's.
+
+The prompt is written to stop and hand these to you rather than act on them, but
+do not point it at a shared or production cluster.
+
+:::
+
 ## Before you start
 
 You need:
@@ -125,11 +143,13 @@ Help me get a **quick-start CCX install** running on Kubernetes, with **Apache C
 
 1. Work **one phase at a time**, and wait for my OK before starting the next.
 2. **Never guess** UUIDs, CIDRs, domains or sizes. Look them up, show a short table, and let me pick.
-3. **Ask before changing anything**: `kubectl apply/create/run`, `helm install/upgrade`, `cmk create/deploy/delete`. Read-only commands are fine.
-4. **Secrets only come from the environment variables above** and go into Kubernetes secrets or a `0600` values file. Never print them or ask me for them, and keep them out of command arguments: pipe generated manifests into `kubectl apply -f -`. Only show key names or lengths.
-5. Use `-n <ns>` on every `kubectl` and `helm` command.
-6. **Prove a check works before trusting it.** Any test that can fail for an uninteresting reason - a registry probe, a readiness check, a credential test - must be run against a case you know passes, so a broken method cannot read as a real result.
-7. **A pod is not ready because it is Running.** Judge readiness per container (`.status.containerStatuses[].ready`), never on `.status.phase`. A crashlooping container sits in `Running` between restarts.
+3. **Ask before changing anything**: `kubectl apply/create/run/delete/patch/replace/edit`, `helm install/upgrade/uninstall/rollback`, `cmk create/deploy/delete/update`. Read-only commands are fine.
+4. **Never delete a cluster-scoped object.** CRDs, ClusterIssuers, ClusterRoles and their bindings, webhook configurations, PersistentVolumes, StorageClasses, namespaces. Deleting a CRD cascades to every custom resource of that type **cluster-wide**, so it can destroy databases that have nothing to do with CCX. If one is in the way, show me what it is, what it holds and what owns it, and stop. I will remove it myself.
+5. **Never modify an object this install did not create.** Before touching anything that already exists, check `meta.helm.sh/release-name` and `app.kubernetes.io/managed-by`. If it belongs to another release, or to nothing, say so and stop rather than adopting or overwriting it. That includes a ClusterIssuer or a Secret whose name you were about to reuse: pick a different name or ask.
+6. **Secrets only come from the environment variables above** and go into Kubernetes secrets or a `0600` values file. Never print them or ask me for them, and keep them out of command arguments: pipe generated manifests into `kubectl apply -f -`. Only show key names or lengths.
+7. Use `-n <ns>` on every `kubectl` and `helm` command.
+8. **Prove a check works before trusting it.** Any test that can fail for an uninteresting reason - a registry probe, a readiness check, a credential test - must be run against a case you know passes, so a broken method cannot read as a real result.
+9. **A pod is not ready because it is Running.** Judge readiness per container (`.status.containerStatuses[].ready`), never on `.status.phase`. A crashlooping container sits in `Running` between restarts.
 
 ## Must match
 
@@ -167,9 +187,20 @@ Ask a few at a time:
 
 - `kubectl get nodes -L kubernetes.io/arch` must show `amd64` everywhere. Docs sizing: 3 × 4 vCPU / 8 GB and about 60 GB of PVCs. If the cluster is smaller or single-node, say so and what it costs (no HA, no headroom), then carry on if I accept.
 - `kubectl get storageclass`: if there is no default class, or I picked a different one, find the storage class keys in both charts and set them in Phases 4 and 6.
-- Note which of ingress-nginx, cert-manager and external-dns are missing.
+- **What already runs on this cluster.** `ccxdeps` bundles ingress-nginx, cert-manager, nats, victoria-metrics, loki, a postgres-operator and a mysql-operator, and its defaults install the operators whether or not the cluster has them. Installing a second copy of an operator is not a duplicate - the two fight over the same cluster-scoped CRDs, and the damage lands on whatever the existing one manages.
+
+  Check for each before installing anything: `kubectl get deploy -A | grep -Ei 'ingress-nginx|cert-manager|external-dns|nats|victoria|loki|postgres-operator|mysql-operator'`, and `kubectl get crd` for the operator CRDs.
+
+  - Missing: enable that subchart (`ingressController.enabled=true`, `cert-manager.enabled=true`, and so on).
+  - Already present, and it is a plain dependency (ingress-nginx, cert-manager, nats, victoria-metrics, loki): leave that subchart disabled and point CCX at what is there. Tell me which you reused.
+  - Already present, and it is an **operator** (postgres-operator, mysql-operator): stop and ask me. Do not set `installOperators`, and do not assume the existing operator is CCX's - it may belong to someone else's workload.
 - **Namespace:** check `kubectl get namespace <ns>`. If it's missing, create it after I confirm. Every later step needs it.
-- **Leftover CRDs from a previous CCX install.** Helm never removes CRDs on uninstall, so a rebuilt cluster keeps them and the next `ccxdeps` install dies with `conflict ... with "postgres-operator" ... .spec.versions`. `--take-ownership` does not help - Helm's `crds/` path ignores it. Run `kubectl get crd | grep -E 'acid.zalan.do|mysql.oracle.com|zalando.org'`. If any exist, check each has **zero** custom resources and no owning release, show me the list, and delete them only after I confirm.
+- **Pre-existing CRDs.** Helm never removes CRDs on uninstall, so a rebuilt cluster keeps them and the next `ccxdeps` install dies with `conflict ... with "postgres-operator" ... .spec.versions`. `--take-ownership` does not help - Helm's `crds/` path ignores it. Check with `kubectl get crd | grep -E 'acid.zalan.do|mysql.oracle.com|zalando.org'`.
+
+  If any exist, **do not delete them** - see rule 4. Gather the evidence and hand it to me: for each CRD, `kubectl get <crd> -A` to count custom resources **across every namespace**, plus `helm list -A` and the CRD's `meta.helm.sh/release-name` annotation to find an owner. Then tell me plainly which of these two situations it is:
+
+  - Every one holds zero resources and no release owns it: they are leftovers from a removed CCX install, and I can delete them. Give me the exact command and let me run it.
+  - Any of them holds resources, or a release owns it: **something else on this cluster is using that operator.** Stop. Deleting the CRD would destroy those databases. This cluster is not a dedicated CCX cluster and the install should not continue here.
 - **Source IP as CloudStack sees it:** the firewall rules must allow the address the cluster's traffic appears from **on the path to the CloudStack public range**. With my OK, run a short-lived pod on **each node** (`nodeName` override). If the public range is routed privately (e.g. a static route), use the `src` from `ip route get <an IP in the public range>`. Otherwise use `curl -s ifconfig.me`. Record every distinct IP.
 
 ## Phase 2: CloudStack (read-only)
@@ -186,6 +217,8 @@ Ask a few at a time:
 
 A stock Ubuntu 24.04 image fails on CloudStack. Follow the docs' **Guest template requirements**: patch cloud-init, confirm `cloud-init status` exits `0`, reset the image, and register it with `sshkeyenabled=true`. Then, with my OK, deploy a test VM **from the registered template**, run the check again, and delete the VM. Record `template_id`.
 
+Record the ID of every CloudStack object you create - VM, public IP, keypair, firewall rule - and delete **only those IDs** when cleaning up. Never delete by name match or by listing what looks unused: this is someone's cloud, and other VMs on it are not yours. Afterwards, show me the VM, IP, volume and keypair counts so I can see they are back where they started.
+
 If `CS_TEMPLATE` is set, do **not** assume it is patched - an ID left over from an earlier setup is usually the stock image, and every deploy then fails at host init. A name or description claiming it is patched is not evidence either. Check that it exists and reports `sshkeyenabled: true`, then run the test-VM check above against it. Use it only if `cloud-init status` exits `0`; otherwise tell me it isn't usable and build the template from scratch.
 
 While that test VM is up, it is the only chance to settle two things cheaply, both of which otherwise fail much later:
@@ -198,8 +231,8 @@ While that test VM is up, it is the only chance to settle two things cheaply, bo
 - `ccx.imagePullSecret` is used by the chart templates even if `values.yaml` doesn't list it. Check with `grep -rn imagePullSecret`, and set it to the **actual name of the secret you create** - if the tarball ships `gcr.yaml`, that name is `gcr-pull-secret`, not `gcr-pull`.
 - Create the pull secret. If the tarball has `gcr.yaml`, just `kubectl apply -n <ns> -f gcr.yaml` (it carries no namespace of its own). Otherwise write a `0600` `.dockerconfigjson` for `eu.gcr.io` (username `_json_key`, password = the key file's contents), `kubectl create secret generic <name> -n <ns> --type=kubernetes.io/dockerconfigjson --from-file=.dockerconfigjson=<file>`, and delete the file.
 - **Verify the credential before installing anything.** For each private image in the chart's values, fetch a registry token with the secret's `auth` and request the manifest; a `200` means pullable. Run the same check against a known-public image first - if that control does not return `200`, your method is broken and the private results mean nothing. Finding this out now costs a minute; finding out during the install costs a failed release.
-- Install `ccxdeps`. Add `ingressController.enabled=true` or `cert-manager.enabled=true` only for what's missing, plus external-dns only if I gave its provider credentials secret (and set its provider values). Wait for all pods, judging readiness per container. `ccxdeps` also provides the `victoria-metrics` Service that the ccx chart looks up for `prometheusHostname`, so it must be running before Phase 6.
-- If the ClusterIssuer I named doesn't exist, create it after I confirm. For public domains, use Let's Encrypt as the OpenStack tutorial shows. For private domains (e.g. `.local`, or a lab behind NAT), Let's Encrypt can't issue, so use a self-signed ClusterIssuer (`spec.selfSigned: {}`) or a CA ClusterIssuer from my own CA secret, and tell me browsers will warn until that CA is trusted. For existing certificates, both TLS secrets must exist in `<ns>`: the one in `ccx.ingress.ssl.secretName` (covering `ccxFQDN`) and one named `<ccFQDN>`.
+- Install `ccxdeps`, enabling only the subcharts the Phase 1 survey found missing, and leaving the rest disabled so nothing already on the cluster gets a second copy. Add external-dns only if I gave its provider credentials secret (and set its provider values). Wait for all pods, judging readiness per container. `ccxdeps` also provides the `victoria-metrics` Service that the ccx chart looks up for `prometheusHostname`, so it must be running before Phase 6.
+- ClusterIssuers are cluster-scoped and shared. If one with the name I gave already exists, do not modify or replace it - show me what it issues and let me choose between reusing it and picking a different name. If it doesn't exist, create it after I confirm. For public domains, use Let's Encrypt as the OpenStack tutorial shows. For private domains (e.g. `.local`, or a lab behind NAT), Let's Encrypt can't issue, so use a self-signed ClusterIssuer (`spec.selfSigned: {}`) or a CA ClusterIssuer from my own CA secret, and tell me browsers will warn until that CA is trusted. For existing certificates, both TLS secrets must exist in `<ns>`: the one in `ccx.ingress.ssl.secretName` (covering `ccxFQDN`) and one named `<ccFQDN>`.
 - Show the A records for both FQDNs pointing at the ingress `EXTERNAL-IP`, and wait until they resolve.
 
 ## Phase 5: Cloud secret
@@ -223,7 +256,9 @@ stringData:
   MYCLOUD_S3_INSECURE_SSL: <$S3_INSECURE, or "true" if the S3 certificate is self-signed or invalid, else "false">
 ```
 
-Check it with `kubectl get secret mycloud -n <ns> -o json | jq '.data | map_values(length)'`.
+First check whether a secret of that name already exists in `<ns>`. If it does and this install did not create it, stop and ask rather than overwriting it - it may belong to another release.
+
+Check the result with `kubectl get secret mycloud -n <ns> -o json | jq '.data | map_values(length)'`.
 
 ## Phase 6: Values and install
 
@@ -252,7 +287,7 @@ Then:
 3. With my OK, run the same command with `--wait` instead of `--dry-run=server`.
 4. Check that `kubectl get configmap ccx -n <ns> -o jsonpath='{.data.USE_PUBLIC_IPS}'` is `true`.
 5. Check that `ccx-config-core` contains `template_id` and the vendor key.
-6. Check that **every** pod using a private image ended up with a pull secret: `kubectl get pod -n <ns> <pod> -o jsonpath='{.spec.imagePullSecrets[*].name}'`. If one has none, the chart forgot it - don't edit the chart, attach the secret to the namespace's ServiceAccount (`kubectl patch serviceaccount default -n <ns> -p '{"imagePullSecrets":[{"name":"<name>"}]}'`) and recreate that pod.
+6. Check that **every** pod using a private image ended up with a pull secret: `kubectl get pod -n <ns> <pod> -o jsonpath='{.spec.imagePullSecrets[*].name}'`. If one has none, the chart forgot it - don't edit the chart. Attaching the secret to the namespace's `default` ServiceAccount fixes it (`kubectl patch serviceaccount default -n <ns> -p '{"imagePullSecrets":[{"name":"<name>"}]}'`), but that affects **every** pod in the namespace, so tell me that before you do it and let me approve. Then recreate the affected pod.
 7. If the release sits at `pending-install` with a pod restarting, look at **cmon** first. Its `startupProbe` is the command that installs the licence, so a wrong `cmon.license` encoding means it never passes, cmon CrashLoopBackOffs, and `--wait` hangs with nothing anywhere mentioning a licence. The tell is `Malformatted JSon request` in the pod events. Confirm with `kubectl logs -n <ns> cmon-0 -c cmon | grep -i licen`: it must say **enterprise**, not community.
 8. Open both FQDNs. `https://<ccFQDN>` returning 503 while `https://<ccxFQDN>` is fine means the whitelist annotation didn't parse - check the ingress controller log for `AnnotationParsingFailed`.
 
