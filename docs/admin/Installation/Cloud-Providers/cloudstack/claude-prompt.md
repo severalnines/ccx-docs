@@ -8,6 +8,39 @@ sidebar_class_name: sidebar-badge-beta
 
 This page contains a ready-made prompt for [Claude Code](https://claude.com/claude-code) that gets a quick-start CCX install running with CloudStack as the cloud provider. It follows the [CloudStack guide](cloudstack.md), asks for your domains, networks and instance types, reads credentials from environment variables, looks up the CloudStack IDs from the CloudStack API, and waits for your approval before changing anything.
 
+## What this installs
+
+Numbers below are from a real run of this prompt against a single-node cluster,
+not estimates. A quick-start install ends up with roughly **39 pods** and about
+**66 GiB of PersistentVolumeClaims**, and pulls around a gigabyte of images.
+
+**Inside the namespace**, `ccxdeps` brings ingress-nginx, cert-manager, NATS,
+VictoriaMetrics with Alertmanager, Loki, a PostgreSQL cluster for CCX, a MySQL
+InnoDB cluster for ClusterControl, and the Zalando PostgreSQL and Oracle MySQL
+operators. The `ccx` chart then adds the CCX services, ClusterControl and cmon.
+
+**Cluster-wide** - these are the ones that reach beyond the namespace and matter
+on a shared cluster:
+
+| Object | Count | Notes |
+|---|---|---|
+| CustomResourceDefinitions | 14 | 6 cert-manager, 5 `*.zalan.do` / `zalando.org`, 3 `*.mysql.oracle.com` |
+| ClusterRoles and bindings | ~16 | cert-manager, ingress-nginx, both operators |
+| Admission webhooks | 3 | cert-manager |
+| ClusterIssuer | 1 | the one you name |
+| IngressClass | 1 | `nginx` |
+
+**Outside Kubernetes.** The prompt registers a guest template in CloudStack, and
+briefly creates a test VM with a public IP and an SSH keypair to prove the
+template boots, then removes them. Each datastore you then deploy consumes
+**one VM and one public IP per node**, a data volume per node, firewall rules,
+and one S3 bucket named `ccx-<datastore uuid>`.
+
+**What it does not do.** It never deletes a cluster-scoped object, never touches
+an object it did not create, and deletes only the CloudStack IDs it recorded
+during the run. Where something already exists and is in the way, it is written
+to stop and hand you the evidence instead of acting.
+
 :::danger Use a cluster dedicated to CCX
 
 This prompt assumes the Kubernetes cluster is **for CCX and nothing else**. It
@@ -194,7 +227,7 @@ Ask a few at a time:
   - Missing: enable that subchart (`ingressController.enabled=true`, `cert-manager.enabled=true`, and so on).
   - Already present, and it is a plain dependency (ingress-nginx, cert-manager, nats, victoria-metrics, loki): leave that subchart disabled and point CCX at what is there. Tell me which you reused.
   - Already present, and it is an **operator** (postgres-operator, mysql-operator): stop and ask me. Do not set `installOperators`, and do not assume the existing operator is CCX's - it may belong to someone else's workload.
-- **Namespace:** check `kubectl get namespace <ns>`. If it's missing, create it after I confirm. Every later step needs it.
+- **Namespace:** check `kubectl get namespace <ns>`. If it's missing, create it after I confirm. If it already exists, list what is in it (`helm list -n <ns>`, `kubectl get all -n <ns>`) before going further. A `ccx` or `ccxdeps` release already there means this is not a fresh install: `helm upgrade --install` would rewrite that release with the values we are about to generate, so **stop and ask me** rather than continuing.
 - **Pre-existing CRDs.** Helm never removes CRDs on uninstall, so a rebuilt cluster keeps them and the next `ccxdeps` install dies with `conflict ... with "postgres-operator" ... .spec.versions`. `--take-ownership` does not help - Helm's `crds/` path ignores it. Check with `kubectl get crd | grep -E 'acid.zalan.do|mysql.oracle.com|zalando.org'`.
 
   If any exist, **do not delete them** - see rule 4. Gather the evidence and hand it to me: for each CRD, `kubectl get <crd> -A` to count custom resources **across every namespace**, plus `helm list -A` and the CRD's `meta.helm.sh/release-name` annotation to find an owner. Then tell me plainly which of these two situations it is:
@@ -288,8 +321,7 @@ Then:
 4. Check that `kubectl get configmap ccx -n <ns> -o jsonpath='{.data.USE_PUBLIC_IPS}'` is `true`.
 5. Check that `ccx-config-core` contains `template_id` and the vendor key.
 6. Check that **every** pod using a private image ended up with a pull secret: `kubectl get pod -n <ns> <pod> -o jsonpath='{.spec.imagePullSecrets[*].name}'`. If one has none, the chart forgot it - don't edit the chart. Attaching the secret to the namespace's `default` ServiceAccount fixes it (`kubectl patch serviceaccount default -n <ns> -p '{"imagePullSecrets":[{"name":"<name>"}]}'`), but that affects **every** pod in the namespace, so tell me that before you do it and let me approve. Then recreate the affected pod.
-7. If the release sits at `pending-install` with a pod restarting, look at **cmon** first. Its `startupProbe` is the command that installs the licence, so a wrong `cmon.license` encoding means it never passes, cmon CrashLoopBackOffs, and `--wait` hangs with nothing anywhere mentioning a licence. The tell is `Malformatted JSon request` in the pod events. Confirm with `kubectl logs -n <ns> cmon-0 -c cmon | grep -i licen`: it must say **enterprise**, not community.
-8. Open both FQDNs. `https://<ccFQDN>` returning 503 while `https://<ccxFQDN>` is fine means the whitelist annotation didn't parse - check the ingress controller log for `AnnotationParsingFailed`.
+7. Open both FQDNs and tell me the status codes. Both should answer; the troubleshooting list below covers what a failure means.
 
 ## Phase 7: Smoke test
 
@@ -308,8 +340,8 @@ If something fails:
 - `Missing secret ... cloudSecrets` → the secret isn't in `<ns>`.
 - `Endpoint url cannot have fully qualified paths` → a scheme leaked into `MYCLOUD_S3_ENDPOINT`.
 - `x509: certificate signed by unknown authority` on a backup → wal-g got switched on; it ignores `S3_INSECURE_SSL` and needs a trusted certificate.
-- `Malformatted JSon request` in cmon's events, release stuck at `pending-install` → `cmon.license` needs the extra base64 layer.
-- Admin portal 503 while the main UI works → `ccx.ingress.whitelist` was passed as a list instead of a comma-separated string.
+- Release stuck at `pending-install` with cmon restarting, `Malformatted JSon request` in its events → `cmon.license` needs the extra base64 layer. cmon's `startupProbe` is the command that installs the licence, so a wrong encoding means it never becomes ready and `--wait` hangs with nothing mentioning a licence. Confirm with `kubectl logs -n <ns> cmon-0 -c cmon | grep -i licen`: it must say **enterprise**, not community.
+- Admin portal 503 while the main UI is fine → `ccx.ingress.whitelist` was passed as a list instead of a comma-separated string. Confirm with `AnnotationParsingFailed` in the ingress controller log.
 - `helm install` fails on a CRD `conflict ... .spec.versions` → CRDs left behind by a previous install.
 - `unknown cloudstack vendor`, or the deployer crashing on startup → the `cloudstack_vendors` key doesn't match `clouds[].code`.
 
