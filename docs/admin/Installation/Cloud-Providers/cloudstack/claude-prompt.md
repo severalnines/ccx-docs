@@ -16,20 +16,65 @@ You need:
 - A Google service account JSON key, used to pull the private CCX images. Contact [johan@severalnines.com](mailto:johan@severalnines.com) to get one.
 - `kubectl` and `helm` access to the Kubernetes cluster that will run CCX.
 - CloudStack API access (API URL, API key and secret key), ideally with [CloudMonkey (`cmk`)](https://github.com/apache/cloudstack-cloudmonkey) configured.
+- S3-compatible object storage for datastore backups, with a bucket and credentials. Use whatever you already run - AWS S3, Ceph RADOS Gateway, SeaweedFS, OpenStack Swift with the S3 API. If you have nothing, [MinIO](https://min.io/) is the usual choice for a lab, and the CloudStack guide's [S3 backup storage](cloudstack.md#s3-backup-storage) section walks through setting it up.
 - [Claude Code](https://claude.com/claude-code) installed on the same machine.
 
-Export your credentials as environment variables in the shell you start Claude Code from. The prompt builds the Kubernetes secrets from them, so you never paste a secret into the chat:
+Export your credentials and endpoints as environment variables in the shell you start Claude Code from. The prompt builds the Kubernetes secrets from them, so you never paste a secret into the chat:
 
 ```bash
+# Secrets - required
 export CLOUDSTACK_API_KEY=...
 export CLOUDSTACK_SECRET_KEY=...
 export S3_ACCESS_KEY=...
 export S3_SECRET_KEY=...
 export CMON_LICENSE=...          # base64-encoded license
 export CCX_ADMIN_PASSWORD=...    # optional, generated if unset
+
+# Endpoints - optional, and not secret. Set them and the prompt skips the
+# matching questions; leave them unset and it asks instead.
+export CLOUDSTACK_API_URL=http://cloudstack.example.com:8080/client/api
+export S3_ENDPOINT=minio.example.com:9000   # host[:port], no http:// prefix
+export S3_BUCKET=ccx-backups
+export S3_INSECURE=false                    # true only for a self-signed cert - see the caution below
 ```
 
+The `CLOUDSTACK_*` names are the ones the [Apache CloudStack Terraform provider](https://github.com/apache/cloudstack-terraform-provider) uses, so an existing environment usually works unchanged. The prompt also accepts `CS_URL`, `CS_APIKEY` and `CS_SECRET` as aliases.
+
 To keep them out of your shell history, put the lines in a `0600` file and `source` it.
+
+:::note
+
+The two endpoints have different formats, and mixing them up is the most common
+setup mistake. `CLOUDSTACK_API_URL` is a full URL ending in `/client/api`, while
+`S3_ENDPOINT` is a bare `host[:port]` with no scheme, because that is what CCX
+writes into `MYCLOUD_S3_ENDPOINT`. The prompt strips a leading `http://` or
+`https://` from `S3_ENDPOINT` for you and tells you it did.
+
+:::
+
+:::caution PostgreSQL needs a trusted S3 certificate
+
+CCX always reaches S3 over HTTPS, so a plain-HTTP endpoint does not work. Beyond
+that, `S3_INSECURE=true` covers CCX's own bucket management and the credentials
+it registers with ClusterControl, but **not wal-g**, which PostgreSQL datastores
+use for WAL archiving. A self-signed certificate, or a bare IP address that no
+public CA will issue for, leaves PostgreSQL backups failing with
+`x509: certificate signed by unknown authority` while `pg_wal` grows unchecked.
+
+The prompt checks for this in Phase 0 and tells you before you build on it. For
+the fix - a DNS name plus a DNS-01 issued certificate, which works even for a
+private address - see
+[S3 backup storage](cloudstack.md#s3-backup-storage) in the CloudStack guide.
+
+:::
+
+Zone, network, service offering, disk offering and template IDs are deliberately
+**not** read from the environment. The prompt discovers them with `cmk` and
+validates each one before use - that the zone is Advanced and has a DNS domain,
+that the disk offering is `iscustomized=true`, that the template is patched. If
+you already have the IDs, export them as `CS_ZONE`, `CS_NETWORK`, `CS_OFFERING`,
+`CS_DISK` and `CS_TEMPLATE`: the prompt treats them as hints, pre-selects them in
+its tables, and still runs every check.
 
 :::caution
 
@@ -58,13 +103,18 @@ Help me get a **quick-start CCX install** running on Kubernetes, with **Apache C
 - A **Google service account JSON key** for pulling the private CCX images (e.g. cmon on `eu.gcr.io`). If I don't have one, tell me to ask johan@severalnines.com, then stop.
 - CloudStack API access, ideally with `cmk` configured.
 - `kubectl` and `helm` access to the cluster.
-- **Credentials exported as environment variables** in the shell I started you from. Never ask me for their values:
-  - `CLOUDSTACK_API_KEY`, `CLOUDSTACK_SECRET_KEY`
+- **Credentials exported as environment variables** in the shell I started you from. Never ask me for their values, and never print them:
+  - `CLOUDSTACK_API_KEY`, `CLOUDSTACK_SECRET_KEY` (aliases: `CS_APIKEY`, `CS_SECRET`)
   - `S3_ACCESS_KEY`, `S3_SECRET_KEY`
   - `CMON_LICENSE` (base64)
   - `CCX_ADMIN_PASSWORD` (optional; generated if unset)
 
-  Check each one with `printenv <NAME> >/dev/null && echo set || echo MISSING`. If a required one is missing, tell me to exit, export it, and start you again. `CCX_ADMIN_PASSWORD` is optional: if it's unset, leave `ccx.admin.password` out.
+  Check each one with `printenv <NAME> >/dev/null && echo set || echo MISSING`. If a required one is missing, tell me to exit, export it, and start you again. `CCX_ADMIN_PASSWORD` is optional: if it's unset, leave `ccx.admin.password` out. Report the **length** of each secret you found and flag any that looks implausibly short for what it is, without printing the value.
+- **Endpoints, optionally exported** in the same shell. These are **not** secrets, so read them, show me the value, and ask me to confirm rather than asking me to type it again. If one is unset, ask for it in Phase 0:
+  - `CLOUDSTACK_API_URL` (alias: `CS_URL`) - full URL ending in `/client/api`.
+  - `S3_ENDPOINT` - `host[:port]` with **no scheme**. If it starts with `http://` or `https://`, strip that, use the rest, and tell me you did. CCX always reaches S3 over **HTTPS**, so the scheme carries no information and a plain-HTTP endpoint will not work.
+  - `S3_BUCKET` - the bucket name.
+  - `S3_INSECURE` - `true` when the S3 certificate is self-signed or invalid. It maps **directly** to `MYCLOUD_S3_INSECURE_SSL`; do not invert it.
 
 ## Rules
 
@@ -91,9 +141,15 @@ Ask a few at a time:
 - TLS: a cert-manager ClusterIssuer (`ccx.ingress.ssl.clusterIssuer`), or existing certificates. Also ask whether the domains are public and reachable from the internet. With existing certificates, `ccxFQDN` uses the secret in `ccx.ingress.ssl.secretName`, and the admin portal uses a secret named exactly `<ccFQDN>`.
 - Admin portal allowlist (`ccx.ingress.whitelist`, empty = public), and the admin email (`ccx.admin.email`). The password comes from `CCX_ADMIN_PASSWORD` or is generated.
 - Kubernetes context, namespace (default `ccx`), storage class.
-- CloudStack API URL, `verify_ssl`, cloud code and name, region (code, name, city, country, continent).
+- CloudStack API URL (skip if `CLOUDSTACK_API_URL` is set - show it and confirm), `verify_ssl`, cloud code and name, region (code, name, city, country, continent).
 - Databases to offer (from the chart's `ccx.config.databases`), and the end-user CIDRs allowed to reach them.
-- S3 for backups: endpoint `host[:port]`, bucket, and whether its TLS certificate is valid.
+- S3 for backups: endpoint `host[:port]`, bucket, and whether its TLS certificate is valid. Skip whichever of these `S3_ENDPOINT`, `S3_BUCKET` and `S3_INSECURE` already answer - show the values and confirm them in one go. If I have no S3-compatible storage yet, say that MinIO is the usual choice for a lab and point me at the **S3 backup storage** section of the CloudStack guide.
+
+  Then check the endpoint before we build anything on it, because both failures below surface much later as broken backups:
+
+  - `curl -sSI --max-time 10 https://<endpoint>` - it must answer over **HTTPS**. If only plain HTTP answers, stop and tell me: CCX always connects over HTTPS and bucket creation will fail at deploy time.
+  - If the host part is a **bare IP address**, warn me that no public CA issues certificates for private IPs, so PostgreSQL datastores cannot work against it.
+  - If `S3_INSECURE` is `true` and PostgreSQL is one of the databases I am enabling, warn me that **wal-g does not honour that flag**. WAL archiving then fails silently with `x509: certificate signed by unknown authority` and `pg_wal` grows without bound. The fix is a DNS name with a publicly trusted certificate, as the CloudStack guide's S3 section describes. Ask whether I want to fix S3 first or smoke-test with a non-PostgreSQL database.
 - Paths to the chart tarball and the service account key.
 
 ## Phase 1: Kubernetes
@@ -106,7 +162,8 @@ Ask a few at a time:
 
 ## Phase 2: CloudStack (read-only)
 
-- If `cmk` isn't configured, set it up from `CLOUDSTACK_API_KEY` / `CLOUDSTACK_SECRET_KEY` without printing them.
+- If `cmk` isn't configured, set it up from `CLOUDSTACK_API_URL`, `CLOUDSTACK_API_KEY` and `CLOUDSTACK_SECRET_KEY` without printing the keys.
+- `CS_ZONE`, `CS_NETWORK`, `CS_OFFERING` and `CS_DISK` may be set. Treat them as **hints, not answers**: mark the matching row in each table below as pre-selected, run every check on it as if I had picked it, and say so. A hint that fails its check is reported and dropped, never used.
 - Zone (`cmk list zones`): it must have a DNS domain set. Network (`cmk list networks zoneid=<id>`): an isolated guest network.
 - Service offerings (`cmk list serviceofferings filter=name,id,cpunumber,memory,rootdisksize`): we recommend **at least 20 GB of root disk**. A `rootdisksize` on the offering overrides the 20 GB CCX asks for. Offer only those whose effective root size is at least 20 GB and at least the template's size.
 - Disk offerings with `iscustomized=true`: ask for default, minimum and maximum GiB.
@@ -116,6 +173,8 @@ Ask a few at a time:
 ## Phase 3: Guest template
 
 A stock Ubuntu 24.04 image fails on CloudStack. Follow the docs' **Guest template requirements**: patch cloud-init, confirm `cloud-init status` exits `0`, reset the image, and register it with `sshkeyenabled=true`. Then, with my OK, deploy a test VM **from the registered template**, run the check again, and delete the VM. Record `template_id`.
+
+If `CS_TEMPLATE` is set, do **not** assume it is patched - an ID left over from an earlier setup is usually the stock image, and every deploy then fails at host init. Check that it exists and reports `sshkeyenabled: true`, then run the test-VM check above against it. Use it only if `cloud-init status` exits `0`; otherwise tell me it isn't usable and build the template from scratch.
 
 ## Phase 4: Pull secret and dependencies
 
@@ -139,11 +198,11 @@ type: Opaque
 stringData:
   MYCLOUD_CLOUDSTACK_API_KEY: $CLOUDSTACK_API_KEY
   MYCLOUD_CLOUDSTACK_API_SECRET_KEY: $CLOUDSTACK_SECRET_KEY
-  MYCLOUD_S3_ENDPOINT: <host[:port], no scheme>
+  MYCLOUD_S3_ENDPOINT: <$S3_ENDPOINT, scheme stripped, or the host[:port] I gave you>
   MYCLOUD_S3_ACCESSKEY: $S3_ACCESS_KEY
   MYCLOUD_S3_SECRETKEY: $S3_SECRET_KEY
-  MYCLOUD_S3_BUCKETNAME: <bucket>
-  MYCLOUD_S3_INSECURE_SSL: <"true" if the S3 certificate is self-signed or invalid, else "false">
+  MYCLOUD_S3_BUCKETNAME: <$S3_BUCKET, or the bucket I gave you>
+  MYCLOUD_S3_INSECURE_SSL: <$S3_INSECURE, or "true" if the S3 certificate is self-signed or invalid, else "false">
 ```
 
 Check it with `kubectl get secret mycloud -n <ns> -o json | jq '.data | map_values(length)'`.
@@ -178,7 +237,7 @@ Then:
 
 ## Phase 7: Smoke test
 
-Register at `https://<ccxFQDN>/auth/register?from=ccx` and deploy a 3-node datastore of one of the enabled databases (PostgreSQL if it's enabled) while watching `kubectl logs -f -n <ns> deploy/ccx-runner-service`. Check the datastore reaches Available. Then delete it and confirm its VMs, IPs and volumes are gone.
+Register at `https://<ccxFQDN>/auth/register?from=ccx` and deploy a 3-node datastore of one of the enabled databases while watching `kubectl logs -f -n <ns> deploy/ccx-runner-service`. Prefer PostgreSQL, unless the Phase 0 S3 check warned that wal-g cannot verify the endpoint's certificate - then pick another enabled database and tell me why. Check the datastore reaches Available. Then delete it and confirm its VMs, IPs and volumes are gone.
 
 If something fails:
 
@@ -189,6 +248,8 @@ If something fails:
 - `402` → the `REQUIRE_*` flags are still on.
 - `ImagePullBackOff` → there's a problem with `gcr-pull`.
 - `Missing secret ... cloudSecrets` → the secret isn't in `<ns>`.
+- `Endpoint url cannot have fully qualified paths` → a scheme leaked into `MYCLOUD_S3_ENDPOINT`.
+- `x509: certificate signed by unknown authority` on a backup → wal-g doesn't honour `S3_INSECURE_SSL`; the endpoint needs a trusted certificate.
 
 Finish with the URLs, where the admin login is (the `admin-users` secret), the IDs used, and a reminder that **`apt upgrade cloud-init` on a node reverts the template patch.**
 ````
