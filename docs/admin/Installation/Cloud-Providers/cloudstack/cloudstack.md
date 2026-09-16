@@ -17,6 +17,63 @@ benefiting from the agility and flexibility that cloud environments offer.
 
 CCX allows users to leverage CloudStack’s API to automate the creation, configuration, and deployment of databases, reducing manual effort and minimizing the risk of configuration errors.
 
+## Before you start
+
+What your CloudStack must provide before a CCX datastore can deploy on it, with
+a check for each. Every row links to the section that explains it. The values
+in `<angle brackets>` are the ones you will later put into the CCX configuration.
+
+Verified against Apache CloudStack **4.22.1** on KVM. The API calls CCX uses
+have been stable since 4.11, but older releases have not been tested and lack
+the non-strict anti-affinity type.
+
+| Your CloudStack must have | Check with `cmk` | Details |
+|---|---|---|
+| An **Advanced** zone. Basic zones are not supported: CCX addresses nodes through static NAT and per-IP firewall rules, which only isolated networks offer. | `cmk list zones` shows `networktype: Advanced` and `securitygroupsenabled: false` | [Networking model](#networking-model) |
+| One **isolated guest network** in that zone with the `SourceNat`, `StaticNat`, `Firewall`, `Dhcp` and `UserData` services. Its id becomes `network_id`. | `cmk list networks id=<network_id>` lists those under `service` | [Networking model](#networking-model) |
+| **Egress from the guest network** to the internet. Nodes fetch packages and push backups to S3. If the network offering has `egressdefaultpolicy: false`, add an egress rule or nothing leaves the guest network. | `cmk list networkofferings id=<offering-id>`; if `false`, `cmk create egressfirewallrule networkid=<network_id> protocol=all cidrlist=<guest-cidr>` and confirm with `cmk list egressfirewallrules networkid=<network_id>` | [Guest egress](#guest-egress) |
+| A **public IP range** with headroom: one address per node plus the virtual router, console proxy and secondary storage VM. | `cmk list publicipaddresses zoneid=<zone> state=Free listall=true` counts the free addresses | [Public IP capacity](#public-ip-capacity) |
+| A **route from the CCX control plane** to that public range, and a known egress address for the control plane. The control plane reaches nodes only through static NAT, and its egress CIDR goes into every vendor's `security_groups`. | From a Kubernetes node: `ip route get <an address in the public range>`; for the egress address ask your network team or check what a test VM sees connecting in | [Which rules you need](#which-rules-you-need-and-why) |
+| An **account with API keys** that owns the guest network. CCX deploys VMs, acquires IPs, sets static NAT, creates firewall rules, volumes, tags, SSH keypairs and affinity groups as that account. | `cmk list accounts name=<account>`; generate keys under the account's user | [Credentials](#cloudstack-credentials) |
+| One **service offering per instance type** you want to sell, with an effective root disk of at least 20 GB. Its `cpunumber` and `memory` must match the display values in `instance_types`; CCX does not check. If it sets `rootdisksize`, that wins over the size CCX requests. | `cmk list serviceofferings filter=name,id,cpunumber,memory,rootdisksize` | [Root disk](#root-disk) |
+| A **custom-size disk offering** for data volumes. Fixed-size offerings are not supported. Its id becomes `volume_types[].code`. | `cmk list diskofferings` shows `iscustomized: true` | [Configuration](#ccx-cloudstack-configuration) |
+| A **guest template** built from Ubuntu 24.04 with the cloud-init patch, registered with `sshkeyenabled: true` and `passwordenabled: false`. A stock cloud image fails every deploy. | `cmk list templates templatefilter=executable id=<template_id>` shows `isready: true`, `sshkeyenabled: true` | [Guest template requirements](#guest-template-requirements) |
+| The **`non-strict host anti-affinity`** group type, if you want the nodes of a datastore spread across hypervisors. Without it CCX deploys with a warning and no spreading. | `cmk list affinitygrouptypes` | [Node placement](#node-placement-and-anti-affinity) |
+| **More than one hypervisor host**, if you rely on that spreading for HA. On one host every node lands on it and nothing warns you. | `cmk list hosts type=Routing` | [Node placement](#node-placement-and-anti-affinity) |
+| A **DNS domain** on the zone, so nodes get stable names instead of raw IPs. | `cmk list zones` shows `domain` | [DNS](#dns) |
+| **S3-compatible object storage** for backups, reachable from the guest network and from the control plane, with credentials for the Kubernetes secret. | From a test VM in the guest network: `curl -sI https://<s3-endpoint>` | [S3 backup storage](#s3-backup-storage) |
+
+The lab this page was written against runs the API as Root Admin. A plain
+`User` role has not been tested; if you run CCX under one, verify the first
+deploy end to end before handing it to customers.
+
+:::tip
+Deploy one throwaway VM on the guest network from the CloudStack template you
+will give CCX as `template_id` (the patched Ubuntu image from
+[Guest template requirements](#guest-template-requirements)), acquire a public
+IP, enable static NAT to it, and confirm you can SSH in from the control plane
+and run `apt-get update` from inside. That single exercise walks every row
+above except the offerings.
+:::
+
+### Root disk
+
+We recommend a root disk of at least **20 GB** for every datastore node. Database data lives on the separate data volume, but the root disk holds the OS, packages, logs and tooling.
+
+CCX requests a 20 GB root disk when it deploys a node, but the service offering decides the size:
+
+- If the service offering sets `rootdisksize`, **the offering's value wins**. On Apache CloudStack 4.22.1, an offering with `rootdisksize=20` gave a 20 GB root disk for a 30 GB request.
+- If the offering leaves `rootdisksize` unset, the node gets the size CCX requests.
+- The resulting root disk must be at least as large as the template's root disk.
+
+Before adding a service offering to `instance_types`, check its root disk size:
+
+```
+cmk list serviceofferings filter=name,id,cpunumber,memory,rootdisksize
+```
+
+Use offerings whose effective root disk (their `rootdisksize`, or 20 GB when empty) is 20 GB or more.
+
 ## Networking model
 
 CloudStack is not a special case in CCX — it is the same shape as OpenStack with
@@ -192,6 +249,27 @@ datastore nodes.
 Undersizing shows up as a deploy failing partway through, so size the pool for
 peak concurrent nodes rather than for one datastore.
 
+### Guest egress
+
+Nodes need to reach the internet from the guest network: `apt` mirrors during
+host init, the S3 endpoint for backups, and anything else your cloud-init or
+monitoring path pulls. Traffic leaves through the virtual router's source NAT,
+but whether it is **allowed** to leave is decided by the network offering's
+`egressdefaultpolicy`.
+
+The stock `DefaultIsolatedNetworkOfferingWithSourceNatService` offering sets it
+to `false`, which means deny. On such a network nothing works until an egress
+rule exists:
+
+```bash
+cmk create egressfirewallrule networkid=<network_id> protocol=all cidrlist=<guest-cidr>
+cmk list egressfirewallrules networkid=<network_id>
+```
+
+The symptom without it is a host init that times out while cloud-init waits on
+package downloads, and backups that never reach S3. Neither error mentions
+egress.
+
 ### DNS
 
 Configure a DNS domain for the zone. Without one, `host_fqdn` and
@@ -206,46 +284,6 @@ The one genuinely CloudStack-specific prerequisite: a stock Ubuntu cloud image
 [Guest template requirements](#guest-template-requirements) below for the patch
 and the pre-flight check before you configure anything else.
 
-## Requirements 
-To enable full DBaaS functionality and seamless integration with CloudStack, CCX requires specific resources and access via the CloudStack API. Below are the detailed requirements for deploying and managing database services using CCX within a CloudStack environment.
-
-
-## Prerequisites
-### API Access:
-CCX requires access to the CloudStack API to interact with the cloud infrastructure programmatically. This enables automated provisioning, management, and scaling of database instances.
-
-### Required Resources
-
-For the proper functioning of CCX with CloudStack, the following resources must be available:
-
-#### Compute Resources (Virtual Machines):
-CCX needs the ability to create and manage virtual machines (VMs) within CloudStack. These VMs serve as the foundation for hosting database instances and must be provisioned dynamically based on workload requirements.
-
-#### Public IP Addresses:
-CCX must be able to acquire and assign public IP addresses to the deployed VMs. This ensures proper network connectivity and allows external clients to access the database services hosted on these VMs.
-
-#### Firewall Configuration:
-CCX requires the ability to create and manage firewall rules for the VMs. This is essential for securing database instances by controlling traffic and defining which ports and protocols are allowed for communication.
-
-#### Volume Management:
-CCX must be able to acquire and attach storage volumes to the VMs for database storage. Only volumes with configurable size are supported, allowing users to define storage capacity according to their specific database needs.
-
-#### Root Disk:
-We recommend a root disk of at least **20 GB** for every datastore node. Database data lives on the separate data volume, but the root disk holds the OS, packages, logs and tooling.
-
-CCX requests a 20 GB root disk when it deploys a node, but the service offering decides the size:
-
-- If the service offering sets `rootdisksize`, **the offering's value wins**. On Apache CloudStack 4.22.1, an offering with `rootdisksize=20` gave a 20 GB root disk for a 30 GB request.
-- If the offering leaves `rootdisksize` unset, the node gets the size CCX requests.
-- The resulting root disk must be at least as large as the template's root disk.
-
-Before adding a service offering to `instance_types`, check its root disk size:
-
-```
-cmk list serviceofferings filter=name,id,cpunumber,memory,rootdisksize
-```
-
-Use offerings whose effective root disk (their `rootdisksize`, or 20 GB when empty) is 20 GB or more.
 
 ## Guest template requirements
 
@@ -652,3 +690,83 @@ The secret has to be included in the ccx-values under the cloudSecrets.
   cloudSecrets:
     - cloudstack-s3
 ```
+## Known limitations
+
+What is specific to CCX on CloudStack, and what to expect instead. Items marked
+*by design* are deliberate; the rest are gaps. Limitations that apply to every
+provider, such as how vertical and storage scaling work, are listed in
+[Limitations in CCX](../../../Limitations.md).
+
+### The service offering's root disk size wins
+
+If a service offering declares `rootdisksize`, CloudStack applies it and ignores
+the root volume size CCX requests. Requesting a 30 GB root disk under an
+offering that declares 20 yields 20 GB. Only offerings that leave `rootdisksize`
+unset honour the size CCX sends. If a root-size change appears to do nothing,
+check the offering before anything else. See [Root disk](#root-disk) for the
+minimum size and the check command.
+
+### Offerings and IDs are not validated before a deploy starts
+
+The UUIDs in `instance_types`, `volume_types`, `zone`, `network_id` and
+`template_id` are taken from config as-is. A retired offering, a wrong network
+or a missing template is only discovered when CloudStack rejects the call,
+partway through a deploy, after other resources already exist. The failed
+deploy is rolled back, but the error arrives late and is CloudStack's, not
+CCX's.
+
+The `cpu` and `ram` values under `instance_types` are display values shown to
+end users. CCX does not check them against the offering, so keep them in sync
+by hand.
+
+### VPC deployments are not supported
+
+Set `has_vpcs: false`. The VPC operations exist on the CloudStack deployer but
+are not implemented; a request that reaches them fails with an internal error.
+
+### One zone per region, one guest network per zone
+
+Each region maps to a single zone and each zone to a single `network_id`, as
+shown under [Configuration](#configuration). Multi-zone regions are not
+supported.
+
+### Deleting a large datastore can outrun the job deadline
+
+Nodes are torn down one at a time, and each VM destroy waits for CloudStack to
+finish expunging it, which took 2-3 minutes per VM on the KVM lab. The delete
+job has a 15-minute budget that also covers cmon removal, DNS and backup
+cleanup, so a datastore of roughly six or more nodes can exceed it.
+
+When that happens the job reports a failure while the deployer keeps deleting
+in the background. Retry the delete once the nodes are gone; it finds nothing
+left to remove and completes the remaining steps. Nothing is left behind in the
+cloud. Two- and three-node datastores are well inside the budget.
+
+### A failed teardown is retried, not reconciled
+
+CCX tags every VM, volume and public IP it creates with `ccx-cluster` and
+`ccx-node`, but it does not yet scan the cloud for resources it has lost track
+of. If a delete fails, retry it; teardown is idempotent. To audit by hand:
+
+```bash
+cmk list virtualmachines listall=true tags[0].key=ccx-cluster tags[0].value=<cluster-uuid>
+cmk list volumes         listall=true tags[0].key=ccx-cluster tags[0].value=<cluster-uuid>
+cmk list publicipaddresses listall=true tags[0].key=ccx-cluster tags[0].value=<cluster-uuid>
+```
+
+Anything returned for a datastore CCX no longer lists is an orphan.
+
+### The guest template patch does not survive a cloud-init upgrade
+
+See [Guest template requirements](#guest-template-requirements). Until the
+upstream fix ships, `apt upgrade cloud-init` inside a node reverts the patch, and
+that node will fail host init on its next boot. Pin the package in the template
+or re-apply the patch after upgrades.
+
+### Any cloud-init warning fails host init (by design)
+
+CCX refuses a node whose `cloud-init status` exits non-zero, including exit `2`
+(completed with recoverable warnings). It cannot tell from the exit code what
+was skipped, and a half-provisioned node is worse than a failed deploy. A
+template must boot with `recoverable_errors: {}`; see the pre-flight check
+above.
