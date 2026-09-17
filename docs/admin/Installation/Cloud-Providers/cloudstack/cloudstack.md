@@ -537,7 +537,19 @@ At present, CCX supports a single zone per region, ensuring streamlined resource
 CCX supports only disks with configurable, custom sizes. This flexibility allows users to specify disk capacities according to the specific needs of their database workloads, ensuring efficient storage allocation and scaling based on demand.
 
 ### Deployer configuration file ccx-values-deployer
-The cloudstack provider has to be defined under `cloudstack_vendors`, here is an example
+The cloudstack provider has to be defined under `cloudstack_vendors`, here is an example.
+
+:::danger[The chart's `minimal-values-cloudstack.yaml` ships a mismatch - do not copy it]
+
+The sample in the chart pairs `code: mycloud` under `clouds:` with a
+`cloudstack:` key under `cloudstack_vendors:`. The deployer looks the vendor up
+by the cloud's own `code`, and does not check that the key exists, so a mismatch
+is a nil-pointer crash on startup - before any validation runs and with nothing
+naming the real problem. The key under `cloudstack_vendors` must be spelled
+exactly like `clouds[].code`, and like the prefix on your secret keys.
+
+:::
+
 ```yaml
         cloudstack_vendors:
           mycloud:
@@ -645,42 +657,65 @@ and management, not every possible monitoring topology.
 :::
 
 ### Cloudstack credentials
-We store Cloudstack credentials in the Kubernetes secrets.
-In the Kubernetes secret we will have two values for API_KEY and API_SECRET_KEY
 
-The name of this variables should be as follows &lt;name_of_the_cloudstack_vendor&gt;_CLOUDSTACK_API_KEY and &lt;name_of_the_cloudstack_vendor&gt;_CLOUDSTACK_API_SECRET_KEY.
+CloudStack API credentials live in a Kubernetes secret, as two values: the API
+key and the API secret key.
 
-In our case the cloudstack vendor is called `mycloud` so we need to create secret named `mycloud`
+:::important[The key prefix is your cloud's `code`, not the word "cloudstack"]
+
+Every key in a cloud secret is read by **suffix**. CCX strips the known suffix
+(`CLOUDSTACK_API_KEY`, `S3_ENDPOINT`, `S3_INSECURE_SSL`, and so on) and treats
+whatever is left, lowercased, as the name of the cloud the value belongs to. So
+`MYCLOUD_S3_ENDPOINT` configures a cloud called `mycloud`, and
+`CLOUDSTACK_S3_ENDPOINT` configures a different one called `cloudstack`.
+
+That name has to match `clouds[].code` in your values, and the key under
+`cloudstack_vendors`. Get it wrong and **nothing fails loudly**: the key is
+parsed, filed under a cloud nobody uses, and the cloud you did configure is left
+without that setting. A missing `S3_INSECURE_SSL` then defaults to `false` and
+your self-signed endpoint fails later, at backup time, with no mention of the
+variable.
+
+The examples on this page use `mycloud` throughout, so every key is prefixed
+`MYCLOUD_`. If you name your cloud something else, change the prefix to match.
+
+:::
+
+The secret itself is named after the cloud by convention, which keeps things
+readable but is not required - only the key prefixes matter.
+
 ```yaml
 apiVersion: v1
 data:
-  MYCLOUD_CLOUDSTACK_API_KEY: base64_encoed_api_key
-  MYCLOUD_CLOUDSTACK_API_SECRET_KEY: base64_encoded_secret_api_key
+  MYCLOUD_CLOUDSTACK_API_KEY: <base64_api_key>
+  MYCLOUD_CLOUDSTACK_API_SECRET_KEY: <base64_api_secret_key>
 kind: Secret
 metadata:
-  annotations:
-  name: mycloud 
+  name: mycloud
 type: Opaque
 ```
 
-The secret has to be included in the ccx-values under the cloudSecrets.
+The secret has to be included in the ccx-values under `cloudSecrets`, by the
+secret's own name:
 
 ```yaml
   cloudSecrets:
-    - cloudstack
+    - mycloud
 ```
 
 ### S3 backup storage
-For the Cloudstack S3 backup, we need to create a Kubernetes secret with S3 storage informations and credentials.
-`CLOUDSTACK_S3_INSECURE_SSL` can be set to true if you don't have a valid TLS cert for your s3 endpoint.
+
+Datastore backups go to S3-compatible object storage, configured through a second
+Kubernetes secret. The same prefix rule applies: these keys must carry your
+cloud's `code`, which is `mycloud` in the examples here.
 
 ```yaml
 apiVersion: v1
 data:
   MYCLOUD_S3_ACCESSKEY: <base64_access_key>
-  MYCLOUD_S3_BUCKETNAME: <base64_bucket_name>
-  MYCLOUD_S3_ENDPOINT: <base64_endpoint>
   MYCLOUD_S3_SECRETKEY: <base64_secret_key>
+  MYCLOUD_S3_ENDPOINT: <base64_endpoint>
+  MYCLOUD_S3_BUCKETNAME: <base64_bucket_name>
   MYCLOUD_S3_INSECURE_SSL: <base64_true_or_false>
 kind: Secret
 metadata:
@@ -688,16 +723,68 @@ metadata:
 type: Opaque
 ```
 
-:::note
-  For the key MYCLOUD_S3_ENDPOINT: base64_endpoint, if you are using an AWS S3 bucket, the endpoint should be provided without the https details.
-:::
-
-The secret has to be included in the ccx-values under the cloudSecrets.
+The secret has to be included in the ccx-values under `cloudSecrets`, alongside
+the credentials secret:
 
 ```yaml
   cloudSecrets:
+    - mycloud
     - cloudstack-s3
 ```
+
+**`MYCLOUD_S3_ENDPOINT` is `host[:port]` with no scheme.** Not
+`https://minio.example.com:9000`, just `minio.example.com:9000`. A scheme makes
+the deployer fail with `Endpoint url cannot have fully qualified paths`. This
+applies to every endpoint, not only AWS.
+
+**CCX always connects over HTTPS.** The scheme carries no information, which is
+why it is not accepted, and an endpoint that only answers plain HTTP will not
+work. Check before you build on it:
+
+```bash
+curl -sSI --max-time 10 https://<endpoint>
+```
+
+**`MYCLOUD_S3_INSECURE_SSL: "true"` is for a self-signed or otherwise untrusted
+certificate.** It covers CCX's own bucket management and the credentials it
+registers with ClusterControl. It does **not** cover wal-g - see the caution
+below.
+
+**You do not pre-create a bucket.** CCX makes one bucket per datastore, named
+`ccx-<datastore uuid>`. `MYCLOUD_S3_BUCKETNAME` is only consulted when a
+datastore is deleted, to decide where to look for its backups, so a `404` on
+that name is expected and not an error.
+
+:::warning[wal-g ignores `S3_INSECURE_SSL`]
+
+The chart ships `ccx.services.runner.env.USE_WALG: "true"`. wal-g brings its own
+S3 client which does not honour `S3_INSECURE_SSL` and requires a certificate it
+trusts, so PostgreSQL backups fail with `x509: certificate signed by unknown
+authority` against a self-signed endpoint. Either give the endpoint a trusted
+certificate, or set:
+
+```yaml
+ccx:
+  services:
+    runner:
+      env:
+        USE_WALG: "false"
+```
+
+which routes PostgreSQL backups through `pg_basebackup` instead, and that path
+does honour the flag.
+
+:::
+
+:::note[A bare IP address cannot have a publicly-trusted certificate]
+
+No public CA issues certificates for private IPs, so an endpoint like
+`192.168.1.13:9000` can only ever present a self-signed certificate. That is
+workable with `MYCLOUD_S3_INSECURE_SSL: "true"` and `USE_WALG: "false"`, but if
+you want wal-g, the endpoint needs a DNS name and a certificate your database
+nodes trust.
+
+:::
 ## Known limitations
 
 What is specific to CCX on CloudStack, and what to expect instead. Items marked
@@ -749,6 +836,25 @@ When that happens the job reports a failure while the deployer keeps deleting
 in the background. Retry the delete once the nodes are gone; it finds nothing
 left to remove and completes the remaining steps. Nothing is left behind in the
 cloud. Two- and three-node datastores are well inside the budget.
+
+### Deleting a datastore leaves its S3 bucket behind
+
+CloudStack resources are released correctly on delete - VMs, volumes, public IPs
+and firewall rules all go - but the datastore's `ccx-<datastore uuid>` bucket is
+not removed, and no later cleanup removes it either. The deployer's record of the
+bucket name is empty by the time the delete runs, and the deletion step is
+guarded on that field, so it is skipped silently and reports success. Nothing is
+logged on either the success or the failure path.
+
+Until this is fixed, remove the bucket by hand after deleting a datastore. It
+still holds that datastore's backups, so check the contents before deleting it:
+
+```bash
+aws --endpoint-url https://<endpoint> s3 ls s3://ccx-<datastore-uuid>
+aws --endpoint-url https://<endpoint> s3 rb s3://ccx-<datastore-uuid> --force
+```
+
+Tracked as CCX-6236.
 
 ### A failed teardown is retried, not reconciled
 
