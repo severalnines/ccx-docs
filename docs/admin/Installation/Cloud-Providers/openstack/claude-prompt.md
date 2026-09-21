@@ -1,32 +1,35 @@
 ---
-title: Install CCX supporting OpenStack with Claude (Beta)
+title: Install CCX supporting OpenStack with Claude (Alpha)
 sidebar_label: Claude prompt
-sidebar_class_name: sidebar-badge-beta
+sidebar_class_name: sidebar-badge-alpha
 ---
 
-# Install CCX supporting OpenStack with Claude <span className="badge badge--warning">Beta</span>
+# Install CCX supporting OpenStack with Claude <span className="badge badge--danger">Alpha</span>
 
 This page contains a ready-made prompt for [Claude Code](https://claude.com/claude-code) that gets a quick-start CCX install running with OpenStack as the cloud provider. It follows the [OpenStack guide](openstack.md) and the [OpenStack tutorial](../../Tutorial-openstack.md), reads your OpenStack credentials from the RC file variables you already have, looks up flavors, images, networks and zones with the `openstack` CLI, and waits for your approval before changing anything.
 
-:::caution Not yet corrected against a live run
-
-The [CloudStack prompt](../cloudstack/claude-prompt.md) was rewritten after installing from it. This one has not been through that yet: every value and command in it was checked against the deployer source and the chart, not against a running OpenStack. If a step disagrees with what your cloud does, tell Claude to stop and trust the cloud, and please report what you hit.
-
-:::
-
 ## What this installs
 
-The Kubernetes side is the same as for every other cloud, and the numbers
-measured on the [CloudStack run](../cloudstack/claude-prompt.md#what-this-installs)
-of the same charts apply: roughly **39 pods**, about **66 GiB of
-PersistentVolumeClaims**, around a gigabyte of images, and the cluster-scoped
-objects listed there (14 CRDs, ClusterRoles for cert-manager, ingress-nginx and
-the two database operators, one ClusterIssuer, one IngressClass).
+The Kubernetes side does not depend on the cloud, and the numbers below were
+measured on a single-node quick-start install of these charts, not estimated.
+It ends up with roughly **39 pods** and about **66 GiB of
+PersistentVolumeClaims**, and pulls around a gigabyte of images.
 
 **Inside the namespace**, `ccxdeps` brings ingress-nginx, cert-manager, NATS,
 VictoriaMetrics with Alertmanager, Loki, a PostgreSQL cluster for CCX, a MySQL
 InnoDB cluster for ClusterControl, and the Zalando PostgreSQL and Oracle MySQL
 operators. The `ccx` chart then adds the CCX services, ClusterControl and cmon.
+
+**Cluster-wide** - these are the ones that reach beyond the namespace and matter
+on a shared cluster:
+
+| Object | Count | Notes |
+|---|---|---|
+| CustomResourceDefinitions | 14 | 6 cert-manager, 5 `*.zalan.do` / `zalando.org`, 3 `*.mysql.oracle.com` |
+| ClusterRoles and bindings | ~16 | cert-manager, ingress-nginx, both operators |
+| Admission webhooks | 3 | cert-manager |
+| ClusterIssuer | 1 | the one you name |
+| IngressClass | 1 | `nginx` |
 
 **In OpenStack.** The prompt creates the `ccx-common` security group if you do
 not have one, and briefly boots one test server with a floating IP and a
@@ -68,7 +71,7 @@ You need:
 - The project's **OpenStack RC file** (Horizon → API Access → Download OpenStack RC File), or a `clouds.yaml` entry for it.
 - The [`openstack` CLI](https://docs.openstack.org/python-openstackclient/latest/) (`pipx install python-openstackclient`). It is not strictly required - the prompt can fall back to signed REST calls - but it makes every lookup a one-liner.
 - An Ubuntu 22.04 or 24.04 cloud image in Glance. Stock images work on OpenStack; no patching is needed.
-- S3-compatible object storage for datastore backups. On OpenStack this is **required**, not optional: the deployer refuses to start without S3 credentials for the cloud. Use whatever you already run - Ceph RADOS Gateway, Swift with the S3 API, MinIO, AWS S3. If you have nothing, [MinIO](https://min.io/) is the usual lab choice, and the CloudStack guide's [S3 backup storage](../cloudstack/cloudstack.md#s3-backup-storage) section applies unchanged.
+- S3-compatible object storage for datastore backups. On OpenStack this is **required**, not optional: the deployer refuses to start without S3 credentials for the cloud. Use whatever you already run - Ceph RADOS Gateway, Swift with the S3 API, MinIO, AWS S3. If you have nothing, [MinIO](https://min.io/) is the usual lab choice; see [S3 backup storage](openstack.md#s3-backup-storage) in the OpenStack guide for the secret it needs.
 - The CCX Helm charts. The public `s9s` repository at `https://severalnines.github.io/helm-charts/` is the default and its images are public. If Severalnines gave you a chart tarball instead, it may use private images and ship a `gcr.yaml` pull secret; the prompt handles both.
 - [Claude Code](https://claude.com/claude-code) installed on the same machine.
 
@@ -129,8 +132,7 @@ with ClusterControl, but not wal-g: if your chart enables wal-g
 (`ccx.services.runner.env.USE_WALG`), PostgreSQL WAL archiving fails against a
 self-signed endpoint with `x509: certificate signed by unknown authority`. The
 prompt sets `USE_WALG: "false"` when `S3_INSECURE=true` and leaves the chart
-default alone otherwise. See [S3 backup storage](../cloudstack/cloudstack.md#s3-backup-storage)
-for the details.
+default alone otherwise.
 
 :::
 
@@ -225,7 +227,7 @@ Ask a few at a time:
 - Kubernetes context, namespace (default `ccx`), storage class.
 - Cloud code and display name, and the region's display details (name, city, country, continent). The region **code** is `OS_REGION_NAME` - show it and confirm, do not ask me to type it.
 - Databases to offer (from the chart's `ccx.config.databases`), and the end-user CIDRs allowed to reach them.
-- S3 for backups: endpoint `host[:port]` and whether its TLS certificate is valid. Skip whichever of these `S3_ENDPOINT` and `S3_INSECURE` already answer - show the values and confirm them in one go. Do not ask me for a bucket name; see below. If I have no S3-compatible storage yet, say that MinIO is the usual choice for a lab and point me at the **S3 backup storage** section of the CloudStack guide, which applies unchanged.
+- S3 for backups: endpoint `host[:port]` and whether its TLS certificate is valid. Skip whichever of these `S3_ENDPOINT` and `S3_INSECURE` already answer - show the values and confirm them in one go. Do not ask me for a bucket name; see below. If I have no S3-compatible storage yet, say that MinIO is the usual choice for a lab and point me at the **S3 Backup Storage** section of the OpenStack guide.
 
   Then check the endpoint before we build anything on it, because both failures below surface much later as broken backups:
 
