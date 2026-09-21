@@ -56,7 +56,9 @@ nav:
           - Cloud Providers:
               - Overview: admin/Installation/Cloud-Providers/Cloud-Providers.md
               - Aws: admin/Installation/Cloud-Providers/aws.md
-              - Openstack: admin/Installation/Cloud-Providers/openstack.md
+              - Openstack:
+                  - Openstack: admin/Installation/Cloud-Providers/openstack/openstack.md
+                  - Claude Prompt: admin/Installation/Cloud-Providers/openstack/claude-prompt.md
               - Cloudstack:
                   - Cloudstack: admin/Installation/Cloud-Providers/cloudstack/cloudstack.md
                   - Claude Prompt: admin/Installation/Cloud-Providers/cloudstack/claude-prompt.md

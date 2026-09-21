@@ -350,8 +350,8 @@ fails the install rather than degrading it.
 :::
 
 For a per-key reference of what each secret holds, see
-[OpenStack Credentials](Cloud-Providers/openstack.md#openstack-credentials) and
-[S3 Backup Storage](Cloud-Providers/openstack.md#s3-backup-storage).
+[OpenStack Credentials](Cloud-Providers/openstack/openstack.md#openstack-credentials) and
+[S3 Backup Storage](Cloud-Providers/openstack/openstack.md#s3-backup-storage).
 
 ---
 
