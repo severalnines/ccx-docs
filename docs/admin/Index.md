@@ -14,7 +14,7 @@ Our deployment solutions offer customizable configurations for various node type
 We support integration with several leading Cloud Service Providers (CSPs), including:
 
 - [Amazon Web Services (AWS)](Installation/Cloud-Providers/aws.md)
-- [OpenStack](Installation/Cloud-Providers/openstack.md)
+- [OpenStack](Installation/Cloud-Providers/openstack/openstack.md)
 - [CloudStack](Installation/Cloud-Providers/cloudstack/cloudstack.md) (beta)
 - [VMWare](Installation/Cloud-Providers/vmware.md)
 - [Google Cloud (GCP)](Installation/Cloud-Providers/gcp.md)
