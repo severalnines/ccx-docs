@@ -11,18 +11,12 @@ A number of variables is used to control the frontend. The enviroment variables 
 
 
 ```yaml
-- name: FE_BASE_DOMAIN
-  value: The app's base domain
-- name: FE_STRIPE_PK
-  value: stripe key
 - name: FE_REACT_APP_FAVICON_URL
   value: app favicon path
 - name: FE_REACT_APP_LOGO_URL
   value: app logo path
 - name: FE_VPC_DISABLED
   value: hide VPCs entirely (sidebar entry, the VPCs page, and the create-VPC option in the deployment wizard)
-- name: FE_BILLING_DISABLED
-  value: control billing, pricing, invoices, subscription etc
 - name: FE_ONBOARDING_DISABLED
   value: disable the onboarding hints and welcome flow
 - name: FE_USER_MENU_DISABLED
@@ -40,8 +34,6 @@ A number of variables is used to control the frontend. The enviroment variables 
   value: hide breadcrumbs
 - name: FE_HIDE_FEEDBACK
   value: hide feedback button at the bottom left of the page
-- name: FE_HIDE_PROJECT_NAME
-  value: not in use but intended to show or hide project dropdown in header bar
 - name: FE_USE_PRIVATE_IPS
   value: show private IPs instead of public ones in connection details and node cards
 - name: FE_WRONG_GLOBAL_REDIRECT_URL
