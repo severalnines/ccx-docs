@@ -50,20 +50,66 @@ A number of variables is used to control the frontend. The enviroment variables 
   value: "https://example.com/my.css" # CSS file URL that will be loaded and applied to the CCX UI, might be useful for theming/visual customisatons. Could also break the layout if not used with caution.
 ```
 
-### Example
+### Examples
 
-The enviroment variables are set under `ccx.services.uiapp.env`. Below is an example:
+The environment variables are set under `ccx.services.uiapp.env`. The examples below use placeholder domains.
 
-```
+#### Branding
+
+Replace the default logo and favicon, and load your own stylesheet:
+
+```yaml
 ccx:
-   ...
-   services:
-       ...
-       uiapp:
-            affinity: {}
-            replicas: 3
-            env:        
-                FE_REACT_APP_FAVICON_URL: "https://ccx.example.com/favicon.ico"
-                FE_REACT_APP_LOGO_URL: "https://ccx.example.com/logo.png"        
-                FE_VPC_DISABLED: 'true'
+  services:
+    uiapp:
+      env:
+        FE_REACT_APP_LOGO_URL: "https://cdn.example.com/brand/logo.svg"
+        FE_REACT_APP_FAVICON_URL: "https://cdn.example.com/brand/favicon.ico"
+        FE_EXTERNAL_CSS_URL: "https://cdn.example.com/brand/ccx.css"
+```
+
+#### Single-cloud white-label installation
+
+A branded installation on one cloud, with VPCs, onboarding and the feedback button hidden, and login handled outside the built-in `ccx-ui-auth` app:
+
+```yaml
+ccx:
+  services:
+    uiapp:
+      env:
+        FE_REACT_APP_LOGO_URL: "https://cdn.example.com/brand/logo.svg"
+        FE_REACT_APP_FAVICON_URL: "https://cdn.example.com/brand/favicon.ico"
+        FE_HIDE_CLOUD_PROVIDER: "true"
+        FE_VPC_DISABLED: "true"
+        FE_ONBOARDING_DISABLED: "true"
+        FE_HIDE_FEEDBACK: "true"
+        FE_AUTH_UI_APP_DISABLED: "true"
+        FE_AUTH_APP_URL: "/auth/?from=ccx"
+```
+
+#### Embedded in a service portal
+
+CCX runs inside an iframe in your own portal. The portal provides navigation, login and the user menu, so CCX hides its own. Users who open CCX directly at `https://ccx.example.com` are sent back to the portal. `FE_WRONG_GLOBAL_REDIRECT_URL` and `FE_GLOBAL_REDIRECT_URL` only take effect when both are set.
+
+```yaml
+ccx:
+  services:
+    uiapp:
+      env:
+        FE_REACT_APP_LOGO_URL: "https://cdn.example.com/brand/logo.svg"
+        FE_REACT_APP_FAVICON_URL: "https://cdn.example.com/brand/favicon.ico"
+        FE_HIDE_HEADER: "true"
+        FE_HIDE_FOOTER: "true"
+        FE_HIDE_BREADCRUMBS: "true"
+        FE_USER_MENU_DISABLED: "true"
+        FE_HIDE_CLOUD_PROVIDER: "true"
+        FE_HIDE_FEEDBACK: "true"
+        FE_ONBOARDING_DISABLED: "true"
+        FE_VPC_DISABLED: "true"
+        FE_USE_PRIVATE_IPS: "true"
+        FE_EULA: "true"
+        FE_EULA_URL: "https://portal.example.com/eula"
+        FE_AUTH_REDIRECT_URL: "https://portal.example.com/"
+        FE_WRONG_GLOBAL_REDIRECT_URL: "https://ccx.example.com"
+        FE_GLOBAL_REDIRECT_URL: "https://portal.example.com/"
 ```
