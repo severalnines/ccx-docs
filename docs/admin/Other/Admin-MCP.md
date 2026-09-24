@@ -17,9 +17,9 @@ The admin API accepts two kinds of credentials. Both live in Kubernetes secrets 
 | Secret | Keys | Environment variables | Covers |
 |--------|------|-----------------------|--------|
 | `admin-users` | `ADMIN_USERS` = `email:password` | `CCX_ADMIN_USERNAME`, `CCX_ADMIN_PASSWORD` | datastores, nodes, audit log, users, billing, cmon version |
-| `admin-basic-auth` | `ADMIN_AUTH_USERNAME`, `ADMIN_AUTH_PASSWORD` | `CCX_ADMIN_BASIC_USERNAME`, `CCX_ADMIN_BASIC_PASSWORD` | health check, datastore/user counters, VPC listing |
+| `admin-basic-auth` | `ADMIN_AUTH_USERNAME`, `ADMIN_AUTH_PASSWORD` | `CCX_ADMIN_BASIC_USERNAME`, `CCX_ADMIN_BASIC_PASSWORD` | health check, datastore/user counters, VPC listing, billing |
 
-The admin user login is the one you need. Basic auth is optional: the counter tools fall back to counting the full lists without it.
+The admin user login is the one you need. Basic auth is optional for everything except `ccx_admin_list_vpcs`, which has no fallback: the counter tools count the full lists instead, and billing accepts either credential set.
 
 ```bash
 kubectl -n <ccx-namespace> get secret admin-users -o jsonpath='{.data.ADMIN_USERS}' | base64 -d
