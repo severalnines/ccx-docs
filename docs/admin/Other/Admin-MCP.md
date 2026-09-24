@@ -41,7 +41,7 @@ claude mcp add ccx-admin \
   -- npx -y @severalnines/ccx-admin-mcp@latest
 ```
 
-The `-e` flags store the values as environment variables of the server, so the password does not appear in the process list.
+The `-e` flags store the values as environment variables of the registered server, so the password is not part of the server's command line every time it starts. It is still visible in the argument list of this one `claude mcp add` invocation and in your shell history; on a shared machine prefer the JSON configuration below or a `.env` file.
 
 ### Other MCP clients
 

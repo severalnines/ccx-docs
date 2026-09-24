@@ -9,7 +9,7 @@ CCX ships an [MCP](https://modelcontextprotocol.io) (Model Context Protocol) ser
 - "Show me the slowest queries on my database"
 - "Scale my cluster to a medium instance"
 
-The server runs on your machine and talks to CCX with your own credentials; nothing is sent anywhere else.
+The server runs on your machine and talks to CCX with your own credentials. Everything a tool returns, including connection strings and database user names, is passed to the AI assistant and from there to its model provider, so check the assistant's privacy and data-retention settings before asking it for secrets.
 
 ## Credentials
 
