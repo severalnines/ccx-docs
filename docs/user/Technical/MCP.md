@@ -24,12 +24,12 @@ Node.js 18 or newer is required.
 ```bash
 claude mcp add ccx \
   -e CCX_BASE_URL=https://ccx.example.com \
-  -e CCX_CLIENT_ID=<your-client-id> \
-  -e CCX_CLIENT_SECRET=<your-client-secret> \
+  -e CCX_CLIENT_ID='your-client-id' \
+  -e CCX_CLIENT_SECRET='your-client-secret' \
   -- npx -y @severalnines/ccx-mcp@latest
 ```
 
-The `-e` flags store the values as environment variables of the registered server, so the secret is not part of the server's command line every time it starts. It is still visible in the argument list of this one `claude mcp add` invocation and in your shell history; on a shared machine prefer the JSON configuration below. For password authentication use `-e CCX_USERNAME=...` and `-e CCX_PASSWORD=...` instead of the client id and secret. Restart Claude Code (or run `/mcp` and reconnect) afterwards.
+The `-e` flags store the values as environment variables of the registered server, so the secret is not part of the server's command line every time it starts. It is still visible in the argument list of this one `claude mcp add` invocation and in your shell history; on a shared machine prefer the JSON configuration below. For password authentication use `-e CCX_USERNAME='you@example.com'` and `-e CCX_PASSWORD='your-password'` instead of the client id and secret (keep the single quotes so shell-special characters in the password are passed through unchanged). Restart Claude Code (or run `/mcp` and reconnect) afterwards.
 
 ### Other MCP clients
 

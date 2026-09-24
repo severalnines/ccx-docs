@@ -87,7 +87,7 @@ The delete tools additionally require `confirm: true` in the tool call. That is 
 
 | Tool | Description |
 |------|-------------|
-| `ccx_admin_check` | Verify connectivity and both credential sets; shows the admin identity |
+| `ccx_admin_check` | Verify connectivity and whichever credential sets are configured; shows the admin identity when a session is used |
 | `ccx_admin_cmon_version` | Version of the ClusterControl controller (cmon) |
 | `ccx_admin_list_datastores` | All datastores across all users with owner, status and latest job; filter by status, cloud, type, owner, name or job status |
 | `ccx_admin_get_datastore` | One datastore with its latest job and database nodes |
@@ -100,7 +100,7 @@ The delete tools additionally require `confirm: true` in the tool call. That is 
 | `ccx_admin_suspend_user` / `ccx_admin_unsuspend_user` | Suspend a user with a reason, or lift the suspension |
 | `ccx_admin_delete_user` | Delete a user (protected) |
 | `ccx_admin_billing_usage` | Per-datastore usage for a date range: instance hours, volume GiB-hours, egress, backups (see [Billing](Billing.md)) |
-| `ccx_admin_list_vpcs` | VPC ids known to CCX for an AWS region. The only tool that requires the basic-auth credentials; the backend does not query the cloud, so an empty result means "unknown" rather than "none" |
+| `ccx_admin_list_vpcs` | VPC ids known to CCX for an AWS region. The only tool that requires the basic-auth credentials (`CCX_ADMIN_BASIC_USERNAME` and `CCX_ADMIN_BASIC_PASSWORD`); the backend does not query the cloud, so an empty result means "unknown" rather than "none" |
 
 ## Security notes
 
