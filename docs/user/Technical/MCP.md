@@ -22,13 +22,14 @@ Node.js 18 or newer is required.
 ### Claude Code
 
 ```bash
-claude mcp add ccx -- npx -y @severalnines/ccx-mcp@latest \
-  --endpoint https://ccx.example.com \
-  --client-id <your-client-id> \
-  --client-secret <your-client-secret>
+claude mcp add ccx \
+  -e CCX_BASE_URL=https://ccx.example.com \
+  -e CCX_CLIENT_ID=<your-client-id> \
+  -e CCX_CLIENT_SECRET=<your-client-secret> \
+  -- npx -y @severalnines/ccx-mcp@latest
 ```
 
-Use `--username` and `--password` instead of the client id and secret for password authentication. Restart Claude Code (or run `/mcp` and reconnect) afterwards.
+The `-e` flags store the values as environment variables of the registered server, so the secret is not part of the server's command line every time it starts. It is still visible in the argument list of this one `claude mcp add` invocation and in your shell history; on a shared machine prefer the JSON configuration below. For password authentication use `-e CCX_USERNAME=...` and `-e CCX_PASSWORD=...` instead of the client id and secret. Restart Claude Code (or run `/mcp` and reconnect) afterwards.
 
 ### Other MCP clients
 
@@ -50,7 +51,7 @@ Add the server to the client's MCP configuration file (`.mcp.json` for Claude Co
 }
 ```
 
-Replace `https://ccx.example.com` with the URL of your CCX deployment.
+Replace `https://ccx.example.com` with the URL of your CCX deployment. For password authentication replace `CCX_CLIENT_ID` and `CCX_CLIENT_SECRET` with `CCX_USERNAME` and `CCX_PASSWORD`. Keep the configuration file private: it holds your credentials in clear text.
 
 ## Protection mode
 
