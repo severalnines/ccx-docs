@@ -105,6 +105,10 @@ Our platform facilitates user account creation and management, streamlining the 
 
 Our billing and payment processing tools are designed to simplify financial transactions, including the management of payments and invoices.
 
+### AI Assistants (MCP)
+
+CCX ships two MCP servers for AI assistants such as Claude Code: `ccx-admin-mcp` gives operators a view across all users and datastores (status, nodes, audit logs, users, billing usage), and `ccx-mcp` lets customers manage their own datastores. Read more in [Admin MCP server](Other/Admin-MCP.md) and [MCP server for AI assistants](../user/Technical/MCP.md).
+
 ## Feature Matrix
 
 Each datastore has different features and are suitable for different use cases. Below is a feature matrix showing what operational feature is supported on each datastore:

@@ -363,6 +363,7 @@ const sidebars: SidebarsConfig = {
           items: [
             'user/Technical/API',
             'user/Technical/Terraform',
+            'user/Technical/MCP',
           ],
         },
       ],
