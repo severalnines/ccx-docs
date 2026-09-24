@@ -28,7 +28,8 @@ The reponse is either JSON or CSV.
 Basic auth is supported. The credentials are stored in the `admin-basic-auth` secret:
 
 ```
-kubectl get secret -n ccx admin-basic-auth -o jsonpath={.data.password} | base64 --decode
+kubectl get secret -n ccx admin-basic-auth -o jsonpath='{.data.ADMIN_AUTH_USERNAME}' | base64 --decode
+kubectl get secret -n ccx admin-basic-auth -o jsonpath='{.data.ADMIN_AUTH_PASSWORD}' | base64 --decode
 ```
 
 ### Method: GET
