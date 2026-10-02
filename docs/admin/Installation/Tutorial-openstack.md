@@ -420,14 +420,11 @@ Below is a minimal working example. You can add more instance types, regions, an
 ```yaml
 ccxFQDN: ccx.example.com
 ccFQDN: cc.example.com
-cc:
-  cidr: 203.0.113.0/24   # ClusterControl admin portal — restrict to your admin network
 cmon:
   # Base64-encoded license key. Note the spelling: the chart reads `license`.
   # `licence` is silently ignored — no error, and the license is never applied.
   license:
 ccx:
-  cidr: 0.0.0.0/0        # End-user portal — intended to be publicly reachable
   cloudSecrets:
     - openstack      # Must match the Kubernetes secret name from Step 4
     - openstack-s3
@@ -438,6 +435,11 @@ ccx:
     REQUIRE_EMAIL_VERIFICATION: "false"
     REQUIRE_SUBSCRIPTION: "false"
   ingress:
+    # Restricts the ClusterControl web UI (path / on ccFQDN) to these source
+    # ranges. Comma-separated CIDRs; empty or unset means reachable from
+    # anywhere. It does not cover the cmon API paths on the same host, and the
+    # end-user portal (ccxFQDN) has no equivalent setting.
+    whitelist: 203.0.113.0/24
     ssl:
       clusterIssuer: letsencrypt-prod
   config:
