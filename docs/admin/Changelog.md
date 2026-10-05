@@ -11,6 +11,17 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.57.5
+Release date: 05-10-2026
+
+### Bugs
+- Deleted or suspended users were still granted a session through JWT login (`POST /auth/jwt-login` accept-only path), returning 200 with user data or an unhandled 500 instead of being rejected; they now get a 403
+- Repair job timeout config values without time units (previously assumed seconds) are now parsed correctly again, restoring backward compatibility with older configs
+- After a failed node is repaired, the database/parameter group configuration is now re-applied to the replacement node once the cluster returns to `STARTED`, retrying for up to 15 minutes — fixing replacement nodes left with default settings when the config resync raced cluster recovery
+- Fixed a transaction deadlock in external DNS updates where two concurrent updates could each hold one of the two pool connections waiting on the other, wedging the runner pod
+- Fixed availability zone selection in the deployment wizard mutating the zones array in place instead of copying it, which could leave stale zone values in the form
+- Fixed the rollback-from-Kubernetes-secrets-to-files restore check treating a node as already restored when only `cmon.data` was present without cmon config files, which could skip the needed restore
+
 ## Release Notes - CCX - v1.57.4
 Release date: 15-09-2026
 CMON version: 2.4.0-23957
