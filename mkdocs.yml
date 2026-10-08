@@ -126,6 +126,7 @@ nav:
           - Products:
               - MSSQLServer:
                   - Overview: user/Reference/Products/MSSQLServer/overview.md
+                  - Backup and Restore: user/Reference/Products/MSSQLServer/backup-restore.md
                   - Configurations: user/Reference/Products/MSSQLServer/configurations.md
                   - Limitations: user/Reference/Products/MSSQLServer/limitations.md
                   - User Management: user/Reference/Products/MSSQLServer/User-Management.md

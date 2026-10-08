@@ -19,3 +19,4 @@ Scaling is not supported in SQLServer as of the standard license.
 ## Further Reading
 
 - [Limitations](./limitations.md)
+- [Backup and Restore](./backup-restore.md)
