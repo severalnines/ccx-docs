@@ -11,6 +11,18 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.57.7
+Release date: 08-10-2026
+
+### Bugs
+- The admin REST API accepted OAuth bearer tokens from any active user, not just admins, on every endpoint protected by `checkAuth` — a regular user who created their own API credentials could call admin-only endpoints (e.g. list/export all users and datastores, delete datastores and users). OAuth bearer tokens are now rejected with 401 on the admin API regardless of the token holder's role; admin cookie sessions and basic auth on the billing usage endpoint are unaffected
+
+## Release Notes - CCX - v1.57.6
+Release date: 07-10-2026
+
+### Bugs
+- PostgreSQL users created through the CCX UI were always granted `SUPERUSER`, regardless of whether the "Grant host-level control" toggle was enabled; `SUPERUSER` is now only granted when the toggle is explicitly on
+
 ## Release Notes - CCX - v1.57.5
 Release date: 05-10-2026
 
