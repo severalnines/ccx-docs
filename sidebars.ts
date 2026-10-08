@@ -284,6 +284,7 @@ const sidebars: SidebarsConfig = {
                   label: 'MSSQLServer',
                   items: [
                     'user/Reference/Products/MSSQLServer/overview',
+                    'user/Reference/Products/MSSQLServer/backup-restore',
                     'user/Reference/Products/MSSQLServer/configurations',
                     'user/Reference/Products/MSSQLServer/limitations',
                     'user/Reference/Products/MSSQLServer/User-Management',
