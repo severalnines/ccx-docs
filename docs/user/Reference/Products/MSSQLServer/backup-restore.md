@@ -27,9 +27,13 @@ The log backups determine how much data can be lost: with the default schedule, 
 
 The backup schedule can be tuned and backups can be paused.
 
-### After a failover
+### After a failover or a restore
 
-The first backup taken on a new primary after a failover is always a full backup, even if a differential or log backup was scheduled. Normal scheduling continues after that.
+The first backup taken on a new primary after a failover is always a full backup, even if a differential or log backup was scheduled.
+
+The first backup taken after a restore is also a full backup, even if a differential or log backup was scheduled. The restored databases no longer continue the chain of backups taken before the restore, so a new chain is started from a full backup.
+
+Normal scheduling continues after that.
 
 ### Deleting backups
 
@@ -66,7 +70,3 @@ Please note:
 ### Backups taken before CCX 1.58
 
 Backups taken before CCX 1.58 (written to disk first and then uploaded) can still be restored. CCX downloads them to the primary before restoring them. A restore sequence may mix both kinds, for example an older full backup followed by newer differential and log backups.
-
-## Limitations
-
-- **Backups taken right after a restore.** Differential and log backups taken between a restore and the next scheduled full backup may not be restorable. With the default schedule this window lasts until the next daily full backup. Backups taken before the restore, and backups taken after the next full backup, are not affected.
