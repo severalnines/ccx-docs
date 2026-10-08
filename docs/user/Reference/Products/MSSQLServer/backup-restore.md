@@ -39,15 +39,23 @@ When a backup is deleted, either manually or because it has passed the retention
 
 ### Restore a backup on the existing datastore
 
-Choose the backup to restore. CCX builds the sequence SQL Server needs to reach that point and restores it on the primary:
+Restoring starts from a full backup. The **Restore from Backup** dialog lists the full backup and every restore point taken after it: the differential backups (shown as *Incremental*) and the log backups.
 
-1. the full backup the chosen backup is based on,
-2. the most recent differential backup before the chosen backup, if any,
-3. the log backups after that, up to and including the chosen backup.
+![Restore from Backup](../../../images/mssql-restore-from-backup.png)
+
+- **Restore Full Backup** restores the full backup only.
+- **Restore Latest** restores the newest restore point in the list.
+- **Select** on a row restores up to that restore point.
+
+CCX builds the sequence SQL Server needs to reach the chosen point and restores it on the primary:
+
+- **Full backup:** the full backup only.
+- **Differential backup:** the full backup, then the chosen differential backup.
+- **Log backup:** the full backup, then the most recent differential backup taken after the full backup and before the chosen log backup (if there is one), then every log backup after that up to and including the chosen one.
 
 Choosing a log backup restores the database to the moment that log backup was taken.
 
-The backup files are read directly from S3 storage. In the Always On configuration, the databases are restored on the replica as well and rejoined to the availability group, so the datastore is highly available again when the restore finishes.
+The backup files are read directly from S3 storage. In the Always On configuration, `ccxdb` is also restored on the replica and rejoined to the availability group, so it is highly available again when the restore finishes. Other user-created databases are not replicated; see [Limitations](./limitations.md).
 
 Please note:
 
