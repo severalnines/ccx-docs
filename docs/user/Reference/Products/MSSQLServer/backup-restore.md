@@ -20,10 +20,10 @@ Three backup types are used together:
 | Type | What it contains | Default schedule |
 |---|---|---|
 | Full | The complete database | Once a day |
-| Differential (incremental) | Changes since the last full backup | Every hour |
+| Differential (shown as "incremental" in the backup schedule) | Changes since the last full backup | Every hour |
 | Log | The transaction log since the previous log backup | Every 15 minutes |
 
-The log backups determine how much data can be lost: with the default schedule, a restore can bring the database back to within about 15 minutes of a failure.
+The log backups determine how much data can be lost: with the default schedule, there is normally a restore point about every 15 minutes.
 
 The backup schedule can be tuned and backups can be paused.
 
@@ -53,11 +53,11 @@ Please note:
 
 - A restore replaces the current contents of the restored databases. Data written after the chosen backup is lost.
 - The databases are unavailable to applications while the restore runs.
-- Backups taken on either node can be restored, also after a failover has moved the primary to the other node.
+- Backups taken before a failover can be restored after it, on the new primary.
 
 ### Backups taken before CCX 1.58
 
-Backups taken before CCX 1.58 (written to disk first and then uploaded) remain listed and can still be restored. CCX downloads them to the primary before restoring them. A restore sequence may mix both kinds, for example an older full backup followed by newer differential and log backups.
+Backups taken before CCX 1.58 (written to disk first and then uploaded) can still be restored. CCX downloads them to the primary before restoring them. A restore sequence may mix both kinds, for example an older full backup followed by newer differential and log backups.
 
 ## Limitations
 
