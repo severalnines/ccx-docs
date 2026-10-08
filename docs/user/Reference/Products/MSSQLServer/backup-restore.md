@@ -1,6 +1,6 @@
 # Backup and Restore
 
-CCX backs up Microsoft SQL Server with SQL Server's own native backup, streamed directly to S3 storage.
+CCX backs up Microsoft SQL Server with SQL Server's own native backup, streamed directly to S3 storage. Native S3 streaming was introduced in CCX 1.58.
 
 ## Backup
 
@@ -55,9 +55,9 @@ Please note:
 - The databases are unavailable to applications while the restore runs.
 - Backups taken on either node can be restored, also after a failover has moved the primary to the other node.
 
-### Backups taken before native S3 streaming
+### Backups taken before CCX 1.58
 
-Backups taken before native S3 streaming was introduced (written to disk first and then uploaded) remain listed and can still be restored. CCX downloads them to the primary before restoring them. A restore sequence may mix both kinds, for example an older full backup followed by newer differential and log backups.
+Backups taken before CCX 1.58 (written to disk first and then uploaded) remain listed and can still be restored. CCX downloads them to the primary before restoring them. A restore sequence may mix both kinds, for example an older full backup followed by newer differential and log backups.
 
 ## Limitations
 
