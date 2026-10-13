@@ -11,7 +11,7 @@ const config: Config = {
   url: 'https://severalnines.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/ccx-docs',
+  baseUrl: '/ccx-docs/',
 
   plugins: [require.resolve("@cmfcmf/docusaurus-search-local")],
   // GitHub pages deployment config.
@@ -66,8 +66,8 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    // Social card used for link previews (og:image / twitter:image)
+    image: 'img/ccx-social-card.png',
     navbar: {
       title: 'Severalnines CCX documentation',
       logo: {
@@ -138,7 +138,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Severalnines AB. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Severalnines AB.`,
     },
     prism: {
       theme: prismThemes.github,
