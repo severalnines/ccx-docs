@@ -185,6 +185,11 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'doc',
+          id: 'admin/Limitations',
+          label: 'Limitations',
+        },
+        {
+          type: 'doc',
           id: 'admin/FAQ',
           label: 'FAQ',
         },
