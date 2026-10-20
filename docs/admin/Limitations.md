@@ -97,20 +97,9 @@ E-mail recipient settings in the UI have no effect.
 
 ### Reduced host and query statistics
 
-Some samplers are switched off or slowed down when operating in CCX:
-
-- **SSH-based host statistics**: the CPU, network and OS collectors do not run;
-  memory and TCP statistics still do. Use the Prometheus-based dashboards for
-  host CPU and network metrics.
-- **ProxySQL statistics**: stat deltas are not stored, so ProxySQL statistics
-  graphs in the UI are empty.
-- **MySQL deadlocks and long transactions**: the InnoDB transaction monitor
-  is off, so nothing is reported.
-- **MySQL SQL statistics** (Query Monitor): the default sampling interval is
-  10 s instead of 1 s. Set `mysql_sql_statistics_interval` to override it.
-- **Database growth**: MySQL tracks at most 10 databases, regardless of
-  `database_growth_db_limit` (default 20). On PostgreSQL, `cmon` does not run
-  `ANALYZE` as part of the growth check.
+Some samplers are switched off or slowed down when operating in CCX. Thus, in
+CC UI you may not see data in all charts. That is expected. Check the CCX
+Grafana dashboards instead.
 
 ### Prometheus is managed by CCX, not by ClusterControl
 
