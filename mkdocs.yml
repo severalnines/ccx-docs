@@ -83,6 +83,7 @@ nav:
           - Operations And Management: admin/Troubleshooting/Operations-and-Management.md
           - Support: admin/Troubleshooting/Support.md
           - Troubleshooting: admin/Troubleshooting/Troubleshooting.md
+      - Limitations: admin/Limitations.md
       - Changelog: admin/Changelog.md
   - User Guide:
       - Introduction: user/Index.md
