@@ -33,24 +33,18 @@ Size the initial data volume for expected growth rather than relying on
 repeated small scale-ups, and prefer fewer, larger increments where the
 autoscaling percentage allows.
 
-## ClusterControl (CMON) runs in CCX mode
+## ClusterControl (CMON) when operating in CCX
 
-The ClusterControl controller (`cmon`) that CCX deploys runs with
-`ccx_mode=true` in `/etc/cmon.cnf`. Every datastore's configuration inherits
-the flag, and datastores created by CCX also get it set explicitly. The
-ClusterControl UI has no CCX-specific logic of its own: it shows the menus and
-pages a stand-alone ClusterControl shows. The differences below come from
-`cmon` and appear in the UI as empty pages, missing data or failed requests.
-
-`ccx_mode` is listed as an ordinary boolean under the datastore's
-**Configuration** settings. Do not change it. CCX depends on the behaviour
-below; turning the flag off makes `cmon` take over work that CCX does itself,
-such as deploying Prometheus and upgrading the CMON database schema.
+When operating in CCX, the ClusterControl controller (`cmon`) leaves several
+tasks to CCX and switches off features that do not apply to a managed
+service. The ClusterControl UI still shows the same menus and pages as a
+stand-alone ClusterControl, so these differences appear in the UI as empty
+pages, missing data or failed requests rather than as hidden menu items.
 
 ### Operational reports are not available
 
-`cmon` creates no report generator for a datastore in CCX mode, and the cron
-thread skips scheduled report runs.
+`cmon` creates no report generator for a datastore when operating in CCX, and
+the cron thread skips scheduled report runs.
 
 - Generating, viewing, downloading or deleting an operational report fails
   with `Failed to get reporter for cluster <id>.` (legacy RPC:
@@ -103,7 +97,7 @@ E-mail recipient settings in the UI have no effect.
 
 ### Reduced host and query statistics
 
-Some samplers are switched off or slowed down in CCX mode:
+Some samplers are switched off or slowed down when operating in CCX:
 
 - **SSH-based host statistics**: the CPU, network and OS collectors do not run;
   memory and TCP statistics still do. Use the Prometheus-based dashboards for
@@ -120,7 +114,7 @@ Some samplers are switched off or slowed down in CCX mode:
 
 ### Prometheus is managed by CCX, not by ClusterControl
 
-`cmon` does not install or recover Prometheus in CCX mode. A job that asks
+`cmon` does not install or recover Prometheus when operating in CCX. A job that asks
 ClusterControl to deploy Prometheus succeeds without changing anything and
 logs `In CCX mode - Prometheus is managed elsewhere. Won't install anything.`
 See [Observability](Observability.md) for how monitoring is deployed in CCX.
@@ -141,7 +135,7 @@ See [Observability](Observability.md) for how monitoring is deployed in CCX.
 
 ### Schema upgrades of the CMON database are manual
 
-`cmon` does not automatically upgrade its own database schema in CCX mode. It
+`cmon` does not automatically upgrade its own database schema when operating in CCX. It
 only checks the schema at start-up. If the schema does not match, the
 datastore's cluster thread does not start and the log shows
 `Cmon DB schema is not compatible in CCX mode. Please run the schema upgrade manually.`
@@ -149,6 +143,6 @@ datastore's cluster thread does not start and the log shows
 ### Abandoned clusters are not cleaned up
 
 `cmon` skips its abandoned-cluster cleanup and its cleanup of stale controller
-records in CCX mode. CCX is responsible for removing datastores. Never delete
+records when operating in CCX. CCX is responsible for removing datastores. Never delete
 nodes or datastores from the ClusterControl UI or the S9S CLI; see
 [Operations and Management](Troubleshooting/Operations-and-Management.md#clustercontrol-ui).
