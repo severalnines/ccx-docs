@@ -133,13 +133,6 @@ See [Observability](Observability.md) for how monitoring is deployed in CCX.
   forever.
 - **MSSQL backups are always compressed.**
 
-### Schema upgrades of the CMON database are manual
-
-`cmon` does not automatically upgrade its own database schema when operating in CCX. It
-only checks the schema at start-up. If the schema does not match, the
-datastore's cluster thread does not start and the log shows
-`Cmon DB schema is not compatible in CCX mode. Please run the schema upgrade manually.`
-
 ### Abandoned clusters are not cleaned up
 
 `cmon` skips its abandoned-cluster cleanup and its cleanup of stale controller
