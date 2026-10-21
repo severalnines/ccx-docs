@@ -7,9 +7,9 @@ CCX supports two Microsoft SQLServer 2022 configurations:
 
 The 'standard' license is applied.
 
-Only asynchronous commit mode is supported in the Always On configuration. A promotion is lossless; an automatic failover after the primary has failed can lose the last transactions.
+From version 1.58: only asynchronous commit mode is supported in the Always On configuration. A promotion is lossless; an automatic failover after the primary has failed can lose the last transactions.
 
-An Always On datastore cannot be converted to a single-node datastore, so choose the configuration when you create the datastore. See [Always On](./always-on.md) for how databases and availability groups work in the Always On configuration.
+An Always On datastore cannot be converted to a single-node datastore, so choose the configuration when you create the datastore; see [Limitations](./limitations.md). See [Always On](./always-on.md) for how databases and availability groups work in the Always On configuration.
 
 ## Scaling
 
