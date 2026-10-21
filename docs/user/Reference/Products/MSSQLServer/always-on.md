@@ -14,13 +14,13 @@ An Always On datastore cannot be converted to a single-node (standalone) datasto
 
 - **Availability group**: a SQL Server Always On availability group with `CLUSTER_TYPE = NONE` (no Windows or Pacemaker cluster manager). Every node of the datastore that is in the group holds a replica of its databases.
 - **Primary** of an availability group: the replica that accepts reads and writes. The others are **secondaries**.
-- **The datastore's primary**: the node that is the primary of `s9s_ag1`, the availability group CCX manages. CCX shows this node as the primary of the datastore. Your own availability groups should have their primary on this node too; see [Creating your own availability group](#creating-your-own-availability-group).
+- **The datastore's primary**: the node that is the primary of `s9s_ag1`, the availability group CCX manages. CCX shows this node as the primary of the datastore.
 
 ## Databases and availability groups
 
 **What CCX manages:** when the datastore is deployed, CCX creates the database `ccxdb`, takes a first backup of it, and adds it to an availability group named `s9s_ag1` with a replica on every node.
 
-**What you manage:** you cannot create or drop databases or availability groups from the CCX UI or API in the Always On configuration. Create and drop them yourself, directly in SQL Server with T-SQL.
+**What you manage:** you cannot create or drop databases or availability groups from the CCX UI or API in the Always On configuration. Create and drop them yourself, directly in SQL Server.
 
 Once a database is in an availability group, CCX looks after that availability group as described on this page.
 
@@ -62,7 +62,7 @@ The edition of SQL Server decides how availability groups behave:
 | Databases per availability group | One (basic availability group) | Several |
 | Secondary readable | No (`ALLOW_CONNECTIONS = NO`): connect to the primary for reads and writes | Yes, when the replica has `ALLOW_CONNECTIONS = ALL` |
 
-CCX applies the standard license unless your CCX installation is configured otherwise. With the standard license, create one availability group for each database. CCX creates its own replicas with `ALLOW_CONNECTIONS = NO` on Standard and `ALLOW_CONNECTIONS = ALL` otherwise; use the same on your own availability groups.
+CCX applies the standard license unless your CCX installation is configured otherwise. CCX creates its own replicas with `ALLOW_CONNECTIONS = NO` on Standard and `ALLOW_CONNECTIONS = ALL` otherwise.
 
 ## Logins
 
@@ -71,79 +71,6 @@ An availability group replicates databases, not logins. A login that is missing 
 - Users created through CCX are created on every node with the same SID.
 - When a node is added, CCX copies the logins from the datastore's primary to it.
 - A login you create yourself with T-SQL exists only on the node where you created it. Create logins through CCX, or create them on every node with the same SID.
-
-## Creating your own availability group
-
-An availability group that CCX can look after must look like `s9s_ag1`:
-
-- a replica on every node of the datastore, with the same replica names and endpoint URLs as `s9s_ag1`
-- its primary on the datastore's primary
-- `CLUSTER_TYPE = NONE`, `AVAILABILITY_MODE = ASYNCHRONOUS_COMMIT`, `FAILOVER_MODE = MANUAL` and `SEEDING_MODE = AUTOMATIC`
-
-:::warning
-
-Do not fail your own availability group over to another node yourself. CCX promotes and fails over only the availability groups that have their primary on the datastore's primary.
-
-:::
-
-No database mirroring endpoint needs to be created: every node already has the endpoint `s9s_hadr_endpoint` on TCP port 5022, with certificate authentication.
-
-Find the replica names and endpoint URLs of your datastore with this query:
-
-```sql
-SELECT r.replica_server_name, r.endpoint_url
-FROM sys.availability_replicas r
-JOIN sys.availability_groups g ON g.group_id = r.group_id
-WHERE g.name = 's9s_ag1';
-```
-
-Then, with the replica names of your datastore in place of `db-aaaaa-int` and `db-bbbbb-int`:
-
-1. On the datastore's primary, create the database. An availability group needs the database in the full recovery model, with a full backup taken:
-
-    ```sql
-    CREATE DATABASE salesdb;
-    ALTER DATABASE salesdb SET RECOVERY FULL;
-    BACKUP DATABASE salesdb TO DISK = N'/var/opt/mssql/data/salesdb.bak' WITH INIT;
-    ```
-
-2. On the datastore's primary, create the availability group and allow it to seed. Use `ALLOW_CONNECTIONS = NO` on Standard and `ALLOW_CONNECTIONS = ALL` on Enterprise:
-
-    ```sql
-    CREATE AVAILABILITY GROUP [sales_ag]
-      WITH (CLUSTER_TYPE = NONE)
-      FOR DATABASE salesdb
-      REPLICA ON
-        N'db-aaaaa-int' WITH (ENDPOINT_URL = N'tcp://db-aaaaa-int:5022',
-          AVAILABILITY_MODE = ASYNCHRONOUS_COMMIT, FAILOVER_MODE = MANUAL,
-          SEEDING_MODE = AUTOMATIC, SECONDARY_ROLE (ALLOW_CONNECTIONS = NO)),
-        N'db-bbbbb-int' WITH (ENDPOINT_URL = N'tcp://db-bbbbb-int:5022',
-          AVAILABILITY_MODE = ASYNCHRONOUS_COMMIT, FAILOVER_MODE = MANUAL,
-          SEEDING_MODE = AUTOMATIC, SECONDARY_ROLE (ALLOW_CONNECTIONS = NO));
-    ALTER AVAILABILITY GROUP [sales_ag] GRANT CREATE ANY DATABASE;
-    ```
-
-3. On each secondary, join the availability group and allow it to receive the database:
-
-    ```sql
-    ALTER AVAILABILITY GROUP [sales_ag] JOIN WITH (CLUSTER_TYPE = NONE);
-    ALTER AVAILABILITY GROUP [sales_ag] GRANT CREATE ANY DATABASE;
-    ```
-
-4. SQL Server copies `salesdb` to the secondaries (automatic seeding). Check on each node that the database is synchronizing and healthy:
-
-    ```sql
-    SELECT ag.name, drs.synchronization_state_desc, drs.synchronization_health_desc
-    FROM sys.dm_hadr_database_replica_states drs
-    JOIN sys.availability_groups ag ON ag.group_id = drs.group_id;
-    ```
-
-5. Delete the backup file from step 1 on the primary; it is not needed any more.
-
-Please note:
-
-- Availability group names that start with `s9s_ag` are used by CCX. Choose another name for your own.
-- Database names must be unique across the datastore: a backup fails if two availability groups, or a database inside and one outside an availability group on different nodes, use the same database name.
 
 ## Adding a node
 

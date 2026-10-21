@@ -28,7 +28,7 @@ An Always On datastore cannot be converted to a single-node (standalone) datasto
 
 From version 1.58.
 
-- CCX creates `ccxdb` in the availability group `s9s_ag1`. You cannot create or drop databases or availability groups from the CCX UI or API in the Always On configuration; create and drop them yourself with T-SQL. See [Always On](./always-on.md).
+- CCX creates `ccxdb` in the availability group `s9s_ag1`. You cannot create or drop databases or availability groups from the CCX UI or API in the Always On configuration; create and drop them yourself in SQL Server. See [Always On](./always-on.md).
 - A database that is in no availability group is not replicated to the other node. After a failover it stays on the old primary, which is then taken offline or removed. It is backed up only while it is on the datastore's primary. Put every database into an availability group.
 - Your own availability groups must have their primary on the datastore's primary (the primary of `s9s_ag1`). CCX promotes and fails over only those availability groups.
 - An availability group does not replicate logins. Create logins through CCX, or on every node with the same SID.
