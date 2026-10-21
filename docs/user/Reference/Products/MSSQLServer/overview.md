@@ -7,6 +7,8 @@ CCX supports two Microsoft SQLServer 2022 configurations:
 
 The 'standard' license is applied.
 
+An Always On datastore cannot be converted to a single-node datastore, so choose the configuration when you create the datastore. See [Always On](./always-on.md) for how databases and availability groups work in the Always On configuration.
+
 ## Scaling
 
 Scaling is not supported in SQLServer as of the standard license.
@@ -18,5 +20,6 @@ Scaling is not supported in SQLServer as of the standard license.
 
 ## Further Reading
 
+- [Always On](./always-on.md)
 - [Limitations](./limitations.md)
 - [Backup and Restore](./backup-restore.md)
