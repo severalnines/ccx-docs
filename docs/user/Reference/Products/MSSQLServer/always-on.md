@@ -20,7 +20,7 @@ An Always On datastore cannot be converted to a single-node (standalone) datasto
 
 **What CCX manages:** when the datastore is deployed, CCX creates the database `ccxdb`, takes a first backup of it, and adds it to an availability group named `s9s_ag1` with a replica on every node.
 
-**What you manage:** you cannot create or drop databases or availability groups from the CCX UI or API in the Always On configuration. Create and drop them yourself, directly in SQL Server.
+**What you manage:** you cannot create or drop databases or availability groups from the CCX UI or API in the Always On configuration. In version 1.58, if you want availability groups other than the default `s9s_ag1`, you must create and drop them yourself, directly in SQL Server.
 
 Once a database is in an availability group, CCX looks after that availability group as described on this page.
 
@@ -47,7 +47,7 @@ In this example, `ccxdb` and `salesdb` are highly available. `tempwork` is in no
 
 :::warning
 
-A database that is in no availability group is not replicated. It exists only on the node where it was created. After a failover it stays on the old primary, which is then taken offline or removed, so applications can no longer reach it. It is backed up only while it is on the datastore's primary. Put every database you create into an availability group.
+A database that is in no availability group is not replicated. It exists only on the node where it was created, and is lost when that node is removed or replaced: when the node fails and is repaired, and in every upgrade. After a promotion it stays on the old primary, where applications can no longer reach it and it is no longer backed up. Put every database you create into an availability group.
 
 :::
 
@@ -60,9 +60,9 @@ The edition of SQL Server decides how availability groups behave:
 | | Standard | Enterprise |
 |---|---|---|
 | Databases per availability group | One (basic availability group) | Several |
-| Secondary readable | No (`ALLOW_CONNECTIONS = NO`): connect to the primary for reads and writes | Yes, when the replica has `ALLOW_CONNECTIONS = ALL` |
+| Secondary readable | No: the replicas are configured with `ALLOW_CONNECTIONS = NO`. Connect to the primary for reads and writes | Yes: the replicas are configured with `ALLOW_CONNECTIONS = ALL` |
 
-CCX applies the standard license unless your CCX installation is configured otherwise. CCX creates its own replicas with `ALLOW_CONNECTIONS = NO` on Standard and `ALLOW_CONNECTIONS = ALL` otherwise.
+CCX applies the `standard` license unless your CCX installation is configured otherwise. CCX creates its own replicas with `ALLOW_CONNECTIONS = NO` with the `standard` license and `ALLOW_CONNECTIONS = ALL` otherwise.
 
 ## Logins
 
@@ -77,7 +77,7 @@ An availability group replicates databases, not logins. A login that is missing 
 When a node is added:
 
 1. It joins `s9s_ag1` and receives `ccxdb` by automatic seeding. CCX waits until the new replica is healthy. If this fails, the new node is taken out of the availability groups again and the job fails.
-2. It joins every other availability group that has its primary on one of the existing nodes, with `AVAILABILITY_MODE = ASYNCHRONOUS_COMMIT`, `FAILOVER_MODE = MANUAL`, `BACKUP_PRIORITY = 50`, `SEEDING_MODE = AUTOMATIC` and `ALLOW_CONNECTIONS = NO` (Standard) or `ALL` (Enterprise). For each one that holds a database, CCX waits up to one hour for the new replica to become healthy. An availability group without a database is joined but not waited for.
+2. It joins every other availability group that has its primary on one of the existing nodes, with `AVAILABILITY_MODE = ASYNCHRONOUS_COMMIT`, `FAILOVER_MODE = MANUAL`, `BACKUP_PRIORITY = 50`, `SEEDING_MODE = AUTOMATIC` and `ALLOW_CONNECTIONS = NO` (`standard`) or `ALL` (`enterprise`). For each one that holds a database, CCX waits up to one hour for the new replica to become healthy. An availability group without a database is joined but not waited for.
 3. The logins of the datastore's primary are copied to the new node.
 
 If the new node cannot join one of your availability groups, the job still succeeds. The job log has a warning naming the availability group, the new replica is removed from it again, and that group has no copy on the new node.
@@ -99,6 +99,7 @@ sequenceDiagram
     Note over S: CCX checks again that the replica<br/>holds all of the now frozen log
     S->>S: Takes the primary role
     P->>P: Becomes a secondary
+    Note over S: CCX waits until the databases are ONLINE<br/>on the new primary (the replica has replayed<br/>the log it received)
     Note over P,S: Data movement is resumed and each replica<br/>goes back to the availability mode it had
 ```
 
@@ -108,7 +109,7 @@ If any of these checks fails, the replica is not promoted: the current primary s
 
 Please note:
 
-- The databases are unavailable to applications for a short moment while the roles change.
+- The databases are unavailable to applications from the moment the availability group is taken offline until they are ONLINE on the new primary. This is short when the replica has kept up, and longer after heavy write load, as the new primary first replays the log it received.
 - The availability groups are moved one after another, in no fixed order. If one of them cannot be moved, the promotion fails and the groups moved before it stay on the new node. `s9s_ag1` and your own availability groups can then have their primaries on different nodes.
 - An availability group that has its primary on another node, that holds no database, or that has no replica on the node being promoted, is not moved. If `s9s_ag1` holds no database, it is not moved either.
 - Backups continue on the new primary. The first backup after the promotion is a full backup; see [Backup and Restore](./backup-restore.md).
@@ -162,21 +163,30 @@ A node where neither SQL Server nor SSH answers is removed. The availability gro
 
 ## Automatic repair
 
-When a node fails, CCX can replace it with a new node. With the standard license (two nodes), CCX removes the failed node first and then adds the new one, so the datastore runs on one node in between, and the rules of [Removing a node](#removing-a-node) apply. The new node joins the availability groups as described in [Adding a node](#adding-a-node).
+When a node fails, CCX will run a repair and replace it with a new node. With the `standard` license (two nodes), CCX removes the failed node first and then adds the new one, so the datastore runs on one node in between, and the rules of [Removing a node](#removing-a-node) apply. The new node joins the availability groups as described in [Adding a node](#adding-a-node).
 
 ## Upgrade
 
-An upgrade replaces each node with a new one, the secondaries before the primary.
+An upgrade replaces every node with a new one: the secondaries first, the primary last.
 
-With the standard license and two nodes:
+### With the `standard` license (two nodes)
 
-1. The secondary is removed, then a new node is added.
-2. The new node is promoted, losslessly; the databases are briefly unavailable.
-3. The old primary, now a secondary, is removed, then a new node is added.
+1. CCX removes the secondary and adds a new node.
+2. CCX promotes the new node, losslessly. The databases are unavailable while the roles change; see [Promoting a replica](#promoting-a-replica).
+3. CCX removes the old primary, now a secondary, and adds a new node.
 
-The datastore runs on one node, without high availability, while a node is being replaced. In other configurations, each new node is added before the node it replaces is removed, and a new node is promoted before the old primary is removed.
+While a node is being replaced, the datastore runs on one node, without high availability.
 
-If a new node could not join one of your availability groups, the promotion does not move that group, and removing the old primary, which is still its primary, is refused.
+### With the `enterprise` license (more than two nodes)
+
+1. Each new node is added before the node it replaces is removed.
+2. A new node is promoted before the old primary is removed.
+
+:::warning
+
+If a new node cannot join one of your availability groups, the promotion does not move that group, and removing the old primary, which is still its primary, is refused.
+
+:::
 
 ## Further reading
 
