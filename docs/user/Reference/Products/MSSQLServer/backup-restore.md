@@ -13,6 +13,18 @@ Backups use SQL Server's `BACKUP ... TO URL`, which writes the backup straight t
 - Each database is written to its own object, so a backup of a datastore with several databases contains one file per database.
 - In the Always On configuration, backups are taken on the primary. After a failover, backups continue on the new primary.
 
+### Backups in the Always On configuration
+
+From version 1.58.
+
+A backup covers every database of the datastore, wherever its availability group has its primary:
+
+- A database in an availability group is backed up on the primary of that availability group.
+- A database in no availability group is backed up on the datastore's primary.
+- The backup records which availability group each database was in.
+
+See [Always On](./always-on.md) for databases and availability groups.
+
 ### Backup types and schedule
 
 Three backup types are used together:
@@ -59,7 +71,29 @@ CCX builds the sequence SQL Server needs to reach the chosen point and restores 
 
 Choosing a log backup restores the database to the moment that log backup was taken.
 
-The backup files are read directly from S3 storage. In the Always On configuration, `ccxdb` is also restored on the replica and rejoined to the availability group, so it is highly available again when the restore finishes. Other user-created databases are not replicated; see [Limitations](./limitations.md).
+The backup files are read directly from S3 storage.
+
+### Restore in the Always On configuration
+
+From version 1.58.
+
+In the Always On configuration, each database is restored on the node that is the primary of its availability group when the restore starts. This does not have to be the node that took the backup: any node can read the backup from S3 storage. A database in no availability group is restored on the datastore's primary.
+
+When the restore finishes, every restored database is in an availability group with a replica on every node, and is healthy on each of them. Which availability group a database goes into:
+
+```mermaid
+flowchart LR
+    a{Is the database in an<br/>availability group now?} -->|Yes| b[It goes back into the availability<br/>group it is in now]
+    a -->|No| c{Does the backup name an availability<br/>group that still exists and is empty?}
+    c -->|Yes| d[It goes back into the availability<br/>group named in the backup]
+    c -->|No| e[CCX creates a new availability<br/>group for it, named s9s_agN]
+```
+
+- A database that is in an availability group goes back into the availability group it is in now, even if the backup names another one.
+- A database that is in no availability group, for example because an earlier restore was interrupted, goes back into the availability group named in the backup, if that availability group still exists and holds no database. Run an interrupted restore again: the databases go back into their availability groups.
+- Otherwise CCX creates a new availability group for the database, named `s9s_agN` (for example `s9s_ag4`). When the backup names an availability group that could not be used, the job log says why.
+
+A restore therefore also makes a database that was in no availability group highly available.
 
 Please note:
 
