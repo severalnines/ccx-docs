@@ -20,7 +20,7 @@ An Always On datastore cannot be converted to a single-node (standalone) datasto
 ## Always On-specific limitations
 
 - Refer to the Microsoft standard license for a complete list of limitations.
-- Only asynchronous commit mode is currently supported. If the primary fails, the last transactions committed on it may not have reached the replica, and they are lost.
+- Only asynchronous commit mode is supported. A promotion is lossless, but an automatic failover after the primary has failed is not: the last transactions committed on the failed primary may not have reached the replica, and they are lost.
 - With the standard license, an availability group holds one database, and the secondary is not readable.
 - Scaling is not supported as the standard license does not permit more than two nodes.
 

@@ -48,7 +48,7 @@ A database that is in no availability group is not replicated. It exists only on
 
 :::
 
-All availability groups use **asynchronous commit**. The primary does not wait for the secondaries before it confirms a transaction, so writes are not slowed down by the replicas. A secondary is normally a little behind the primary.
+Only **asynchronous commit** is supported: all availability groups use it. The primary does not wait for the secondaries before it confirms a transaction, so writes are not slowed down by the replicas. A secondary is normally a little behind the primary.
 
 ## Editions
 
@@ -123,7 +123,9 @@ When a node is added, it joins every availability group whose primary is the dat
 
 ## Promoting a replica
 
-Promoting a replica makes it the new primary. CCX moves every availability group that has its primary on the current primary and holds a database. CCX moves each one without losing transactions:
+Promoting a replica makes it the new primary. A promotion is lossless: no committed transaction is lost.
+
+CCX moves every availability group that has its primary on the current primary and holds a database. For each one, CCX makes sure the replica has everything before it changes the roles:
 
 ```mermaid
 sequenceDiagram
@@ -133,10 +135,13 @@ sequenceDiagram
     P->>S: Sends the remaining changes
     Note over S: CCX waits until the replica is synchronized<br/>and holds all of the primary's log
     Note over P: The availability group is taken offline<br/>on the current primary (writes stop)
+    Note over S: CCX checks again that the replica<br/>holds all of the now frozen log
     S->>S: Takes the primary role
     P->>P: Becomes a secondary
     Note over P,S: Data movement is resumed and both<br/>replicas go back to asynchronous commit
 ```
+
+If any of these checks fails, the replica is not promoted: the current primary stays the primary and the availability group goes back to asynchronous commit. In the rare case that the replica's role cannot be determined after the role change was requested, the job stops and says that manual attention is needed, rather than risk two primaries.
 
 Please note:
 
@@ -147,7 +152,12 @@ Please note:
 
 ## When the primary fails
 
-If the primary fails, a replica can only take over with the changes it has already received. Because availability groups use asynchronous commit, the last transactions committed on the failed primary may not have reached the replica, and they are lost.
+When the primary has failed, CCX fails over automatically to the replica that is least behind. This failover is not lossless:
+
+- The failed primary cannot take part, so the replica takes over with the changes it has already received.
+- Because commit is asynchronous, transactions that the failed primary had committed but not yet sent to the replica are lost. Normally these are the transactions of the last moments before the failure.
+
+If the old primary comes back and still reports itself as primary, CCX takes it offline and shows it as failed ("There was a forced failover when host was PRIMARY"), so it cannot accept writes next to the new primary. Review that no data is missing, then remove the node from the datastore.
 
 ## Removing a node
 
