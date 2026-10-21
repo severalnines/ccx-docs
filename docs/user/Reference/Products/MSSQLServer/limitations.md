@@ -20,7 +20,7 @@ An Always On datastore cannot be converted to a single-node (standalone) datasto
 ## Always On-specific limitations
 
 - Refer to the Microsoft standard license for a complete list of limitations.
-- Only asynchronous commit mode is supported. A promotion is lossless, but an automatic failover after the primary has failed is not: the last transactions committed on the failed primary may not have reached the replica, and they are lost.
+- Only asynchronous commit mode is supported. A promotion is lossless, but an automatic failover after a node has failed is not: the last transactions committed on the failed node may not have reached the replica, and they are lost.
 - With the standard license, an availability group holds one database, and the secondary is not readable.
 - Scaling is not supported as the standard license does not permit more than two nodes.
 
@@ -30,7 +30,8 @@ From version 1.58.
 
 - CCX creates `ccxdb` in the availability group `s9s_ag1`. You cannot create or drop databases or availability groups from the CCX UI or API in the Always On configuration; create and drop them yourself in SQL Server. See [Always On](./always-on.md).
 - A database that is in no availability group is not replicated to the other node. After a failover it stays on the old primary, which is then taken offline or removed. It is backed up only while it is on the datastore's primary. Put every database into an availability group.
-- Your own availability groups must have their primary on the datastore's primary (the primary of `s9s_ag1`). CCX promotes and fails over only those availability groups.
+- A promote moves only the availability groups whose primary is the datastore's primary (the primary of `s9s_ag1`) and that have a replica on the promoted node. An availability group led by another node keeps its primary where it is.
+- When a node fails, CCX fails over every availability group that node was the primary of, to the datastore's primary if it holds a replica, otherwise to the replica furthest ahead in the log. This is a forced failover: transactions not yet sent to that replica are lost, as with any automatic failover under asynchronous commit.
 - An availability group does not replicate logins. Create logins through CCX, or on every node with the same SID.
 - Database names must be unique across the datastore.
 - Keep `ccxdb` in `s9s_ag1`. A node cannot be added while `s9s_ag1` holds no database: the add node job fails after waiting 10 minutes for the new node to synchronize. A promotion does not move `s9s_ag1` while it holds no database.

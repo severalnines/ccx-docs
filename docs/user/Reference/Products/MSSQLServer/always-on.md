@@ -2,7 +2,7 @@
 
 From version 1.58.
 
-This page describes how availability groups work in the Always On configuration: which databases and availability groups CCX manages, how to make your own databases highly available, and what CCX does with every availability group when the datastore is deployed, nodes are added, removed, promoted, repaired or upgraded, and when the primary fails.
+This page describes how availability groups work in the Always On configuration: which databases and availability groups CCX manages, how to make your own databases highly available, and what CCX does with every availability group when the datastore is deployed, nodes are added, removed, promoted, repaired or upgraded, and when a node fails.
 
 :::warning
 
@@ -113,25 +113,40 @@ Please note:
 - An availability group that has its primary on another node, that holds no database, or that has no replica on the node being promoted, is not moved. If `s9s_ag1` holds no database, it is not moved either.
 - Backups continue on the new primary. The first backup after the promotion is a full backup; see [Backup and Restore](./backup-restore.md).
 
-## When the primary fails
+## When a node fails
 
-When the datastore's primary has failed, and automatic recovery is enabled for the datastore, CCX fails over to the replica that is least behind. CCX first checks the primary again over a few more monitoring rounds, so a short interruption does not cause a failover. CCX does not fail over a datastore or a primary that is in maintenance.
+CCX fails over automatically only when automatic recovery is enabled for the datastore, and never for a datastore or a failed node that is in maintenance. CCX first checks the failed node again over a few more monitoring rounds, so a short interruption does not cause a failover.
+
+### When the datastore's primary fails
+
+When the datastore's primary has failed, CCX fails over to the replica that is least behind.
 
 This failover is not lossless:
 
 - For each availability group that has its primary on the failed node, holds a database, and has a replica on the chosen node (including your own availability groups), CCX runs `ALTER AVAILABILITY GROUP ... FORCE_FAILOVER_ALLOW_DATA_LOSS` on the chosen node and waits until its databases are ONLINE.
 - Because commit is asynchronous, transactions that the failed primary had committed but not yet sent to the replica are lost. Normally these are the transactions of the last moments before the failure.
 - CCX then removes the failed node's replica from those availability groups. Until the failed node is replaced, the databases have one replica and are not highly available.
-- Availability groups that have their primary on another node are not failed over.
+- Availability groups led by another node that is still running keep their primary.
 
-If the old primary comes back and still reports itself as primary, CCX fences it so that it cannot accept writes next to the new primary:
+### When another node fails
+
+When a node that is not the datastore's primary fails, and it was the primary of some of your availability groups, CCX fails over each of those that holds a database:
+
+- The new primary is the datastore's primary if it holds a replica of the availability group, otherwise the surviving replica furthest ahead in the log.
+- CCX runs `ALTER AVAILABILITY GROUP ... FORCE_FAILOVER_ALLOW_DATA_LOSS` there. Transactions the failed node had not yet sent to that replica are lost, as with any automatic failover under asynchronous commit.
+- CCX removes the failed node's replica from the availability group, and makes its other replicas synchronize with the new primary.
+- An availability group whose failover fails does not stop the others; the job fails and names it.
+
+### When the old primary comes back
+
+If a node whose availability groups were failed over comes back and still reports itself as primary of one of them, CCX fences it so that it cannot accept writes next to the new primary:
 
 - its availability groups are set `OFFLINE` on that node
 - SQL Server is stopped on that node
 - the node is put into maintenance for 30 days
 - a critical split-brain alarm is raised
 
-The transactions the replica never received exist only on that node. If you need them, contact support before the node is removed.
+The transactions the new primary never received exist only on that node. If you need them, contact support before the node is removed.
 
 ## Removing a node
 
@@ -143,7 +158,7 @@ The remove node job is refused, and says why, when:
 - one of your availability groups has its primary on the node and cannot be moved, for example because it has no replica on another connected node.
 - SQL Server on the node does not answer but the node answers SSH: SQL Server may still be running there as the primary of an availability group.
 
-A node where neither SQL Server nor SSH answers is removed. Availability groups that had their primary on it are not moved: their databases stay unavailable on the remaining replica until you run `ALTER AVAILABILITY GROUP ... FORCE_FAILOVER_ALLOW_DATA_LOSS` there.
+A node where neither SQL Server nor SSH answers is removed. The availability groups it was the primary of are failed over first, in the same way as when a node fails: forced, to the datastore's primary if it holds a replica, otherwise to the replica furthest ahead in the log, so transactions the node had not yet sent are lost. If one of them cannot be failed over, the removal fails.
 
 ## Automatic repair
 
