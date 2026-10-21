@@ -28,9 +28,12 @@ An Always On datastore cannot be converted to a single-node (standalone) datasto
 
 From version 1.58.
 
-- CCX creates `ccxdb` in the availability group `s9s_ag1`. Further databases and availability groups are created and dropped by you in SQL Server; CCX cannot create or drop databases or availability groups in the Always On configuration yet. See [Always On](./always-on.md).
-- A database that is in no availability group is not replicated to the other node. It is lost on a failover, an automatic repair or a node replacement. Put every database into an availability group.
-- Keep `ccxdb` in `s9s_ag1`. A node cannot be added while `s9s_ag1` holds no database: the add node job fails after waiting 10 minutes for the new node to synchronize.
+- CCX creates `ccxdb` in the availability group `s9s_ag1`. You cannot create or drop databases or availability groups from the CCX UI or API in the Always On configuration; create and drop them yourself with T-SQL. See [Always On](./always-on.md).
+- A database that is in no availability group is not replicated to the other node. After a failover it stays on the old primary, which is then taken offline or removed. It is backed up only while it is on the datastore's primary. Put every database into an availability group.
+- Your own availability groups must have their primary on the datastore's primary (the primary of `s9s_ag1`). CCX promotes and fails over only those availability groups.
+- An availability group does not replicate logins. Create logins through CCX, or on every node with the same SID.
+- Database names must be unique across the datastore.
+- Keep `ccxdb` in `s9s_ag1`. A node cannot be added while `s9s_ag1` holds no database: the add node job fails after waiting 10 minutes for the new node to synchronize. A promotion does not move `s9s_ag1` while it holds no database.
 - SQL Server reports an availability group that holds no database as not healthy.
 
 ## Single node
@@ -41,4 +44,4 @@ From version 1.58.
 
 - A restore replaces the current contents of the restored databases. Data written after the chosen backup is lost.
 - The restored databases are unavailable to applications while the restore runs.
-- If a restore fails, the final line of the job's error message may not include the reason. The job log describes the failing step in the lines before it.
+- Every node must be reachable for a restore in the Always On configuration.
