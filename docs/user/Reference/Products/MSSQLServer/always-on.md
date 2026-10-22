@@ -80,7 +80,7 @@ When a node is added:
 2. It joins every other availability group that has its primary on one of the existing nodes, with `AVAILABILITY_MODE = ASYNCHRONOUS_COMMIT`, `FAILOVER_MODE = MANUAL`, `BACKUP_PRIORITY = 50`, `SEEDING_MODE = AUTOMATIC` and `ALLOW_CONNECTIONS = NO` (`standard`) or `ALL` (`enterprise`). For each one that holds a database, CCX waits up to one hour for the new replica to become healthy. An availability group without a database is joined but not waited for.
 3. The logins of the datastore's primary are copied to the new node.
 
-If the new node cannot join one of your availability groups, the job still succeeds. The job log has a warning naming the availability group, the new replica is removed from it again, and that group has no copy on the new node.
+If the new node cannot join one of your availability groups, or the datastore's primary cannot be reached while CCX waits for a replica to become healthy, the job fails: the new replica is taken out of every availability group it joined, the job log names the availability group and the reason, and CCX retries the add later. An availability group whose primary is on a node that is down at that moment is skipped with a warning naming it; the new node gets a copy once that group has a primary again.
 
 ## Promoting a replica
 
