@@ -45,7 +45,11 @@ markdown_extensions:
       use_pygments: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 nav:
   - Home: /
   - Admin Guide:
@@ -126,6 +130,7 @@ nav:
           - Products:
               - MSSQLServer:
                   - Overview: user/Reference/Products/MSSQLServer/overview.md
+                  - Always On: user/Reference/Products/MSSQLServer/always-on.md
                   - Backup and Restore: user/Reference/Products/MSSQLServer/backup-restore.md
                   - Configurations: user/Reference/Products/MSSQLServer/configurations.md
                   - Limitations: user/Reference/Products/MSSQLServer/limitations.md
