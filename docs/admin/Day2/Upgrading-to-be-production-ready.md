@@ -281,12 +281,9 @@ At this point, ccx should be deployed with minimal values yaml. The following va
 :::
 
 ```yaml
-cc:
-  cidr: 203.0.113.0/24 # ClusterControl admin portal — restrict to your admin network
 ccFQDN: cc.ccx.somedomain.com # dns name for ccx
 ccxFQDN: ccx.somedomain.com # dns name for cc
 ccx:
-  cidr: 0.0.0.0/0 #setup according to your network
   cloudSecrets: # List of Kubernetes secrets containing cloud credentials.
   - openstack # This secret must exist in Kubernetes. See 'secrets-template.yaml' for reference.
   - openstack-s3
@@ -445,6 +442,11 @@ ccx:
   env:
     DISABLE_ROLLBACK: "false" #when "true", a datastore that fails to deploy is kept instead of deleted, which helps with debugging. Set to "false" for prod so failed deployments are cleaned up automatically.
   ingress:
+    # Restricts the ClusterControl web UI (path / on ccFQDN) to these source
+    # ranges. Comma-separated CIDRs; empty or unset means reachable from
+    # anywhere. It does not cover the cmon API paths on the same host, and the
+    # end-user portal (ccxFQDN) has no equivalent setting.
+    whitelist: 203.0.113.0/24
     annotations:
       external-dns.alpha.kubernetes.io/hostname: somedomain.com # domain used for databases. It has to match with ExternalDNS used one.
     ssl:
@@ -537,8 +539,8 @@ ccx:
 
 The value is a comma-separated list of CIDR ranges. Any request from an IP not matching the list will receive a `403 Forbidden` response from nginx.
 
-:::note
-Only the CC ingress (`ccFQDN`) supports whitelisting through this value. The CCX user-facing ingress and other internal ingresses are not affected.
+:::warning
+This value is applied to **one** ingress only — `ccv2-ingress`, which serves path `/` on `ccFQDN`, i.e. the ClusterControl web UI. The chart renders three further ingresses on the *same* hostname that do **not** get the annotation: `cmon-ingress-ssl` (`/cmon/…`, the CMON RPC API), `cmon-ssh-ingress` and `websocket-cmon-ssh-ingress`. Those stay reachable from anywhere. Setting `whitelist` restricts who can open the ClusterControl UI; it does not put the host behind an allow-list. Use a firewall, security group or network policy if you need that. The CCX end-user portal (`ccxFQDN`) has no whitelist setting at all.
 :::
 
 To apply the change, upgrade the helm release:
