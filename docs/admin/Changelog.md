@@ -11,6 +11,11 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - Unreleased
+
+### Features
+- New **Connect an AI assistant (MCP)** card on **Settings > Credentials**: users generate an OAuth2 key for the CCX MCP server and copy a ready-made Claude Code command or Claude Desktop / Cursor configuration; Regenerate rotates the key and revokes the old one. Off by default, enable it with `FE_SHOW_MCP_CARD: "true"`. Do not enable it on deployments that use the JWT integration. See [Frontend customization](Customisation/Frontend.md#mcp-card)
+
 ## Release Notes - CCX - v1.57.7
 Release date: 08-10-2026
 

@@ -5,6 +5,10 @@ Integration with JWT can be used if you are white-labeling the UI and wish to in
 JWT allows a way to authenticate users from your service panel in CCX.
 Read more in the [JWT Authentication guide](JWT.md).
 
+:::warning
+Do not enable `FE_SHOW_MCP_CARD` on a deployment that uses the JWT integration. JWT sessions create API credentials for the organization's shared service user, not for the individual person, so all members of an organization share the MCP key, one member's **Regenerate** revokes it for everyone, and users who belong to more than one organization cannot generate a key.
+:::
+
 ## Theming and white-labeling
 Colours, the logo and the favicon can be changed without modifying the application.
 Read more in the [Theming and white-labeling guide](Theming.md).
@@ -50,9 +54,29 @@ A number of variables is used to control the frontend. The enviroment variables 
   value: URL where unauthorized users can login or sign up.
 - name: FE_AUTH_UI_APP_DISABLED
   value: "true" # set it to true if you don't want to use the built-in `ccx-ui-auth` app. FE_AUTH_APP_URL *must* be set for this in order to work.
+- name: FE_SHOW_MCP_CARD
+  value: "true" # show the "Connect an AI assistant (MCP)" card on Settings > Credentials and the "AI-powered management" entry on the welcome screen. Off by default. See MCP card below.
 - name: FE_EXTERNAL_CSS_URL
   value: "https://example.com/my.css" # stylesheet loaded at runtime to re-brand the UI. See the Theming and white-labeling guide for the supported theme tokens.
 ```
+
+### MCP card
+
+`FE_SHOW_MCP_CARD` shows the **Connect an AI assistant (MCP)** card on **Settings > Credentials** and the **AI-powered management** entry on the welcome screen, which links to that page. The card lets users generate an OAuth2 credential for the [CCX MCP server](../../user/Technical/MCP.md) and copy a ready-made Claude Code command or Claude Desktop / Cursor configuration. It is off by default; set it to `"true"` to enable it:
+
+```yaml
+ccx:
+  services:
+    uiapp:
+      env:
+        FE_SHOW_MCP_CARD: "true"
+```
+
+It is off by default because the card names CCX, links to the severalnines GitHub repository and installs the `@severalnines/ccx-mcp` npm package, which a white-label deployment may not want. The command it generates points the MCP server at the URL the user has open (the page's origin), so it works wherever the frontend serves `/api`.
+
+Do not enable it on a deployment that uses the [JWT integration](#integration-using-jwt): see the warning in that section.
+
+Without the card, users can still create OAuth2 credentials in the **OAuth2 Credentials** table on **Settings > Credentials** and set up the MCP server by hand.
 
 ### Examples
 
