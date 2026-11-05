@@ -15,3 +15,5 @@ This allows you to:
 ## Limitations
 
 PITR is not supported yet.
+
+Only the user who created the source datastore can create a datastore from its backup. To copy data to a datastore owned by another user, or to keep your own copy, see [Export data](Export-Data.md).
