@@ -35,10 +35,10 @@ mysql -h <TARGET_HOST> -uccxadmin -p < dump.sql
 
 Leave out `--master-data` and `--source-data`. They add a replication statement to the dump, which then runs on the target.
 
-If routines, views, triggers or events were created by a user other than `ccxadmin`, remove the `DEFINER` clauses before loading, because that user does not exist on the target:
+Routines, views, triggers and events keep their `DEFINER` account. If that account is not `ccxadmin`, create it on the target before loading. Alternatively, remove the `DEFINER` clauses so the objects are owned by the account that loads the dump. This command changes only the lines that start a `CREATE` statement, so data values are not touched:
 
 ```bash
-sed 's/\sDEFINER=`[^`]*`@`[^`]*`//g' -i dump.sql
+sed -E '/^(CREATE|\/\*![0-9]+ CREATE\*\/|\/\*![0-9]+ DEFINER=)/ s/ DEFINER=`[^`]*`@`[^`]*`//' -i dump.sql
 ```
 
 ## MariaDB
@@ -72,11 +72,11 @@ psql "host=<TARGET_HOST> user=ccxadmin dbname=postgres sslmode=require" -c "CREA
 psql "host=<TARGET_HOST> user=ccxadmin dbname=app1 sslmode=require" -v ON_ERROR_STOP=1 -f app1.sql
 ```
 
-All objects on the target are owned by `ccxadmin`. Create your application roles and grant them privileges again.
+All objects on the target are owned by `ccxadmin`. Create your application roles and grant them privileges again after the load. If the database has row-level security policies for specific roles (`CREATE POLICY ... TO <role>`), create those roles on the target before the load, or the load stops at the policy.
 
 Trusted extensions such as `pgcrypto` are created by the load. An extension that needs a superuser fails to load. See [Extensions](../Reference/Products/PostgreSQL/extensions.md) for the list of supported extensions.
 
-Use a `pg_dump` version that is the same as or newer than the source server.
+Use `pg_dump` and `psql` of the target's major version. The client must not be older than the source, and a dump from a newer client can contain settings an older target rejects.
 
 ## Microsoft SQL Server
 
