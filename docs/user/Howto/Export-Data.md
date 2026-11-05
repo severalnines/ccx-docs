@@ -1,6 +1,6 @@
 # Export data or copy it to another datastore
 
-CCX backups cannot be downloaded, and [Create datastore from backup](Create-Datastore-From-Backup.md) only works for the user who created the source datastore. To keep your own copy of the data, or to move it into a datastore owned by another user, make a logical dump with the database's own tools and the `ccxadmin` credentials.
+You cannot download CCX backups, and [Create datastore from backup](Create-Datastore-From-Backup.md) only works for the user who created the source datastore. To keep your own copy of the data, or to move it into a datastore owned by another user, make a logical dump with the database's own tools and the `ccxadmin` credentials.
 
 The procedures below cover MySQL, MariaDB, PostgreSQL and Microsoft SQL Server. Valkey is not covered.
 
@@ -11,10 +11,9 @@ The procedures below cover MySQL, MariaDB, PostgreSQL and Microsoft SQL Server. 
 - Create the target datastore with the same database type and the same or a newer major version.
 - Stop writes to the source before you start. Changes made after the dump starts are not copied.
 
-What is copied and what is not:
+The dump copies your application databases: tables, data, views, routines, triggers and events. Keep in mind:
 
-- The dump contains your application databases: tables, data, views, routines, triggers and events.
-- The target's `ccxadmin` password does not change. Data from the source's `ccxdb` is loaded into the target's `ccxdb`.
+- The target's `ccxadmin` password does not change. The load puts the data from the source's `ccxdb` into the target's `ccxdb`.
 - Database users are not copied, except on SQL Server (see below). Create them again on the target, in the CCX UI or with SQL.
 - System databases (`mysql`, `sys`, `postgres`, `master` and others) are never part of the dump. Do not add them.
 
@@ -35,7 +34,7 @@ mysql -h <TARGET_HOST> -uccxadmin -p < dump.sql
 
 Leave out `--master-data` and `--source-data`. They add a replication statement to the dump, which then runs on the target.
 
-Routines, views, triggers and events keep their `DEFINER` account. If that account is not `ccxadmin`, create it on the target before loading. Alternatively, remove the `DEFINER` clauses so the objects are owned by the account that loads the dump. This command changes only the lines that start a `CREATE` statement, so data values are not touched:
+Routines, views, triggers and events keep their `DEFINER` account. If that account is not `ccxadmin`, create it on the target before loading. Alternatively, remove the `DEFINER` clauses so the account that loads the dump becomes the definer. This command changes only the lines that start a `CREATE` statement, so data values are not touched:
 
 ```bash
 sed -E '/^(CREATE|\/\*![0-9]+ CREATE\*\/|\/\*![0-9]+ DEFINER=)/ s/ DEFINER=`[^`]*`@`[^`]*`//' -i dump.sql
@@ -72,9 +71,9 @@ psql "host=<TARGET_HOST> user=ccxadmin dbname=postgres sslmode=require" -c "CREA
 psql "host=<TARGET_HOST> user=ccxadmin dbname=app1 sslmode=require" -v ON_ERROR_STOP=1 -f app1.sql
 ```
 
-All objects on the target are owned by `ccxadmin`. Create your application roles and grant them privileges again after the load. If the database has row-level security policies for specific roles (`CREATE POLICY ... TO <role>`), create those roles on the target before the load, or the load stops at the policy.
+`ccxadmin` owns all objects on the target. Create your application roles and grant them privileges again after the load. If the database has row-level security policies for specific roles (`CREATE POLICY ... TO <role>`), create those roles on the target before the load, or the load stops at the policy.
 
-Trusted extensions such as `pgcrypto` are created by the load. An extension that needs a superuser fails to load. See [Extensions](../Reference/Products/PostgreSQL/extensions.md) for the list of supported extensions.
+The load creates trusted extensions such as `pgcrypto`. An extension that needs a superuser fails to load. See [Extensions](../Reference/Products/PostgreSQL/extensions.md) for the list of supported extensions.
 
 Use `pg_dump` and `psql` of the target's major version. The client must not be older than the source, and a dump from a newer client can contain settings an older target rejects.
 
@@ -110,4 +109,4 @@ The import creates the server logins of the database users that are missing on t
 ALTER LOGIN appuser WITH PASSWORD = '<NEW_PASSWORD>';
 ```
 
-In an Always On datastore only `ccxdb` is replicated to the secondary node. See [Limitations](../Reference/Products/MSSQLServer/limitations.md).
+An Always On datastore replicates only `ccxdb` to the secondary node. See [Limitations](../Reference/Products/MSSQLServer/limitations.md).
