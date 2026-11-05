@@ -10,7 +10,7 @@ The procedures below cover MySQL, MariaDB, PostgreSQL and Microsoft SQL Server. 
 - Copy the host and the `ccxadmin` password of each datastore from **Nodes > Connection Information**.
 - Create the target datastore with the same database type and the same or a newer major version.
 - Stop writes to the source before you start. Changes made after the dump starts are not copied.
-- Load the dump into the target's primary (writer) host. Replicas are read-only.
+- Load the dump into the target's primary (writer) host. Replicas accept only reads.
 
 The dump copies your application databases: tables, data, views, routines, triggers and events. Keep in mind:
 
@@ -46,7 +46,7 @@ Load it into the target:
 mysql -h <TARGET_HOST> -uccxadmin -p < dump.sql
 ```
 
-Always keep `--set-gtid-purged=OFF`. Without it, the dump turns off binary logging during the load (`SET @@SESSION.SQL_LOG_BIN= 0`), so the data never reaches the target's replicas, and it writes the source's GTID state into the target (`SET @@GLOBAL.GTID_PURGED`).
+Always keep `--set-gtid-purged=OFF`. Without it, the dump turns off binary logging during the load (`SET @@SESSION.SQL_LOG_BIN= 0`). The data then never reaches the target's replicas. The dump also writes the source's GTID state into the target (`SET @@GLOBAL.GTID_PURGED`).
 
 Leave out `--master-data`, `--source-data`, `--dump-slave` and `--dump-replica`. They add a replication statement to the dump, which then runs on the target.
 
@@ -75,7 +75,9 @@ MariaDB's own `mysqldump` and `mysql` commands also work. Oracle's MySQL `mysqld
 
 ## PostgreSQL
 
-Dump each database separately. Use `--no-owner --no-privileges`, because roles from the source do not exist on the target, and `--no-publications --no-subscriptions`, so no logical replication setup is copied to the target. Do not use `pg_dumpall`: it copies roles and their passwords, including `ccxadmin`'s, and loading it changes the target's `ccxadmin` password.
+`ccxadmin` is not a superuser. It can only dump objects whose owner is `ccxadmin` or that grant it access. If the owner is another user, such as a user created in the CCX UI, `pg_dump` as `ccxadmin` fails with `permission denied for schema <name>`. In that case, run `pg_dump` as the owner of the objects, or as a user created with the **Superuser** privilege in the CCX UI. Load into the target as `ccxadmin` either way.
+
+Dump each database separately. Use `--no-owner --no-privileges`, because roles from the source do not exist on the target, and `--no-publications --no-subscriptions`. These two flags keep logical replication setup out of the dump. Do not use `pg_dumpall`. It copies roles with their passwords, including `ccxadmin`'s. Loading it changes the target's `ccxadmin` password.
 
 ```bash
 pg_dump "host=<SOURCE_HOST> user=ccxadmin dbname=app1 sslmode=require" \
@@ -121,7 +123,7 @@ sqlpackage /Action:Import /TargetServerName:<TARGET_HOST> /TargetDatabaseName:ap
   /SourceFile:app1.bacpac
 ```
 
-The import creates the server logins of the database users that are missing on the target, with a random password. Set a new password for each one:
+The import never changes a server login that already exists on the target. A database user whose login exists on the target, such as `mssql_exporter`, which CCX uses for monitoring, keeps its login: the import maps the user to it, and the login keeps its password. `ccxadmin` and `sa` are not changed either. For a database user whose login is missing, the import creates the login with a random password. Set a new password for each one:
 
 ```sql
 ALTER LOGIN appuser WITH PASSWORD = '<NEW_PASSWORD>';
