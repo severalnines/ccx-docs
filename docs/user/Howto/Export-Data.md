@@ -34,7 +34,7 @@ mysql -h <TARGET_HOST> -uccxadmin -p < dump.sql
 
 Leave out `--master-data` and `--source-data`. They add a replication statement to the dump, which then runs on the target.
 
-Routines, views, triggers and events keep their `DEFINER` account. If that account is not `ccxadmin`, create it on the target before loading. Alternatively, remove the `DEFINER` clauses so the account that loads the dump becomes the definer. This command changes only the lines that start a `CREATE` statement, so data values are not touched:
+Routines, views, triggers and events keep their `DEFINER` account. `ccxadmin` cannot create objects with another account as definer, even if that account exists on the target. If any definer is not `ccxadmin`, remove the `DEFINER` clauses before loading, so `ccxadmin` becomes the definer. This command changes only the lines that start a `CREATE` statement, so data values are not touched:
 
 ```bash
 sed -E '/^(CREATE|\/\*![0-9]+ CREATE\*\/|\/\*![0-9]+ DEFINER=)/ s/ DEFINER=`[^`]*`@`[^`]*`//' -i dump.sql
