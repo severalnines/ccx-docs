@@ -19,6 +19,7 @@ The dump copies your application databases: tables, data, views, routines, trigg
 - System databases (`mysql`, `sys`, `postgres`, `master` and others) are never part of the dump. Do not add them.
 
 :::danger CRITICAL: never dump the MySQL and MariaDB system databases
+
 You **MUST NOT** include `mysql`, `sys`, `performance_schema` or `information_schema` in the dump, and you **MUST NOT** use `--all-databases` (`-A`).
 
 The `mysql` database holds the datastore's users and passwords, including the accounts CCX uses to manage the datastore. Loading it into the target overwrites them: CCX loses access to the target datastore, replication breaks and the target's `ccxadmin` password changes to the source's. The target datastore stops working.
@@ -29,6 +30,7 @@ To list the databases you can copy, run this on the source:
 SELECT schema_name FROM information_schema.schemata
 WHERE schema_name NOT IN ('mysql', 'sys', 'performance_schema', 'information_schema');
 ```
+
 :::
 
 ## MySQL
