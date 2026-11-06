@@ -52,13 +52,12 @@ Always keep `--set-gtid-purged=OFF`. Without it, the dump turns off binary loggi
 
 Leave out `--master-data`, `--source-data`, `--dump-slave` and `--dump-replica`. They add a replication statement to the dump, which then runs on the target.
 
-Routines, views, triggers and events keep their `DEFINER` account. `ccxadmin` cannot create objects with another account as definer, even if that account exists on the target. If any definer is not `ccxadmin`, remove the `DEFINER` clauses before loading, so `ccxadmin` becomes the definer. This command changes only the lines that start a `CREATE` statement, so data values are not touched. It writes a new file and works with both GNU and macOS `sed`:
+If the load fails with `ERROR 1227` on a `DEFINER` clause, remove the clauses and load the new file instead. `ccxadmin` then becomes the definer:
 
 ```bash
 sed -E '/^(CREATE|\/\*![0-9]+ CREATE\*\/|\/\*![0-9]+ DEFINER=)/ s/ DEFINER=`[^`]*`@`[^`]*`//' dump.sql > dump-nodefiner.sql
+mysql -h <TARGET_HOST> -uccxadmin -p < dump-nodefiner.sql
 ```
-
-Then load `dump-nodefiner.sql` instead of `dump.sql`.
 
 ## MariaDB
 
@@ -73,7 +72,7 @@ mariadb-dump -h <SOURCE_HOST> -uccxadmin -p --single-transaction \
 mariadb -h <TARGET_HOST> -uccxadmin -p < dump.sql
 ```
 
-MariaDB's own `mysqldump` and `mysql` commands also work. Oracle's MySQL `mysqldump` fails against MariaDB with `Unknown table 'COLUMN_STATISTICS'` unless you add `--column-statistics=0`. The CRITICAL warning about system databases and the notes on `--master-data` and `DEFINER` from the MySQL section apply here too.
+MariaDB's own `mysqldump` and `mysql` commands also work. Oracle's MySQL `mysqldump` fails against MariaDB with `Unknown table 'COLUMN_STATISTICS'` unless you add `--column-statistics=0`. The CRITICAL warning about system databases and the notes on `--master-data` and `ERROR 1227` from the MySQL section apply here too.
 
 ## PostgreSQL
 
