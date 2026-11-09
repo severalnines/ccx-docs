@@ -2,6 +2,13 @@
 
 CCX is a comprehensive data management and storage solution that offers a range of features including flexible node configurations, scalable storage options, secure networking, and robust monitoring tools. It supports various deployment types to cater to different scalability and redundancy needs, alongside comprehensive management functions for users, databases, nodes, and firewalls. The CCX project provides a versatile platform for efficient data handling, security, and operational management, making it suitable for a wide array of applications and workloads.
 
+## Architecture at a glance
+
+<img src="/ccx-docs/img/ccx-overview-light.svg" alt="CCX at a glance: application teams and the platform team use the CCX control plane in Kubernetes, which deploys, manages and monitors encrypted, highly available datastores in your own cloud. Applications connect directly to the datastores, never through the control plane." class="themed-diagram themed-diagram--light" />
+<img src="/ccx-docs/img/ccx-overview-dark.svg" alt="CCX at a glance: application teams and the platform team use the CCX control plane in Kubernetes, which deploys, manages and monitors encrypted, highly available datastores in your own cloud. Applications connect directly to the datastores, never through the control plane." class="themed-diagram themed-diagram--dark" />
+
+The control plane automates the database lifecycle; the data plane is where the databases and their data live, inside your own infrastructure. For the services, ports and traffic flows behind this picture, see the detailed [Architecture](Installation/architecture.md).
+
 ## Installation
 Check out our [Architecture and installation guide](Installation/Index.md) to get started.
 

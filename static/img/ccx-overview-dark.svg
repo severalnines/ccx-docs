@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 790" width="100%" role="img" aria-labelledby="ccxOvTitle ccxOvDesc" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+<title id="ccxOvTitle">CCX architecture at a glance</title>
+<desc id="ccxOvDesc">Application teams and the platform team use the CCX control plane, which runs on your Kubernetes and provides self-service, lifecycle automation, backup and recovery, and observability. The control plane deploys, manages and monitors datastores in your own cloud: replicated, encrypted clusters that back up to S3-compatible storage. Applications connect directly to the datastores, never through the control plane.</desc>
+<defs>
+<linearGradient id="cpGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9d174d"/><stop offset="1" stop-color="#5b21b6"/></linearGradient>
+<filter id="sh" x="-10%" y="-10%" width="120%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000000" flood-opacity="0.45"/></filter>
+<marker id="mA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7d8899"/></marker>
+<marker id="mCp" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f472b6"/></marker>
+<marker id="mDp" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#22d3ee"/></marker>
+</defs>
+<style>.flow{stroke-dasharray:7 6;animation:flow 1.1s linear infinite}.flowSlow{animation-duration:2.2s}.pulse{animation:pulse 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@keyframes flow{to{stroke-dashoffset:-13}}@keyframes pulse{0%,100%{opacity:.25}50%{opacity:.65}}@media (prefers-reduced-motion:reduce){.flow,.pulse{animation:none}}</style>
+<rect x="32" y="20" width="330" height="72" rx="14" fill="#1c2230" stroke="#30363d" filter="url(#sh)"/>
+<circle cx="70" cy="56.0" r="21" fill="#3b1730"/>
+<g transform="translate(58,44.0)" fill="none" stroke="#f472b6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.2c2.9.3 5 2.6 5 5.8"/></g>
+<text x="104" y="53.0" font-size="16.5" font-weight="700" fill="#e6edf3">Application teams</text>
+<text x="104" y="72.0" font-size="13.2" fill="#9aa7b8">Self-service portal · API · Terraform</text>
+<rect x="378" y="20" width="310" height="72" rx="14" fill="#1c2230" stroke="#30363d" filter="url(#sh)"/>
+<circle cx="416" cy="56.0" r="21" fill="#3b1730"/>
+<g transform="translate(404,44.0)" fill="none" stroke="#f472b6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-4 3.1-6.6 7-6.6s7 2.6 7 6.6"/><path d="M17.5 4.5l1.5 1.5 3-3"/></g>
+<text x="450" y="53.0" font-size="16.5" font-weight="700" fill="#e6edf3">Platform &amp; DBA team</text>
+<text x="450" y="72.0" font-size="13.2" fill="#9aa7b8">Admin portal · usage · audit</text>
+<rect x="850" y="20" width="318" height="72" rx="14" fill="#1c2230" stroke="#30363d" filter="url(#sh)"/>
+<circle cx="888" cy="56.0" r="21" fill="#123642"/>
+<g transform="translate(876,44.0)" fill="none" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 8.5h18"/><path d="M10 12.5l-2.5 2.5 2.5 2.5M14 12.5l2.5 2.5-2.5 2.5"/></g>
+<text x="922" y="53.0" font-size="16.5" font-weight="700" fill="#e6edf3">Your applications</text>
+<text x="922" y="72.0" font-size="13.2" fill="#9aa7b8">Same address after failover</text>
+<path d="M197,96 L197,146" stroke="#7d8899" stroke-width="2" marker-end="url(#mA)"/>
+<path d="M533,96 L533,146" stroke="#7d8899" stroke-width="2" marker-end="url(#mA)"/>
+<rect x="32" y="152" width="836" height="206" rx="18" fill="url(#cpGrad)" filter="url(#sh)"/>
+<text x="56" y="184" font-size="12.1" font-weight="700" fill="#ffffff" fill-opacity="0.75" letter-spacing="1.6">CCX CONTROL PLANE</text>
+<text x="56" y="210" font-size="22.0" font-weight="700" fill="#ffffff">Database-as-a-Service on your Kubernetes</text>
+<rect x="56.0" y="232" width="188.0" height="104" rx="12" fill="#ffffff" fill-opacity="0.13" stroke="#ffffff" stroke-opacity="0.22"/>
+<circle cx="86.0" cy="262" r="17" fill="#ffffff" fill-opacity="0.2"/>
+<g transform="translate(74.0,250)" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M10 9l5 2.5-2.2.8-.8 2.2z"/></g>
+<text x="110.0" y="267" font-size="16.0" font-weight="700" fill="#ffffff">Self-service</text>
+<text x="72.0" y="302" font-size="13.2" fill="#ffffff" fill-opacity="0.85">Portal, REST API,</text>
+<text x="72.0" y="319" font-size="13.2" fill="#ffffff" fill-opacity="0.85">Terraform, SSO</text>
+<rect x="256.0" y="232" width="188.0" height="104" rx="12" fill="#ffffff" fill-opacity="0.13" stroke="#ffffff" stroke-opacity="0.22"/>
+<circle cx="286.0" cy="262" r="17" fill="#ffffff" fill-opacity="0.2"/>
+<g transform="translate(274.0,250)" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.3-4.6L4 8"/><path d="M4 3.5V8h4.5"/><path d="M4 13a8 8 0 0 0 14.3 4.6L20 16"/><path d="M20 20.5V16h-4.5"/></g>
+<text x="310.0" y="267" font-size="16.0" font-weight="700" fill="#ffffff">Automation</text>
+<text x="272.0" y="302" font-size="13.2" fill="#ffffff" fill-opacity="0.85">Provision, scale,</text>
+<text x="272.0" y="319" font-size="13.2" fill="#ffffff" fill-opacity="0.85">upgrade, fail over</text>
+<rect x="456.0" y="232" width="188.0" height="104" rx="12" fill="#ffffff" fill-opacity="0.13" stroke="#ffffff" stroke-opacity="0.22"/>
+<circle cx="486.0" cy="262" r="17" fill="#ffffff" fill-opacity="0.2"/>
+<g transform="translate(474.0,250)" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/></g>
+<text x="510.0" y="267" font-size="16.0" font-weight="700" fill="#ffffff">Backup &amp; PITR</text>
+<text x="472.0" y="302" font-size="13.2" fill="#ffffff" fill-opacity="0.85">Scheduled backups,</text>
+<text x="472.0" y="319" font-size="13.2" fill="#ffffff" fill-opacity="0.85">point-in-time restore</text>
+<rect x="656.0" y="232" width="188.0" height="104" rx="12" fill="#ffffff" fill-opacity="0.13" stroke="#ffffff" stroke-opacity="0.22"/>
+<circle cx="686.0" cy="262" r="17" fill="#ffffff" fill-opacity="0.2"/>
+<g transform="translate(674.0,250)" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M3 15l4-4 4 3 5-6 5 4"/></g>
+<text x="710.0" y="267" font-size="16.0" font-weight="700" fill="#ffffff">Observability</text>
+<text x="672.0" y="302" font-size="13.2" fill="#ffffff" fill-opacity="0.85">Dashboards, alerts,</text>
+<text x="672.0" y="319" font-size="13.2" fill="#ffffff" fill-opacity="0.85">query insight, audit</text>
+<path class="flow flowSlow" d="M434,362 L434,424" stroke="#f472b6" stroke-width="3" marker-end="url(#mCp)"/>
+<text x="450" y="398" font-size="14.3" font-weight="700" fill="#f472b6">deploys · manages · monitors</text>
+<rect x="32" y="432" width="1136" height="258" rx="18" fill="#0b2530" stroke="#155e75" stroke-width="1.5"/>
+<g transform="translate(54,448)" fill="none" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/></g>
+<text x="86" y="465" font-size="12.1" font-weight="700" fill="#22d3ee" letter-spacing="1.6">YOUR CLOUD</text>
+<text x="208" y="465" font-size="13.2" fill="#9aa7b8">AWS · Google Cloud · OpenStack · CloudStack · VMware</text>
+<rect x="56" y="488" width="200" height="150" rx="14" fill="#1c2230" stroke="#30363d" filter="url(#sh)"/>
+<circle cx="156.0" cy="536" r="26" fill="#123642"/>
+<g transform="translate(144.0,524)" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="8" ry="2.5"/><path d="M4 5.5l1.8 13c.2 1.4 2.9 2.5 6.2 2.5s6-1.1 6.2-2.5L20 5.5"/></g>
+<text x="156.0" y="590" font-size="16.5" font-weight="700" fill="#e6edf3" text-anchor="middle">Backups</text>
+<text x="156.0" y="610" font-size="13.2" fill="#9aa7b8" text-anchor="middle">S3-compatible storage</text>
+<rect x="324" y="488" width="256" height="150" rx="14" fill="#1c2230" stroke="#30363d" filter="url(#sh)"/>
+<text x="342" y="516" font-size="16.0" font-weight="700" fill="#e6edf3">PostgreSQL</text>
+<ellipse class="pulse" cx="376.0" cy="563" rx="32" ry="34" fill="#123642"/>
+<path d="M354,544 L354,582 A22.0,6 0 0 0 398,582 L398,544" fill="#22d3ee" stroke="#22d3ee" stroke-width="1.5"/>
+<ellipse cx="376.0" cy="544" rx="22.0" ry="6" fill="#22d3ee" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="376.0" y="606" font-size="11.6" fill="#9aa7b8" text-anchor="middle">primary</text>
+<path d="M430,544 L430,582 A22.0,6 0 0 0 474,582 L474,544" fill="#123642" stroke="#22d3ee" stroke-width="1.5"/>
+<ellipse cx="452.0" cy="544" rx="22.0" ry="6" fill="#123642" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="452.0" y="606" font-size="11.6" fill="#9aa7b8" text-anchor="middle">replica</text>
+<path d="M506,544 L506,582 A22.0,6 0 0 0 550,582 L550,544" fill="#123642" stroke="#22d3ee" stroke-width="1.5"/>
+<ellipse cx="528.0" cy="544" rx="22.0" ry="6" fill="#123642" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="528.0" y="606" font-size="11.6" fill="#9aa7b8" text-anchor="middle">replica</text>
+<path d="M402,563 L426,563" stroke="#22d3ee" stroke-width="1.5" class="flow flowSlow"/>
+<path d="M478,563 L502,563" stroke="#22d3ee" stroke-width="1.5" class="flow flowSlow"/>
+<text x="452.0" y="626" font-size="12.1" font-weight="600" fill="#22d3ee" text-anchor="middle">replicated · automatic failover</text>
+<rect x="606" y="488" width="256" height="150" rx="14" fill="#1c2230" stroke="#30363d" filter="url(#sh)"/>
+<text x="624" y="516" font-size="16.0" font-weight="700" fill="#e6edf3">MySQL / MariaDB</text>
+<ellipse class="pulse" cx="658.0" cy="563" rx="32" ry="34" fill="#123642"/>
+<path d="M636,544 L636,582 A22.0,6 0 0 0 680,582 L680,544" fill="#22d3ee" stroke="#22d3ee" stroke-width="1.5"/>
+<ellipse cx="658.0" cy="544" rx="22.0" ry="6" fill="#22d3ee" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="658.0" y="606" font-size="11.6" fill="#9aa7b8" text-anchor="middle">primary</text>
+<path d="M712,544 L712,582 A22.0,6 0 0 0 756,582 L756,544" fill="#123642" stroke="#22d3ee" stroke-width="1.5"/>
+<ellipse cx="734.0" cy="544" rx="22.0" ry="6" fill="#123642" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="734.0" y="606" font-size="11.6" fill="#9aa7b8" text-anchor="middle">replica</text>
+<path d="M788,544 L788,582 A22.0,6 0 0 0 832,582 L832,544" fill="#123642" stroke="#22d3ee" stroke-width="1.5"/>
+<ellipse cx="810.0" cy="544" rx="22.0" ry="6" fill="#123642" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="810.0" y="606" font-size="11.6" fill="#9aa7b8" text-anchor="middle">replica</text>
+<path d="M684,563 L708,563" stroke="#22d3ee" stroke-width="1.5" class="flow flowSlow"/>
+<path d="M760,563 L784,563" stroke="#22d3ee" stroke-width="1.5" class="flow flowSlow"/>
+<text x="734.0" y="626" font-size="12.1" font-weight="600" fill="#22d3ee" text-anchor="middle">replicated · automatic failover</text>
+<rect x="888" y="488" width="256" height="150" rx="14" fill="#1c2230" stroke="#30363d" filter="url(#sh)"/>
+<text x="906" y="516" font-size="16.0" font-weight="700" fill="#e6edf3">SQL Server</text>
+<ellipse class="pulse" cx="940.0" cy="563" rx="32" ry="34" fill="#123642"/>
+<path d="M918,544 L918,582 A22.0,6 0 0 0 962,582 L962,544" fill="#22d3ee" stroke="#22d3ee" stroke-width="1.5"/>
+<ellipse cx="940.0" cy="544" rx="22.0" ry="6" fill="#22d3ee" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="940.0" y="606" font-size="11.6" fill="#9aa7b8" text-anchor="middle">primary</text>
+<path d="M994,544 L994,582 A22.0,6 0 0 0 1038,582 L1038,544" fill="#123642" stroke="#22d3ee" stroke-width="1.5"/>
+<ellipse cx="1016.0" cy="544" rx="22.0" ry="6" fill="#123642" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="1016.0" y="606" font-size="11.6" fill="#9aa7b8" text-anchor="middle">replica</text>
+<path d="M1070,544 L1070,582 A22.0,6 0 0 0 1114,582 L1114,544" fill="#123642" stroke="#22d3ee" stroke-width="1.5"/>
+<ellipse cx="1092.0" cy="544" rx="22.0" ry="6" fill="#123642" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="1092.0" y="606" font-size="11.6" fill="#9aa7b8" text-anchor="middle">replica</text>
+<path d="M966,563 L990,563" stroke="#22d3ee" stroke-width="1.5" class="flow flowSlow"/>
+<path d="M1042,563 L1066,563" stroke="#22d3ee" stroke-width="1.5" class="flow flowSlow"/>
+<text x="1016.0" y="626" font-size="12.1" font-weight="600" fill="#22d3ee" text-anchor="middle">replicated · automatic failover</text>
+<path class="flow flowSlow" d="M320,563 L262,563" stroke="#22d3ee" stroke-width="2" marker-end="url(#mDp)"/>
+<text x="290.0" y="554" font-size="12.1" font-weight="600" fill="#22d3ee" text-anchor="middle">backups</text>
+<text x="600.0" y="668" font-size="13.2" fill="#9aa7b8" text-anchor="middle">Engines: MySQL · MariaDB · PostgreSQL · Redis · Valkey · Microsoft SQL Server</text>
+<path class="flow" d="M1016,96 L1016,426" stroke="#22d3ee" stroke-width="3" marker-end="url(#mDp)"/>
+<rect x="884" y="230" width="264" height="60" rx="30" fill="#1c2230" stroke="#22d3ee" stroke-width="1.5"/>
+<circle cx="916" cy="260" r="20" fill="#3a2e10"/>
+<g transform="translate(904,248)" fill="none" stroke="#e3b341" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></g>
+<text x="948" y="256" font-size="14.3" font-weight="700" fill="#22d3ee">Direct, TLS-encrypted</text>
+<text x="948" y="274" font-size="12.7" fill="#9aa7b8">never via the control plane</text>
+<rect x="32.0" y="712" width="272.0" height="60" rx="30" fill="#1c2230" stroke="#30363d" filter="url(#sh)"/>
+<circle cx="64.0" cy="742" r="19" fill="#3a2e10"/>
+<g transform="translate(52.0,730)" fill="none" stroke="#e3b341" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/></g>
+<text x="94.0" y="738" font-size="15.4" font-weight="700" fill="#e6edf3">Data sovereignty</text>
+<text x="94.0" y="756" font-size="12.7" fill="#9aa7b8">Stays in your environment</text>
+<rect x="320.0" y="712" width="272.0" height="60" rx="30" fill="#1c2230" stroke="#30363d" filter="url(#sh)"/>
+<circle cx="352.0" cy="742" r="19" fill="#3a2e10"/>
+<g transform="translate(340.0,730)" fill="none" stroke="#e3b341" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-4 4 9 2-5h6"/></g>
+<text x="382.0" y="738" font-size="15.4" font-weight="700" fill="#e6edf3">High availability</text>
+<text x="382.0" y="756" font-size="12.7" fill="#9aa7b8">Automatic failover and repair</text>
+<rect x="608.0" y="712" width="272.0" height="60" rx="30" fill="#1c2230" stroke="#30363d" filter="url(#sh)"/>
+<circle cx="640.0" cy="742" r="19" fill="#3a2e10"/>
+<g transform="translate(628.0,730)" fill="none" stroke="#e3b341" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></g>
+<text x="670.0" y="738" font-size="15.4" font-weight="700" fill="#e6edf3">Encrypted</text>
+<text x="670.0" y="756" font-size="12.7" fill="#9aa7b8">In transit and at rest</text>
+<rect x="896.0" y="712" width="272.0" height="60" rx="30" fill="#1c2230" stroke="#30363d" filter="url(#sh)"/>
+<circle cx="928.0" cy="742" r="19" fill="#3a2e10"/>
+<g transform="translate(916.0,730)" fill="none" stroke="#e3b341" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10H7z"/><path d="M3 12h4M17 12h4M12 3v4M12 17v4"/></g>
+<text x="958.0" y="738" font-size="15.4" font-weight="700" fill="#e6edf3">No lock-in</text>
+<text x="958.0" y="756" font-size="12.7" fill="#9aa7b8">Standard engines, any cloud</text>
+</svg>
