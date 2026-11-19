@@ -97,7 +97,7 @@ A Kubernetes cluster with ingress controller (load balancer), persistent volume,
 
 ### What are the Kubernetes version supported?
 
-CCX requires 1.22 or later.
+CCX is tested on Kubernetes 1.32, 1.33, 1.34 and 1.36. Check your distribution as well as the version: the cmon pod runs privileged, which some distributions forbid by default.
 
 ### Is CCX upgrade dependent on the K8s upgrade ? - what are the requirements here?
 
@@ -133,7 +133,7 @@ Yes, SSL is used for all inter-host and client/server communications.
 
 ### Where are backups stored? Are they encrypted and who has access to backups?
 
-Backups are stored in S3-compatible storage. All backups are encrypted by default.
+Backups are stored in S3-compatible storage. CCX does not encrypt the backup files itself; encryption at rest depends on the storage provider. Access is controlled by the bucket credentials configured for CCX.
 
 ### How can I restore from a backup?
 
@@ -145,7 +145,7 @@ Yes.
 
 ### Can I tune the database?
 
-No, the database is auto-tuned by CCX.
+Yes. CCX tunes the defaults to the instance size, and end users can change parameters with [Parameter Groups](../user/Howto/Parameter-group.md) (v1.51 and later).
 
 ### Do we have access to the standby database for read-only workloads?
 
@@ -181,7 +181,7 @@ The “Query” tab in the UI allows for this.
 
 ### Does the IP need to be public?
 
-Yes.
+No, it needs to be reachable. The CCX control plane must reach every database VM on TCP 22 and the database ports, and end users need a route to the database nodes. On OpenStack the VMs get their address from the network set in `floating_network_id`, which is normally public but can be any Neutron external network, including a private pool routed to your customers. Alternatively, `public_pool` attaches the VMs directly to a network without floating IPs.
 
 ### While scaling is there a way to identify the network where the new node will be created?
 

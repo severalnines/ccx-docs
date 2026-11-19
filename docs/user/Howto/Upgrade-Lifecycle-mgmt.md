@@ -28,4 +28,4 @@ Please note, that for primary-replica configurations, the update will cause the 
 
 ## Upgrade database major version
 
-To upgrade the database major version from e.g MariaDB 10.6 to 10.11, you need to create a new datastore from backup, alternatively take mysqldump or pgdump and apply it to your new datastore.
+Major versions are not upgraded in place. To upgrade from e.g. MariaDB 10.6 to 10.11, create a new datastore on the new version and move the data with `mysqldump`/`pg_dump`, or by replication (see the Importing Data guide for your database). Creating a datastore from a backup is not an upgrade path: the new datastore must use the same version as the backup's origin datastore.

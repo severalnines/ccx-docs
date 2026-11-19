@@ -3,7 +3,7 @@
 Yes
 
 ### Can I change the database configuration?
-This is a managed service.
+Yes. Use [Parameter Groups](Howto/Parameter-group.md) to change database parameters. CCX tunes the defaults to the instance size.
 
 ### Does CCX support multiple AZs.
 CCX supports multiple AZs if the Cloud Provider does.
