@@ -11,6 +11,54 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.58.0
+Release date: 19-11-2026
+CMON version: 2.4.0-27420
+
+:::note
+Upgrade notes:
+- The reconciler is now enabled by default (`ccx.reconcile.enabled: true`) and replaces failed nodes itself, so auto-repair is now disabled by default (`ccx.autoRepair.enabled: false`) and cannot be enabled together with it.
+- The `cmon-proxy` deployment, service and ingress have been removed.
+- ccx-backend containers now run as non-root (`securityContext` in `values.yaml`); review custom mounts that relied on root.
+- cmon runs as a single replica with sized resource requests; `--pool` mode remains optional (beta feature).
+:::
+
+### New Features
+- Reconciler: CCX keeps a desired spec per datastore and reconciles the actual state against it, triggered by CCX and cmon job events. It is health aware (waits for unhealthy hosts, requires a writable primary, skips unnecessary primary promotion), backs off on repeated failures and exports planned steps as a Prometheus metric
+- MSSQL 2025 support
+- OpenBao as a secrets provider, with namespace support and Kubernetes auth for cmon
+- Optional Horizontal Pod Autoscaler (`hpa.enabled`) and Argo CD sync-wave annotations
+- Audit log for SUPERUSER creation and cloud resource creation/deletion (AWS, OpenStack), queryable from the admin API
+- ccx-admin: datastore filters (Status, User, Type, Cloud, Internal ID) and a Cloud column
+
+### Improvements
+- Deploy API responses no longer contain secrets
+- Keycloak is optional for organizations
+- External DNS is updated from cmon events instead of polling
+- Datastore operations are blocked until deployment completes, and backups are paused during restore
+- Adding Redis/Valkey nodes with less memory than existing nodes is rejected
+- add_node applies the database config / parameter group only to the added nodes
+- Reboot and repair actions now go through the permission check
+- Login is validated as an email address server-side
+- `SESSION_COOKIE_SAMESITE` sets the `SameSite` attribute of the session cookie (needed for jwt-login in a cross-site iframe)
+- The ccx-ui footer is also hidden when `HIDE_HEADER` is set
+
+### Bugs
+- DNS records (including the public service record) were not deleted when a node was removed, leaking records on repeated failed scale-outs
+- Datastore deletion: failed on AWS/OpenStack security groups, could target cmon cluster `cid:0`, left orphaned cmon clusters that blocked reuse of floating IPs, retried too quickly and could create duplicate `destroy_cluster` jobs; stale jobs of deleted datastores are now aborted and no longer reported
+- Deployment: failed when a node's DNS name resolved late, and datastores were marked available before their DNS record resolved
+- OpenStack nodes were created without an availability zone (volume attach failures), and disk resize failed with a zone name mismatch
+- Create datastore wizard crashed ("Missing parameter: volumeType") when providers share a region or offer only Ephemeral storage; the zone picker got stuck when restoring from backup
+- Parameter groups: creation failed for parameters without defaults, renaming re-applied the group, deleting an in-use group returned 500, and changing it on a locked datastore failed
+- Reconciler: Galera datastores did not recover from a node failure, remove_nodes could remove other hosts than requested, and the volume type was not updated after a change
+- MSSQL upgrade failed when a secondary needed no upgrade, and on multi-AG clusters promotion timed out after 5 minutes
+- After a failover, config-apply/logrotate jobs ran against the halted old primary ("failed to modify db config"); recovery could be disabled by a read-only enable/disable
+- PostgreSQL was reported as stopped after a reboot while running
+- 409 "cluster busy" right after an operation finished (lock released too late), state worker hangs, and cmon client `retry failed after re-authentication` errors
+- Listing firewall rules triggered updates
+- Billing usage report returned 500 on negative `network_egress`
+- Admin console did not list datastores due to an SQL error
+
 ## Release Notes - CCX - v1.57.7
 Release date: 08-10-2026
 
