@@ -117,7 +117,7 @@ The CCX UI can be customized and white-labeled. The CCX UI runs in a POD called 
 
 #### CCX Admin UI
 
-The CCX Admin UI provides basic administration features. It runs in a pod called `ccx-ui-admin`.
+The CCX Admin UI provides basic administration features. It runs in a pod called `ccx-ui-admin` and is served at `https://<ccxFQDN>/admin/`. See [Operations and Management](../Troubleshooting/Operations-and-Management.md#ccx-admin-ui) for how to log in.
 
 #### REST API
 
