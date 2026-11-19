@@ -8,7 +8,7 @@ CCX detects that a datastore node needs an upgrade in two ways:
 
 1. **Image version change** — the `LATEST_SERVER_CONFIG` timestamp in the CCX Helm values is set to a date newer than when the oldest node was provisioned. This signals that a new base image is available.
 
-2. **OS package updates detected** — the ccx-monitor-service running on each datastore node reports available OS package updates back to CCX. When pending updates are detected on any node, the datastore is immediately flagged for upgrade regardless of the `LATEST_SERVER_CONFIG` value.
+2. **Database package updates detected** — the agent on each datastore node watches the database packages (for example `postgresql-<version>`, `mariadb-server`, `mssql-server`) and reports available updates back to CCX. When pending updates are detected on any node, the datastore is immediately flagged for upgrade regardless of the `LATEST_SERVER_CONFIG` value. Other OS package updates do not trigger an upgrade.
 
 When either condition is met, the user is shown an upgrade notification in the UI and can choose to upgrade immediately or schedule it for their configured maintenance window.
 
@@ -51,7 +51,7 @@ CCX will compare `LATEST_SERVER_CONFIG` against the provisioning timestamp of th
 
 ## OS upgrade impact
 
-When the OS on a datastore node receives available package updates, the ccx-monitor-service reports those pending updates to CCX. This triggers the same roll-forward upgrade procedure as an image version change — new node provisioned with the latest image, old node removed.
+OS package updates alone do not trigger an upgrade. OS updates reach the datastore through the node image: raise `LATEST_SERVER_CONFIG` when a new image is available, and the roll-forward procedure replaces every node with one provisioned from the latest image. Any upgrade, including one triggered by a database package update, also provisions the new nodes from the latest image.
 
 **Impact during upgrade:**
 - Nodes are replaced one at a time — the datastore remains available throughout (except during primary promotion).

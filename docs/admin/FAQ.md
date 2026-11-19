@@ -97,7 +97,7 @@ A Kubernetes cluster with ingress controller (load balancer), persistent volume,
 
 ### What are the Kubernetes version supported?
 
-CCX is tested on Kubernetes 1.32 to 1.36. Check your distribution as well as the version: the cmon pod runs privileged, which some distributions forbid by default.
+CCX is tested on Kubernetes 1.32, 1.33, 1.34 and 1.36. Check your distribution as well as the version: the cmon pod runs privileged, which some distributions forbid by default.
 
 ### Is CCX upgrade dependent on the K8s upgrade ? - what are the requirements here?
 
