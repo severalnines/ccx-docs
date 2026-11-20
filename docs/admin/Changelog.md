@@ -11,6 +11,12 @@ Downgrades are not supported.
 :::info
 Please read this section [Upgrading the Control Plane](Day2/Upgrading-the-Control-Plane.md) for more information how to upgrade.
 ::::
+## Release Notes - CCX - v1.58.1
+Release date: 20-11-2026
+
+### Bugs
+- Public sign-up (`POST /auth/register`) accepted server-controlled fields from the client: `emailConfirmed: true` created an account with a confirmed email without the emailed token (bypassing the email verification required before creating datastores), `resetToken` let the client choose its own password reset token, and `externalIds`/`origin` were passed through as well. Sign-up now accepts only the form fields (`login`, `password`, `firstName`, `lastName`, `allowNewsletters`, `termsAccepted`, `disableTrial`); other fields are ignored, so existing clients keep working. Scripts that relied on `emailConfirmed: true` must now confirm the email through the token when email verification is required
+
 ## Release Notes - CCX - v1.58.0
 Release date: 19-11-2026
 CMON version: 2.4.0-27420
