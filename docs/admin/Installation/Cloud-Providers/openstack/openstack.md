@@ -36,6 +36,21 @@ CCX requires a pool of floating IPs to be created. Each VM requires a floating I
 Storage can either be ephemeral or block storage to provide disk storage for database instances. Openstack services such as cinder manages storage volume.
 CCX uses storage volumes for acquiring and attaching storage volumes to VMs.
 
+#### Server groups (anti-affinity)
+
+CCX creates a Nova server group for each datastore so its VMs are spread across hypervisors. The policy is set per cloud with `server_group` in the deployer configuration:
+
+| `policy` | `max_server_per_host` | Behaviour |
+|---|---|---|
+| `anti-affinity` (default) | `1` (default) or higher | Strict. Scheduling fails with `NoValidHost` when no hypervisor has room under the limit. |
+| `soft-anti-affinity` | not allowed | Best effort. Nova prefers hypervisors with fewer VMs of the datastore and places VMs together only when it has to. |
+
+Repairing or upgrading a node creates the replacement VM before the old one is removed, so a datastore briefly needs one VM more than its node count. With strict anti-affinity and one VM per host, every availability zone needs at least one hypervisor more than the largest datastore places in it. On smaller clouds use `soft-anti-affinity`, or raise `max_server_per_host`.
+
+Both policies need compute API microversion 2.64 or later (the default `compute_api_microversion` is 2.79). `soft-anti-affinity` relies on the Nova `ServerGroupSoftAntiAffinityWeigher`, which is enabled by default.
+
+Nova cannot change the policy of an existing server group, so a new policy applies only to datastores created after the change.
+
 #### Security group Configuration
 
 CCX requires the ability to manage security group to create firewall rules to control traffic and secure access to the database VMs.
@@ -135,6 +150,13 @@ openstack_vendors:
    root_volume:
      enabled: true
      size: 30
+#    OPTIONAL server_group sets the anti-affinity policy for datastore VMs. Default: anti-affinity with max_server_per_host 1. See "Server groups (anti-affinity)" above.
+#   server_group:
+#     policy: soft-anti-affinity
+#    or strict, with up to two VMs of a datastore per hypervisor:
+#   server_group:
+#     policy: anti-affinity
+#     max_server_per_host: 2
 #  The cidr: x.x.x.x/32 in database_vendors represents the IP address of the CCX deployment within the Kubernetes cluster, or the NAT gateway IP. This is the source IP that connects to and manages the database nodes across different networks
    database_vendors:
      - name: mariadb
