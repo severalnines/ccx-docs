@@ -25,6 +25,7 @@ CMON version: 2.4.0-27420
 Upgrade notes:
 - The reconciler is now enabled by default (`ccx.reconcile.enabled: true`) and replaces failed nodes itself, so auto-repair is now disabled by default (`ccx.autoRepair.enabled: false`) and cannot be enabled together with it.
 - The `cmon-proxy` deployment, service and ingress have been removed.
+- ccx-backend images now run as the non-root `nobody` user (uid 65534); review custom mounts that relied on root.
 - cmon runs as a single replica with sized resource requests; `--pool` mode remains optional (beta feature).
 :::
 
