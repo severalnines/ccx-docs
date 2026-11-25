@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="732" viewBox="0 0 1200 732" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dr-step-5-title dr-step-5-desc">
+        <title id="dr-step-5-title">Step 5: restore missing datastores from S3</title>
+        <desc id="dr-step-5-desc">Datastores that CCX reports as missing are restored from their backups in S3.</desc>
+        <style>
+.flow { fill: none; stroke-width: 2.4; stroke-dasharray: 6 10; stroke-linecap: round; opacity: 0; }
+@keyframes flow-dash { to { stroke-dashoffset: -96; } }
+[data-motion-item] { display: none; }
+[data-motion-item][data-step="5"] { display: inline; }
+.node { opacity: 0.28; }
+.node[data-in~="5"] { opacity: 1; }
+.ambient { display: none; }
+[data-step="5"] .flow { opacity: 1; animation: flow-dash 3s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .flow { animation: none !important; opacity: 0 !important; } }
+</style>
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#4b4278"/>
+          </marker>
+          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#b80b7b"/>
+          </marker>
+          <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#2b00ad"/>
+          </marker>
+          <marker id="arrow-ink" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#0d0062"/>
+          </marker>
+        </defs>
+
+        <rect width="100%" height="100%" fill="#faf8fd"/>
+
+        <!-- ═════════ ZONES ═════════ -->
+        <rect x="24" y="48" width="400" height="376" rx="8" fill="rgba(13,0,98,0.02)" stroke="rgba(13,0,98,0.18)" stroke-width="1" stroke-dasharray="6,4"/>
+        <text x="40" y="66" fill="#5d5689" font-size="8" font-weight="500" font-family="'Geist Mono', Menlo, Consolas, monospace" letter-spacing="0.14em">REGION A · PRIMARY K8S</text>
+
+        <rect x="776" y="48" width="400" height="376" rx="8" fill="rgba(13,0,98,0.02)" stroke="rgba(13,0,98,0.18)" stroke-width="1" stroke-dasharray="6,4"/>
+        <text x="792" y="66" fill="#5d5689" font-size="8" font-weight="500" font-family="'Geist Mono', Menlo, Consolas, monospace" letter-spacing="0.14em">REGION B · STANDBY K8S</text>
+
+        <rect x="280" y="508" width="640" height="128" rx="8" fill="rgba(43,0,173,0.03)" stroke="rgba(43,0,173,0.30)" stroke-width="1" stroke-dasharray="6,4"/>
+        <text x="904" y="526" fill="#5d5689" font-size="8" font-weight="500" font-family="'Geist Mono', Menlo, Consolas, monospace" letter-spacing="0.14em" text-anchor="end">OUTSIDE BOTH REGIONS</text>
+
+        <!-- ═════════ ARROWS (drawn before nodes) ═════════ -->
+
+        <!-- Steady state, not a numbered step -->
+        <g class="ambient amb-argo">
+          <!-- ArgoCD → primary (current destination) -->
+          <line x1="520" y1="100" x2="336" y2="100" stroke="#4b4278" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+          <rect x="392" y="80" width="72" height="12" rx="2" fill="#faf8fd"/>
+          <text x="428" y="89" fill="#5d5689" font-size="8" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">CURRENT DEST</text>
+        </g>
+        <g class="ambient amb-dns">
+
+          <!-- Primary ExternalDNS → DNS zone -->
+          <path d="M 64,136 H 48 Q 40,136 40,144 V 636 Q 40,644 48,644 H 752 Q 760,644 760,636 V 612" fill="none" stroke="#2b00ad" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-link)"/>
+          <rect x="100" y="624" width="64" height="12" rx="2" fill="#faf8fd"/>
+          <text x="132" y="633" fill="#2b00ad" font-size="8" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">DNS RECORDS</text>
+        </g>
+
+        <!-- ① ccxdb + cmon db replication -->
+        <g data-motion-item="" data-step="1" aria-label="Step 1: ccxdb and cmon db replicate from the primary to the standby cluster">
+          <line x1="336" y1="232" x2="864" y2="232" stroke="#0d0062" stroke-width="1.4" marker-end="url(#arrow-ink)"/>
+          <path class="flow" data-motion-decorative="" aria-hidden="true" focusable="false" d="M 336,232 H 856" stroke="#0d0062"/>
+          <rect x="560" y="212" width="80" height="12" rx="2" fill="#faf8fd"/>
+          <text x="600" y="221" fill="#0d0062" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">① REPLICATION</text>
+        </g>
+
+        <!-- ② backups to S3 -->
+        <g data-motion-item="" data-step="2" aria-label="Step 2: the k8s resource backup job and datastore backups write to S3">
+          <path d="M 200,384 V 568 Q 200,576 208,576 H 320" fill="none" stroke="#4b4278" stroke-width="1.2" marker-end="url(#arrow)"/>
+          <path class="flow" data-motion-decorative="" aria-hidden="true" focusable="false" d="M 200,384 V 568 Q 200,576 208,576 H 312" stroke="#0d0062"/>
+          <rect x="208" y="456" width="68" height="12" rx="2" fill="#faf8fd"/>
+          <text x="210" y="465" fill="#0d0062" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" letter-spacing="0.06em">② RESOURCES</text>
+
+          <path d="M 336,136 H 368 Q 376,136 376,144 V 224 a 8,8 0 0,0 0,16 V 540" fill="none" stroke="#4b4278" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+          <path class="flow" data-motion-decorative="" aria-hidden="true" focusable="false" d="M 336,136 H 368 Q 376,136 376,144 V 224 a 8,8 0 0,0 0,16 V 532" stroke="#0d0062"/>
+          <rect x="384" y="456" width="60" height="12" rx="2" fill="#faf8fd"/>
+          <text x="386" y="465" fill="#5d5689" font-size="8" font-family="'Geist Mono', Menlo, Consolas, monospace" letter-spacing="0.06em">DB BACKUPS</text>
+        </g>
+
+        <!-- ③ restore k8s resources; standby ExternalDNS takes over the records -->
+        <g data-motion-item="" data-step="3" aria-label="Step 3: on DR, restore k8s resources from S3 into the standby; its ExternalDNS updates the DNS zone">
+          <path d="M 536,540 V 240 a 8,8 0 0,1 0,-16 V 188 Q 536,180 544,180 H 904 Q 912,180 912,172 V 152" fill="none" stroke="#4b4278" stroke-width="1.2" marker-end="url(#arrow)"/>
+          <path class="flow" data-motion-decorative="" aria-hidden="true" focusable="false" d="M 536,540 V 240 a 8,8 0 0,1 0,-16 V 188 Q 536,180 544,180 H 904 Q 912,180 912,172 V 160" stroke="#0d0062"/>
+          <rect x="596" y="188" width="88" height="12" rx="2" fill="#faf8fd"/>
+          <text x="640" y="197" fill="#0d0062" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">③ RESTORE K8S</text>
+
+          <path d="M 960,384 V 568 Q 960,576 952,576 H 880" fill="none" stroke="#2b00ad" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-link)"/>
+          <path class="flow" data-motion-decorative="" aria-hidden="true" focusable="false" d="M 960,384 V 568 Q 960,576 952,576 H 888" stroke="#2b00ad"/>
+          <rect x="968" y="456" width="84" height="12" rx="2" fill="#faf8fd"/>
+          <text x="970" y="465" fill="#2b00ad" font-size="8" font-family="'Geist Mono', Menlo, Consolas, monospace" letter-spacing="0.06em">UPDATES ON DR</text>
+        </g>
+
+        <!-- ④ ArgoCD → standby (new destination) -->
+        <g data-motion-item="" data-step="4" aria-label="Step 4: deploy CCX to the standby with the same values, or switch the ArgoCD destination">
+          <line x1="680" y1="100" x2="864" y2="100" stroke="#b80b7b" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+          <path class="flow" data-motion-decorative="" aria-hidden="true" focusable="false" d="M 680,100 H 856" stroke="#b80b7b"/>
+          <rect x="736" y="80" width="72" height="12" rx="2" fill="#faf8fd"/>
+          <text x="772" y="89" fill="#b80b7b" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">④ NEW DEST</text>
+        </g>
+
+        <!-- ⑤ restore missing datastores from S3 -->
+        <g data-motion-item="" data-step="5" aria-label="Step 5: restore any missing datastores from their S3 backups">
+          <path d="M 512,540 V 240 a 8,8 0 0,1 0,-16 V 176 Q 512,168 520,168 H 880 Q 888,168 888,160 V 152" fill="none" stroke="#4b4278" stroke-width="1.2" marker-end="url(#arrow)"/>
+          <path class="flow" data-motion-decorative="" aria-hidden="true" focusable="false" d="M 512,540 V 240 a 8,8 0 0,1 0,-16 V 176 Q 512,168 520,168 H 880 Q 888,168 888,160 V 156" stroke="#0d0062"/>
+          <rect x="676" y="148" width="88" height="12" rx="2" fill="#faf8fd"/>
+          <text x="720" y="157" fill="#0d0062" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">⑤ RESTORE DBS</text>
+        </g>
+
+        <!-- ═════════ NODES ═════════ -->
+
+        <g class="node" data-in="2">
+          <rect x="64" y="80" width="272" height="72" rx="6" fill="#faf8fd"/>
+          <rect x="64" y="80" width="272" height="72" rx="6" fill="#ffffff" stroke="#0d0062" stroke-width="1"/>
+          <rect x="72" y="86" width="28" height="12" rx="2" fill="transparent" stroke="rgba(13,0,98,0.40)" stroke-width="0.8"/>
+          <text x="86" y="95" fill="#0d0062" font-size="7" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">CCX</text>
+          <text x="200" y="110" fill="#0d0062" font-size="12" font-weight="600" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif" text-anchor="middle">CCX control plane</text>
+          <text x="200" y="126" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">helm-ccx · ccxdeps · ingress</text>
+          <text x="200" y="140" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">external-dns · cert-manager</text>
+        </g>
+
+        <g class="node" data-in="1">
+          <rect x="64" y="200" width="272" height="64" rx="6" fill="#faf8fd"/>
+          <rect x="64" y="200" width="272" height="64" rx="6" fill="rgba(13,0,98,0.05)" stroke="#4b4278" stroke-width="1"/>
+          <rect x="72" y="206" width="22" height="12" rx="2" fill="transparent" stroke="rgba(75,66,120,0.50)" stroke-width="0.8"/>
+          <text x="83" y="215" fill="#4b4278" font-size="7" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">DB</text>
+          <text x="200" y="232" fill="#0d0062" font-size="12" font-weight="600" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif" text-anchor="middle">ccxdb + cmon db</text>
+          <text x="200" y="250" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">primary · read/write</text>
+        </g>
+
+        <g class="node" data-in="2">
+          <rect x="64" y="312" width="272" height="72" rx="6" fill="#faf8fd"/>
+          <rect x="64" y="312" width="272" height="72" rx="6" fill="#ffffff" stroke="#4b4278" stroke-width="1" stroke-dasharray="4,3"/>
+          <rect x="72" y="318" width="28" height="12" rx="2" fill="transparent" stroke="rgba(75,66,120,0.50)" stroke-width="0.8"/>
+          <text x="86" y="327" fill="#4b4278" font-size="7" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">JOB</text>
+          <text x="200" y="342" fill="#0d0062" font-size="12" font-weight="600" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif" text-anchor="middle">k8s resource backup</text>
+          <text x="200" y="358" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">secrets · externalServices · ingress</text>
+          <text x="200" y="372" fill="#5d5689" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">manual today · automated in 1.59</text>
+        </g>
+
+        <g class="node" data-in="4">
+          <rect x="520" y="72" width="160" height="56" rx="6" fill="#faf8fd"/>
+          <rect x="520" y="72" width="160" height="56" rx="6" fill="#ffffff" stroke="#4b4278" stroke-width="1" stroke-dasharray="4,3"/>
+          <rect x="528" y="78" width="28" height="12" rx="2" fill="transparent" stroke="rgba(75,66,120,0.50)" stroke-width="0.8"/>
+          <text x="542" y="87" fill="#4b4278" font-size="7" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">OPT</text>
+          <text x="600" y="103" fill="#0d0062" font-size="12" font-weight="600" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif" text-anchor="middle">ArgoCD</text>
+          <text x="600" y="118" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">Application · ≥ 1.58</text>
+        </g>
+
+        <g class="node" data-in="3 4 5">
+          <rect x="864" y="80" width="272" height="72" rx="6" fill="#faf8fd"/>
+          <rect x="864" y="80" width="272" height="72" rx="6" fill="rgba(184,11,123,0.07)" stroke="#b80b7b" stroke-width="1.2"/>
+          <rect x="872" y="86" width="36" height="12" rx="2" fill="transparent" stroke="rgba(184,11,123,0.50)" stroke-width="0.8"/>
+          <text x="890" y="95" fill="#b80b7b" font-size="7" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">ON DR</text>
+          <text x="1000" y="110" fill="#0d0062" font-size="12" font-weight="600" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif" text-anchor="middle">CCX control plane</text>
+          <text x="1000" y="126" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">④ same helm values as primary</text>
+          <text x="1000" y="140" fill="#b80b7b" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">⑤ restore missing datastores</text>
+        </g>
+
+        <g class="node" data-in="1">
+          <rect x="864" y="200" width="272" height="64" rx="6" fill="#faf8fd"/>
+          <rect x="864" y="200" width="272" height="64" rx="6" fill="rgba(13,0,98,0.05)" stroke="#4b4278" stroke-width="1"/>
+          <rect x="872" y="206" width="22" height="12" rx="2" fill="transparent" stroke="rgba(75,66,120,0.50)" stroke-width="0.8"/>
+          <text x="883" y="215" fill="#4b4278" font-size="7" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">DB</text>
+          <text x="1000" y="232" fill="#0d0062" font-size="12" font-weight="600" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif" text-anchor="middle">ccxdb + cmon db</text>
+          <text x="1000" y="250" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">replica · read-only until DR</text>
+        </g>
+
+        <g class="node" data-in="3">
+          <rect x="864" y="312" width="272" height="72" rx="6" fill="#faf8fd"/>
+          <rect x="864" y="312" width="272" height="72" rx="6" fill="#ffffff" stroke="#4b4278" stroke-width="1"/>
+          <rect x="872" y="318" width="30" height="12" rx="2" fill="transparent" stroke="rgba(75,66,120,0.50)" stroke-width="0.8"/>
+          <text x="887" y="327" fill="#4b4278" font-size="7" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">BASE</text>
+          <text x="1000" y="342" fill="#0d0062" font-size="12" font-weight="600" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif" text-anchor="middle">Standby platform</text>
+          <text x="1000" y="358" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">ccxdeps · external-dns</text>
+          <text x="1000" y="372" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">cert-manager · ingress</text>
+        </g>
+
+        <g class="node" data-in="2 3 5">
+          <rect x="320" y="540" width="240" height="72" rx="6" fill="#faf8fd"/>
+          <rect x="320" y="540" width="240" height="72" rx="6" fill="rgba(43,0,173,0.04)" stroke="rgba(43,0,173,0.45)" stroke-width="1"/>
+          <rect x="328" y="546" width="22" height="12" rx="2" fill="transparent" stroke="rgba(43,0,173,0.45)" stroke-width="0.8"/>
+          <text x="339" y="555" fill="#2b00ad" font-size="7" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">S3</text>
+          <text x="440" y="570" fill="#0d0062" font-size="12" font-weight="600" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif" text-anchor="middle">S3 object storage</text>
+          <text x="440" y="586" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">k8s resource backups</text>
+          <text x="440" y="600" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">datastore backups</text>
+        </g>
+
+        <g class="node" data-in="3">
+          <rect x="640" y="540" width="240" height="72" rx="6" fill="#faf8fd"/>
+          <rect x="640" y="540" width="240" height="72" rx="6" fill="rgba(43,0,173,0.04)" stroke="rgba(43,0,173,0.45)" stroke-width="1"/>
+          <rect x="648" y="546" width="26" height="12" rx="2" fill="transparent" stroke="rgba(43,0,173,0.45)" stroke-width="0.8"/>
+          <text x="661" y="555" fill="#2b00ad" font-size="7" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">DNS</text>
+          <text x="760" y="570" fill="#0d0062" font-size="12" font-weight="600" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif" text-anchor="middle">DNS zone</text>
+          <text x="760" y="586" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">ExternalDNS target</text>
+          <text x="760" y="600" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">records follow ingress</text>
+        </g>
+
+        <!-- ═════════ LEGEND ═════════ -->
+        <line x1="24" y1="676" x2="1176" y2="676" stroke="rgba(13,0,98,0.10)" stroke-width="0.8"/>
+        <text x="24" y="708" fill="#4b4278" font-size="8" font-family="'Geist Mono', Menlo, Consolas, monospace" letter-spacing="0.14em">LEGEND</text>
+
+        <rect x="96" y="699" width="14" height="10" rx="2" fill="rgba(184,11,123,0.07)" stroke="#b80b7b" stroke-width="1"/>
+        <text x="116" y="708" fill="#4b4278" font-size="9" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif">Deployed on failover</text>
+
+        <rect x="240" y="699" width="14" height="10" rx="2" fill="#ffffff" stroke="#0d0062" stroke-width="1"/>
+        <text x="260" y="708" fill="#4b4278" font-size="9" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif">Running workload</text>
+
+        <rect x="368" y="699" width="14" height="10" rx="2" fill="rgba(13,0,98,0.05)" stroke="#4b4278" stroke-width="1"/>
+        <text x="388" y="708" fill="#4b4278" font-size="9" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif">Database</text>
+
+        <rect x="456" y="699" width="14" height="10" rx="2" fill="#ffffff" stroke="#4b4278" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="476" y="708" fill="#4b4278" font-size="9" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif">Job / optional</text>
+
+        <rect x="564" y="699" width="14" height="10" rx="2" fill="rgba(43,0,173,0.04)" stroke="rgba(43,0,173,0.45)" stroke-width="1"/>
+        <text x="584" y="708" fill="#4b4278" font-size="9" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif">External service</text>
+
+        <line x1="688" y1="704" x2="708" y2="704" stroke="#0d0062" stroke-width="1.4" marker-end="url(#arrow-ink)"/>
+        <text x="716" y="708" fill="#4b4278" font-size="9" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif">Numbered DR step</text>
+
+        <line x1="820" y1="704" x2="840" y2="704" stroke="#b80b7b" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+        <text x="848" y="708" fill="#4b4278" font-size="9" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif">Failover switch</text>
+
+        <line x1="944" y1="704" x2="964" y2="704" stroke="#4b4278" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+        <text x="972" y="708" fill="#4b4278" font-size="9" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif">Periodic / passive / automatic</text>
+      
+  <rect x="296" y="56" width="96" height="16" rx="2" fill="#faf8fd" stroke="#b80b7b" stroke-width="0.8"/>
+  <text x="344" y="67" fill="#b80b7b" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.1em">UNAVAILABLE</text>
+</svg>
