@@ -107,6 +107,7 @@ nav:
           - Promote A Replica: user/Howto/Promote-a-replica.md
           - Restore Backup: user/Howto/Restore-backup.md
           - Create Datastore From Backup: user/Howto/Create-Datastore-From-Backup.md
+          - Export Data: user/Howto/Export-Data.md
           - Upgrade Lifecycle Mgmt: user/Howto/Upgrade-Lifecycle-mgmt.md
           - Database User Management: user/Howto/Database-User-management.md
           - Database Db Management: user/Howto/Database-Db-management.md

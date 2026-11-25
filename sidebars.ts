@@ -232,6 +232,7 @@ const sidebars: SidebarsConfig = {
             'user/Howto/Restore-backup',
             'user/Howto/Parameter-group',
             'user/Howto/Create-Datastore-From-Backup',
+            'user/Howto/Export-Data',
             'user/Howto/Upgrade-Lifecycle-mgmt',
             'user/Howto/Database-User-management',
             'user/Howto/Database-Db-management',
