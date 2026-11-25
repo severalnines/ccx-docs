@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="732" viewBox="0 0 1200 732" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dr-detach-title dr-detach-desc">
-        <title id="dr-detach-title">Failover: detach replication and promote the standby databases</title>
+        <title id="dr-detach-title">Detach replication and promote the standby databases</title>
         <desc id="dr-detach-desc">With the primary region unavailable, replication is detached and the standby ccxdb and cmon db are promoted to read/write.</desc>
         <style>
 .flow { fill: none; stroke-width: 2.4; stroke-dasharray: 6 10; stroke-linecap: round; opacity: 0; }
@@ -58,20 +58,20 @@
           <text x="132" y="633" fill="#2b00ad" font-size="8" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">DNS RECORDS</text>
         </g>
 
-        <!-- ① ccxdb + cmon db replication -->
+        <!-- ccxdb + cmon db replication -->
         <g data-motion-item="" data-step="1" aria-label="Step 1: ccxdb and cmon db replicate from the primary to the standby cluster">
           <line x1="336" y1="232" x2="864" y2="232" stroke="#0d0062" stroke-width="1.4" marker-end="url(#arrow-ink)"/>
           <path class="flow" data-motion-decorative="" aria-hidden="true" focusable="false" d="M 336,232 H 856" stroke="#0d0062"/>
           <rect x="560" y="212" width="80" height="12" rx="2" fill="#faf8fd"/>
-          <text x="600" y="221" fill="#0d0062" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">① REPLICATION</text>
+          <text x="600" y="221" fill="#0d0062" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">REPLICATION</text>
         </g>
 
-        <!-- ② backups to S3 -->
+        <!-- backups to S3 -->
         <g data-motion-item="" data-step="2" aria-label="Step 2: the k8s resource backup job and datastore backups write to S3">
           <path d="M 200,384 V 568 Q 200,576 208,576 H 320" fill="none" stroke="#4b4278" stroke-width="1.2" marker-end="url(#arrow)"/>
           <path class="flow" data-motion-decorative="" aria-hidden="true" focusable="false" d="M 200,384 V 568 Q 200,576 208,576 H 312" stroke="#0d0062"/>
           <rect x="208" y="456" width="68" height="12" rx="2" fill="#faf8fd"/>
-          <text x="210" y="465" fill="#0d0062" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" letter-spacing="0.06em">② RESOURCES</text>
+          <text x="210" y="465" fill="#0d0062" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" letter-spacing="0.06em">RESOURCES</text>
 
           <path d="M 336,136 H 368 Q 376,136 376,144 V 224 a 8,8 0 0,0 0,16 V 540" fill="none" stroke="#4b4278" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
           <path class="flow" data-motion-decorative="" aria-hidden="true" focusable="false" d="M 336,136 H 368 Q 376,136 376,144 V 224 a 8,8 0 0,0 0,16 V 532" stroke="#0d0062"/>
@@ -79,12 +79,12 @@
           <text x="386" y="465" fill="#5d5689" font-size="8" font-family="'Geist Mono', Menlo, Consolas, monospace" letter-spacing="0.06em">DB BACKUPS</text>
         </g>
 
-        <!-- ③ restore k8s resources; standby ExternalDNS takes over the records -->
+        <!-- restore k8s resources; standby ExternalDNS takes over the records -->
         <g data-motion-item="" data-step="3" aria-label="Step 3: on DR, restore k8s resources from S3 into the standby; its ExternalDNS updates the DNS zone">
           <path d="M 536,540 V 240 a 8,8 0 0,1 0,-16 V 188 Q 536,180 544,180 H 904 Q 912,180 912,172 V 152" fill="none" stroke="#4b4278" stroke-width="1.2" marker-end="url(#arrow)"/>
           <path class="flow" data-motion-decorative="" aria-hidden="true" focusable="false" d="M 536,540 V 240 a 8,8 0 0,1 0,-16 V 188 Q 536,180 544,180 H 904 Q 912,180 912,172 V 160" stroke="#0d0062"/>
           <rect x="596" y="188" width="88" height="12" rx="2" fill="#faf8fd"/>
-          <text x="640" y="197" fill="#0d0062" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">③ RESTORE K8S</text>
+          <text x="640" y="197" fill="#0d0062" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">RESTORE K8S</text>
 
           <path d="M 960,384 V 568 Q 960,576 952,576 H 880" fill="none" stroke="#2b00ad" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-link)"/>
           <path class="flow" data-motion-decorative="" aria-hidden="true" focusable="false" d="M 960,384 V 568 Q 960,576 952,576 H 888" stroke="#2b00ad"/>
@@ -92,20 +92,20 @@
           <text x="970" y="465" fill="#2b00ad" font-size="8" font-family="'Geist Mono', Menlo, Consolas, monospace" letter-spacing="0.06em">UPDATES ON DR</text>
         </g>
 
-        <!-- ④ ArgoCD → standby (new destination) -->
+        <!-- ArgoCD → standby (new destination) -->
         <g data-motion-item="" data-step="4" aria-label="Step 4: deploy CCX to the standby with the same values, or switch the ArgoCD destination">
           <line x1="680" y1="100" x2="864" y2="100" stroke="#b80b7b" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
           <path class="flow" data-motion-decorative="" aria-hidden="true" focusable="false" d="M 680,100 H 856" stroke="#b80b7b"/>
           <rect x="736" y="80" width="72" height="12" rx="2" fill="#faf8fd"/>
-          <text x="772" y="89" fill="#b80b7b" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">④ NEW DEST</text>
+          <text x="772" y="89" fill="#b80b7b" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">NEW DEST</text>
         </g>
 
-        <!-- ⑤ restore missing datastores from S3 -->
+        <!-- restore missing datastores from S3 -->
         <g data-motion-item="" data-step="5" aria-label="Step 5: restore any missing datastores from their S3 backups">
           <path d="M 512,540 V 240 a 8,8 0 0,1 0,-16 V 176 Q 512,168 520,168 H 880 Q 888,168 888,160 V 152" fill="none" stroke="#4b4278" stroke-width="1.2" marker-end="url(#arrow)"/>
           <path class="flow" data-motion-decorative="" aria-hidden="true" focusable="false" d="M 512,540 V 240 a 8,8 0 0,1 0,-16 V 176 Q 512,168 520,168 H 880 Q 888,168 888,160 V 156" stroke="#0d0062"/>
           <rect x="676" y="148" width="88" height="12" rx="2" fill="#faf8fd"/>
-          <text x="720" y="157" fill="#0d0062" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">⑤ RESTORE DBS</text>
+          <text x="720" y="157" fill="#0d0062" font-size="8" font-weight="600" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">RESTORE DBS</text>
         </g>
 
         <!-- ═════════ NODES ═════════ -->
@@ -154,8 +154,8 @@
           <rect x="872" y="86" width="36" height="12" rx="2" fill="transparent" stroke="rgba(184,11,123,0.50)" stroke-width="0.8"/>
           <text x="890" y="95" fill="#b80b7b" font-size="7" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">ON DR</text>
           <text x="1000" y="110" fill="#0d0062" font-size="12" font-weight="600" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif" text-anchor="middle">CCX control plane</text>
-          <text x="1000" y="126" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">④ same helm values as primary</text>
-          <text x="1000" y="140" fill="#b80b7b" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">⑤ restore missing datastores</text>
+          <text x="1000" y="126" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">same helm values as primary</text>
+          <text x="1000" y="140" fill="#b80b7b" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">restore missing datastores</text>
         </g>
 
         <g class="node" data-in="1">
@@ -183,7 +183,7 @@
           <rect x="328" y="546" width="22" height="12" rx="2" fill="transparent" stroke="rgba(43,0,173,0.45)" stroke-width="0.8"/>
           <text x="339" y="555" fill="#2b00ad" font-size="7" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">S3</text>
           <text x="440" y="570" fill="#0d0062" font-size="12" font-weight="600" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif" text-anchor="middle">S3 object storage</text>
-          <text x="440" y="586" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">k8s resource backups</text>
+          <text x="440" y="586" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">k8s resources · ccxdeps DBs</text>
           <text x="440" y="600" fill="#4b4278" font-size="9" font-family="'Geist Mono', Menlo, Consolas, monospace" text-anchor="middle">datastore backups</text>
         </g>
 
@@ -217,7 +217,7 @@
         <text x="584" y="708" fill="#4b4278" font-size="9" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif">External service</text>
 
         <line x1="688" y1="704" x2="708" y2="704" stroke="#0d0062" stroke-width="1.4" marker-end="url(#arrow-ink)"/>
-        <text x="716" y="708" fill="#4b4278" font-size="9" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif">Numbered DR step</text>
+        <text x="716" y="708" fill="#4b4278" font-size="9" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif">DR step</text>
 
         <line x1="820" y1="704" x2="840" y2="704" stroke="#b80b7b" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
         <text x="848" y="708" fill="#4b4278" font-size="9" font-family="'Rubik', 'Helvetica Neue', Arial, sans-serif">Failover switch</text>
