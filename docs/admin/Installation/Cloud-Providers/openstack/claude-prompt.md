@@ -278,7 +278,7 @@ Ask a few at a time:
 - **Prove the credentials first:** `openstack token issue -f value -c expires`. Then `openstack project show "$OS_PROJECT_ID"` (or the name) and confirm the id and domain with me; that id goes into the secret.
 - `OS_FLAVOR`, `OS_IMAGE`, `OS_NETWORK`, `OS_FLOATING_NETWORK`, `OS_VOLUME_TYPE` and `OS_AZ` may be set. Treat them as **hints, not answers**: mark the matching row in each table below as pre-selected, run every check on it as if I had picked it, and say so. A hint that fails its check is reported and dropped, never used. Expect them to be **stale rather than merely unverified** - a hint naming an object that no longer exists usually means the lab was rebuilt under a shell that was never re-exported. Say so in the final summary so I fix my shell, instead of silently working around it.
 - Region: `openstack region list`, and confirm `OS_REGION_NAME` is one of them.
-- Compute API: `openstack versions show --service compute` and read the maximum microversion column. CCX asks for microversion `2.79` by default; if the maximum is lower, set `compute_api_microversion` under the vendor to that maximum and tell me.
+- Compute API: `openstack versions show --service compute` and read the maximum microversion column. CCX asks for microversion `2.79` by default; if the maximum is lower, set `compute_api_microversion` under the vendor to that maximum and tell me. If the maximum is below `2.64`, **stop**: CCX needs `2.64` or later to create server groups, and this cloud is not supported.
 - Availability zones: `openstack availability zone list --compute`.
 - Networks: `openstack network list --external` for `floating_network_id`, and `openstack network list --internal` for `network_id`. For the candidate project network, `openstack subnet list --network <id>` must show a subnet, and `openstack router list` + `openstack router show <router>` must show a router with `external_gateway_info` on the external network and an interface on that subnet. Without that, floating IPs attach but never route, and nodes have no way out to package repositories or S3.
 - Floating IPs: `openstack floating ip list` for what is already allocated, and `openstack quota show --usage` (or `openstack limits show --absolute`) for the floating IP, instance, core, RAM, volume, gigabyte and security group quotas. One floating IP, one server and one data volume per node; count what is free and say how many 3-node datastores fit.
@@ -349,7 +349,7 @@ Write `ccx-openstack-values.yaml`:
 - `ccx.cloudSecrets: [mycloud, mycloud-s3]`, `ccx.imagePullSecret: <the pull secret's real name>` only for a tarball with private images, `ccx.userDomain` if used, and `ccx.config.databases` if I'm not offering all the defaults.
 - `ccx.env`: `USE_PUBLIC_IPS: "true"`, `REQUIRE_EMAIL_VERIFICATION: "false"`, `REQUIRE_SUBSCRIPTION: "false"`. And `ccx.services.runner.env.USE_WALG: "false"` when `S3_INSECURE` is `true`.
 - `ccx.config.clouds`: one cloud with `code: mycloud`, instance types (flavor names), volume types (Cinder type names), network type `public` (`in_vpc: false`), and one region whose `code` is `OS_REGION_NAME` with one availability zone whose `code` is the Nova AZ.
-- `ccx.services.deployer.config.openstack_vendors.mycloud`: `project_id`, `network_id`, `floating_network_id`, `regions.<OS_REGION_NAME>` with `image_id` and `secgrp_name: ccx-common`, `root_volume` only for a `Disk 0` flavor, `compute_api_microversion` only if Phase 2 found the maximum below `2.79`, and one `database_vendors` entry per **enabled** database:
+- `ccx.services.deployer.config.openstack_vendors.mycloud`: `project_id`, `network_id`, `floating_network_id`, `regions.<OS_REGION_NAME>` with `image_id` and `secgrp_name: ccx-common`, `root_volume` only for a `Disk 0` flavor, `compute_api_microversion` only if Phase 2 found the maximum below `2.79` (never below `2.64`), and one `database_vendors` entry per **enabled** database:
 
 ```
 security_groups:
@@ -404,7 +404,7 @@ If something fails:
 - `can't authenticate to openstack` in the deployer log → wrong password, user domain **name**, or a project **name** where the id is needed.
 - Deployer never ready, `s3 config: missing access key` (or `endpoint`) in its log → the S3 secret's prefix doesn't match the cloud code, or `MYCLOUD_S3_*` keys are missing.
 - `Quota exceeded for resources: ['floatingip']` (or `instances`, `cores`, `gigabytes`) → the project quota is full.
-- `Version 2.79 is not supported by the API` → set `compute_api_microversion` to the maximum from Phase 2.
+- `Version 2.79 is not supported by the API` → set `compute_api_microversion` to the maximum from Phase 2. If that maximum is below `2.64`, the cloud is not supported: server groups need `2.64`.
 - `402` → the `REQUIRE_*` flags are still on.
 - `ImagePullBackOff` → private images without a pull secret, or the secret is misnamed or absent from that one pod's spec.
 - `Missing secret ... cloudSecrets` → one of the two secrets isn't in `<ns>`.
