@@ -43,7 +43,7 @@ CCX creates a Nova server group for each datastore so its VMs are spread across 
 | `policy` | `max_server_per_host` | Behaviour |
 |---|---|---|
 | `anti-affinity` (default) | `1` (default) or higher | Strict. Scheduling fails with `NoValidHost` when no hypervisor has room under the limit. |
-| `soft-anti-affinity` | not allowed | Best effort. Nova prefers hypervisors with fewer VMs of the datastore and places VMs together only when it has to. |
+| `soft-anti-affinity` | not allowed | Best effort. Nova prefers hypervisors with fewer VMs of the datastore, but this is one weight among others, so two VMs can share a hypervisor even when another one has room. |
 
 Repairing or upgrading a node creates the replacement VM before the old one is removed, so a datastore briefly needs one VM more than its node count. With strict anti-affinity and one VM per host, every availability zone needs at least one hypervisor more than the largest datastore places in it. On smaller clouds use `soft-anti-affinity`, or raise `max_server_per_host`.
 
